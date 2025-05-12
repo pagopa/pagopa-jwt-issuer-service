@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
   kotlin("jvm") version "2.1.0"
   kotlin("plugin.spring") version "2.1.0"
@@ -30,8 +32,6 @@ springBoot {
 }
 
 object Deps {
-  const val ecsLoggingVersion = "1.5.0"
-  const val openTelemetryVersion = "1.48.0"
   const val openTelemetryInstrumentationVersion = "2.14.0-alpha"
   const val springBootVersion = "3.4.5"
   const val jsonWebTokenVersion = "0.11.5"
@@ -85,7 +85,39 @@ dependencies {
   testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
-kotlin { compilerOptions { freeCompilerArgs.addAll("-Xjsr305=strict") } }
+// openapi code generation
+tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("jwt-issuer-v1") {
+  generatorName.set("spring")
+  inputSpec.set("$rootDir/api-spec/v1/openapi.yaml")
+  outputDir.set(layout.buildDirectory.get().dir("generated").asFile.toString())
+  apiPackage.set("it.pagopa.generated.touchpoint.jwtissuerservice.v1.api")
+  modelPackage.set("it.pagopa.generated.touchpoint.jwtissuerservice.v1.model")
+  generateApiDocumentation.set(false)
+  generateApiTests.set(false)
+  generateModelTests.set(false)
+  library.set("spring-boot")
+  modelNameSuffix.set("Dto")
+  configOptions.set(
+    mapOf(
+      "swaggerAnnotations" to "false",
+      "openApiNullable" to "true",
+      "interfaceOnly" to "true",
+      "hideGenerationTimestamp" to "true",
+      "skipDefaultInterface" to "true",
+      "useSwaggerUI" to "false",
+      "reactive" to "true",
+      "useSpringBoot3" to "true",
+      "oas3" to "true",
+      "generateSupportingFiles" to "true",
+      "enumPropertyNaming" to "MACRO_CASE",
+    )
+  )
+}
+
+tasks.withType<KotlinCompile> {
+  dependsOn("jwt-issuer-v1")
+  compilerOptions { freeCompilerArgs.addAll("-Xjsr305=strict") }
+}
 
 tasks
   .register("applySemanticVersionPlugin") { dependsOn("prepareKotlinBuildScriptModel") }
