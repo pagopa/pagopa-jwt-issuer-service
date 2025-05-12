@@ -21,7 +21,7 @@ version = "0.1.0"
 description = "pagopa-jwt-issuer-service"
 
 sourceSets {
-  main { java.srcDirs("src/main/java", layout.buildDirectory.dir("generated/src/main/java")) }
+  main { java.srcDirs("src/main/java", layout.buildDirectory.dir("generated/src/main/kotlin")) }
 }
 
 java { toolchain { languageVersion = JavaLanguageVersion.of(21) } }
@@ -87,7 +87,7 @@ dependencies {
 
 // openapi code generation
 tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("jwt-issuer-v1") {
-  generatorName.set("spring")
+  generatorName.set("kotlin-spring")
   inputSpec.set("$rootDir/api-spec/v1/openapi.yaml")
   outputDir.set(layout.buildDirectory.get().dir("generated").asFile.toString())
   apiPackage.set("it.pagopa.generated.touchpoint.jwtissuerservice.v1.api")
@@ -109,7 +109,7 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("jwt
       "useSpringBoot3" to "true",
       "oas3" to "true",
       "generateSupportingFiles" to "true",
-      "enumPropertyNaming" to "MACRO_CASE",
+      "enumPropertyNaming" to "UPPERCASE",
     )
   )
 }
