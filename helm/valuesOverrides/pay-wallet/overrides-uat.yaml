@@ -1,0 +1,27 @@
+# overrides from helm/values-dev.yaml.
+# all the properties defined here will take precedence against values-dev.yaml file
+microservice-chart:
+  namespace: "pay-wallet"
+  canaryDelivery:
+    image:
+      repository: pagopauitncoreacr.azurecr.io/pagopajwtissuerservice
+    envConfig:
+      OTEL_SERVICE_NAME: "pagopa-pay-wallet-jwt-issuer-service-blue"
+  image:
+    repository: pagopauitncoreacr.azurecr.io/pagopajwtissuerservice
+  ingress:
+    create: true
+    host: "itnuat.pay-wallet.internal.uat.platform.pagopa.it"
+    path: /pagopa-jwt-issuer-service/(.*)
+    servicePort: 8080
+  serviceAccount:
+    name: "pay-wallet-workload-identity"
+  envConfig:
+    OTEL_SERVICE_NAME: "pagopa-pay-wallet-jwt-issuer-service"
+    OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.otel.svc:4317"
+  keyvault:
+    name: "pagopa-u-pay-wallet-kv"
+    tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
+  azure:
+    workloadIdentityClientId: "928bc159-85e9-4f09-ba08-1e71851166f1"
+

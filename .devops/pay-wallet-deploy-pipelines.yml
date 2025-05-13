@@ -114,6 +114,8 @@ stages:
                     #for jvm build add --values option targeting containing overrides from native helm values, such as required resources etc
                     ${{ if eq(parameters['NATIVE_COMPILATION'], False) }}:
                       ARGUMENTS: "--timeout 5m0s --values helm/valuesOverrides/overrides-jvm-dev.yaml"
+                    ${{ else }}:
+                      ARGUMENTS: "--timeout 5m0s --values helm/valuesOverrides/pay-wallet/overrides-dev.yaml"
 
   # --- END Deploy DEV --- #
 
@@ -229,6 +231,8 @@ stages:
                     #for jvm build add --values option targeting containing overrides from native helm values, such as required resources etc
                     ${{ if eq(parameters['NATIVE_COMPILATION'], False) }}:
                       ARGUMENTS: "--timeout 5m0s --values helm/valuesOverrides/overrides-jvm-uat.yaml"
+                    ${{ else }}:
+                      ARGUMENTS: "--timeout 5m0s --values helm/valuesOverrides/pay-wallet/overrides-uat.yaml"
 
   - stage: "GreenDeployment_WaitForApproval"
     displayName: "UAT green approval deployment"
@@ -315,6 +319,8 @@ stages:
                     #for jvm build add --values option targeting containing overrides from native helm values, such as required resources etc
                     ${{ if eq(parameters['NATIVE_COMPILATION'], False) }}:
                       ARGUMENTS: "--timeout 5m0s --values helm/valuesOverrides/overrides-jvm-uat.yaml"
+                    ${{ else }}:
+                      ARGUMENTS: "--timeout 5m0s --values helm/valuesOverrides/pay-wallet/overrides-uat.yaml"
 
 
   # --- END Deploy UAT --- #

@@ -1,0 +1,10 @@
+apiVersion: v2
+type: application
+version: 0.1.0
+appVersion: 0.1.0
+name: pagopa-jwt-issuer-service
+description: Microservice that provides the creation of JWT tokens for pagopa touchpoint domains
+dependencies:
+  - name: microservice-chart
+    repository: "https://pagopa.github.io/aks-microservice-chart-blueprint"
+    version: 7.5.0
