@@ -230,7 +230,7 @@ stages:
                     BLUE_VERSION: $(app_version)${{ variables.DOCKER_FILE_VERSION_SUFFIX }}
                     #for jvm build add --values option targeting containing overrides from native helm values, such as required resources etc
                     ${{ if eq(parameters['NATIVE_COMPILATION'], False) }}:
-                      ARGUMENTS: "--timeout 5m0s --values helm/valuesOverrides/overrides-jvm-uat.yaml"
+                      ARGUMENTS: "--timeout 5m0s --values helm/valuesOverrides/overrides-jvm-uat.yaml --values helm/valuesOverrides/ecommerce/overrides-uat.yaml"
                     ${{ else }}:
                       ARGUMENTS: "--timeout 5m0s --values helm/valuesOverrides/ecommerce/overrides-uat.yaml"
 
@@ -318,7 +318,7 @@ stages:
                     GREEN_VERSION: $(app_version)${{ variables.DOCKER_FILE_VERSION_SUFFIX }}
                     #for jvm build add --values option targeting containing overrides from native helm values, such as required resources etc
                     ${{ if eq(parameters['NATIVE_COMPILATION'], False) }}:
-                      ARGUMENTS: "--timeout 5m0s --values helm/valuesOverrides/overrides-jvm-uat.yaml"
+                      ARGUMENTS: "--timeout 5m0s --values helm/valuesOverrides/overrides-jvm-uat.yaml --values helm/valuesOverrides/ecommerce/overrides-uat.yaml"
                     ${{ else }}:
                       ARGUMENTS: "--timeout 5m0s --values helm/valuesOverrides/ecommerce/overrides-uat.yaml"
 

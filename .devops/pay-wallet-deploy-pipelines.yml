@@ -113,7 +113,7 @@ stages:
                     GREEN_VERSION: $(Build.SourceVersion)${{ variables.DOCKER_FILE_VERSION_SUFFIX }}
                     #for jvm build add --values option targeting containing overrides from native helm values, such as required resources etc
                     ${{ if eq(parameters['NATIVE_COMPILATION'], False) }}:
-                      ARGUMENTS: "--timeout 5m0s --values helm/valuesOverrides/overrides-jvm-dev.yaml"
+                      ARGUMENTS: "--timeout 5m0s --values helm/valuesOverrides/overrides-jvm-dev.yaml --values helm/valuesOverrides/pay-wallet/overrides-dev.yaml"
                     ${{ else }}:
                       ARGUMENTS: "--timeout 5m0s --values helm/valuesOverrides/pay-wallet/overrides-dev.yaml"
 
@@ -230,7 +230,7 @@ stages:
                     BLUE_VERSION: $(app_version)${{ variables.DOCKER_FILE_VERSION_SUFFIX }}
                     #for jvm build add --values option targeting containing overrides from native helm values, such as required resources etc
                     ${{ if eq(parameters['NATIVE_COMPILATION'], False) }}:
-                      ARGUMENTS: "--timeout 5m0s --values helm/valuesOverrides/overrides-jvm-uat.yaml"
+                      ARGUMENTS: "--timeout 5m0s --values helm/valuesOverrides/overrides-jvm-uat.yaml --values helm/valuesOverrides/pay-wallet/overrides-uat.yaml"
                     ${{ else }}:
                       ARGUMENTS: "--timeout 5m0s --values helm/valuesOverrides/pay-wallet/overrides-uat.yaml"
 
@@ -318,7 +318,7 @@ stages:
                     GREEN_VERSION: $(app_version)${{ variables.DOCKER_FILE_VERSION_SUFFIX }}
                     #for jvm build add --values option targeting containing overrides from native helm values, such as required resources etc
                     ${{ if eq(parameters['NATIVE_COMPILATION'], False) }}:
-                      ARGUMENTS: "--timeout 5m0s --values helm/valuesOverrides/overrides-jvm-uat.yaml"
+                      ARGUMENTS: "--timeout 5m0s --values helm/valuesOverrides/overrides-jvm-uat.yaml --values helm/valuesOverrides/pay-wallet/overrides-uat.yaml"
                     ${{ else }}:
                       ARGUMENTS: "--timeout 5m0s --values helm/valuesOverrides/pay-wallet/overrides-uat.yaml"
 
