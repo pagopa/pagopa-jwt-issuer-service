@@ -94,5 +94,4 @@ microservice-chart:
                 values:
                   - user
   secretProviderClass:
-    secretProviderClass:
       create: false
