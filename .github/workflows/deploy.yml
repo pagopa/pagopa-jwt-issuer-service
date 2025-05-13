@@ -35,7 +35,7 @@ jobs:
           echo "SKIP_BUILD=${{ steps.configure_pipeline_parameters.outputs.SKIP_BUILD }}"
         shell: bash
       - name: Azure eCommerce Pipelines Action
-        uses: jacopocarlini/azure-pipelines@v1.3
+        uses: jacopocarlini/azure-pipelines@b9721743a54e862597395b4a70727cfdc03028fb # v1.3
         with:
           azure-devops-project-url: https://dev.azure.com/pagopaspa/pagoPA-projects
           azure-pipeline-name: 'pagopa-ecommerce-jwt-issuer-service.deploy'
@@ -48,7 +48,7 @@ jobs:
                 "UAT_PROD_DEPLOY": "${{ steps.configure_pipeline_parameters.outputs.UAT_PROD_DEPLOY }}"
             }
       - name: Azure Pay Wallet Pipelines Action
-        uses: jacopocarlini/azure-pipelines@v1.3
+        uses: jacopocarlini/azure-pipelines@b9721743a54e862597395b4a70727cfdc03028fb # v1.3
         with:
           azure-devops-project-url: https://dev.azure.com/pagopaspa/pagoPA-projects
           azure-pipeline-name: '/pagopa-pay-wallet-jwt-issuer-service.deploy'
