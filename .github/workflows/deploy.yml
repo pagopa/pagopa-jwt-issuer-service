@@ -3,8 +3,6 @@ name: Trigger pipeline deploy
 on:
   release:
     types: [published]
-  push:
-    branches: [ "CHK-4128-add-cicd-pipeline" ]
 
 permissions:
   contents: read
