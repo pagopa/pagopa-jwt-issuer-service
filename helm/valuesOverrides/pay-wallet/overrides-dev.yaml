@@ -19,6 +19,11 @@ microservice-chart:
     tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
   azure:
     workloadIdentityClientId: "8cad3639-cc88-4bff-85fe-5b1ddb2d449e"
+  tolerations:
+    - effect: "NoSchedule"
+      key: "paymentWalletOnly"
+      operator: "Equal"
+      value: "true"
   affinity:
     nodeAffinity:
       requiredDuringSchedulingIgnoredDuringExecution:
@@ -28,3 +33,12 @@ microservice-chart:
                 operator: In
                 values:
                   - paywallet
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/instance: pagopajwtissuerservice
+          namespaces: [ "pay-wallet" ]
+          topologyKey: topology.kubernetes.io/zone
