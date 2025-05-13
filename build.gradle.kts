@@ -27,7 +27,7 @@ sourceSets {
 java { toolchain { languageVersion = JavaLanguageVersion.of(21) } }
 
 springBoot {
-  mainClass.set("it.pagopa.touchpoint.jwtissuerservice.JwtissuerserviceApplicationKt")
+  mainClass.set("it.pagopa.touchpoint.jwtissuerservice.JwtIssuerServiceApplicationKt")
   buildInfo { properties { additional.set(mapOf("description" to project.description)) } }
 }
 
@@ -156,7 +156,7 @@ tasks.jacocoTestReport {
     files(
       classDirectories.files.map {
         fileTree(it).matching {
-          exclude("it/pagopa/touchpoint/jwtissuerservice/JwtissuerserviceApplication.class")
+          exclude("it/pagopa/touchpoint/jwtissuerservice/JwtIssuerServiceApplication.class")
         }
       }
     )
