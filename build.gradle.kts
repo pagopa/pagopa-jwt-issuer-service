@@ -88,6 +88,8 @@ dependencies {
 
 // openapi code generation
 tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("jwt-issuer-v1") {
+  description = "Generate rest controller and dto definitions from the openapi yaml file"
+  group = JavaBasePlugin.BUILD_TASK_NAME
   generatorName.set("kotlin-spring")
   inputSpec.set("$rootDir/api-spec/v1/openapi.yaml")
   outputDir.set(layout.buildDirectory.get().dir("generated").asFile.toString())
