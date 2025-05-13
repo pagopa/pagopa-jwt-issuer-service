@@ -43,6 +43,111 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "Create new token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							" pm.test(\"POST tokens should return 200 with a valid token\", function () {",
+							"    pm.response.to.have.status(200);",
+							"    const responseJson = pm.response.json();",
+							"    const token = responseJson.token;",
+							"    pm.expect(token).to.be.a(\"string\");",
+							"    const tokenParts = token.split(\".\");",
+							"    const header = JSON.parse(atob(tokenParts[0]));",
+							"    const payload = JSON.parse(atob(tokenParts[1]));",
+							"    pm.expect(header.kid).to.be.a(\"string\");",
+							"    pm.expect(header.alg).to.be.a(\"string\");",
+							"    pm.expect(payload.jti).to.be.a(\"string\");",
+							"    pm.expect(payload.aud).to.be.eq(\"audience\");",
+							"    pm.expect(payload.iss).to.be.a(\"string\");",
+							"    pm.expect(payload.customClaim1).to.be.eq(\"value1\");",
+							"    pm.expect(payload.customClaim2).to.be.eq(\"value2\");",
+							"    const expiration = payload.exp;",
+							"    const issuedAt = payload.iat;",
+							"    pm.expect(expiration - issuedAt).to.be.eq(30);",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"audience\": \"audience\",\n    \"duration\": 30,\n    \"privateClaims\": {\n        \"customClaim1\": \"value1\",\n        \"customClaim2\": \"value2\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/tokens",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"tokens"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Retrieve keys",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							" pm.test(\"GET tokens/keys should return 200 with valid keys\", function () {",
+							"    pm.response.to.have.status(200);",
+							"    const responseJson = pm.response.json();",
+							"    pm.expect(responseJson.keys.length > 0).to.be.true;",
+							"    const key = responseJson.keys[0];",
+							"    pm.expect(key.alg).to.be.a(\"string\");",
+							"    pm.expect(key.alg).to.be.a(\"string\");",
+							"    pm.expect(key.alg).to.be.a(\"string\");",
+							"    pm.expect(key.alg).to.be.a(\"string\");",
+							"    pm.expect(key.alg).to.be.a(\"string\");",
+							"    pm.expect(key.alg).to.be.a(\"string\");",
+							"    pm.expect(key.alg).to.be.a(\"string\");",
+							"",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/tokens/keys",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"tokens",
+						"keys"
+					]
+				}
+			},
+			"response": []
 		}
 	]
 }
