@@ -95,6 +95,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/JWKResponse'
+      required:
+        - keys
     JWKResponse:
       type: object
       description: JSON Web Key response object
@@ -264,8 +266,7 @@ components:
           type: string
           description: the audience (f.e. service/domain) the token is intended for, used to compose the `aud` claim
         duration:
-          type: number
-          format: long
+          type: integer
           description: token duration in seconds (used for `exp` claim)
         privateClaims:
           type: object

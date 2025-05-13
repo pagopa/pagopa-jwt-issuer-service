@@ -82,6 +82,7 @@ dependencies {
   testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
   testImplementation("org.jetbrains.kotlin:kotlin-test")
   testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
+  testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test")
   testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
