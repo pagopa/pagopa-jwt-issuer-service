@@ -411,7 +411,7 @@ stages:
                     script: |
                       helm repo add microservice-chart https://pagopa.github.io/aks-microservice-chart-blueprint
                       helm dep build helm
-                - template: azure-templates/helm-microservice-chart-deploy.yml
+                - template: ./helm-microservice-chart-deploy.yml
                   parameters:
                     DO_DEPLOY: true
                     DO_BLUE_GREEN_DEPLOY: false
