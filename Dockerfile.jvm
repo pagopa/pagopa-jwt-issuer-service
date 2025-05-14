@@ -5,10 +5,11 @@ COPY gradlew .
 COPY gradle gradle
 COPY build.gradle.kts .
 COPY settings.gradle.kts .
-
 COPY eclipse-style.xml eclipse-style.xml
 COPY src src
 COPY api-spec api-spec
+
+RUN chmod +x ./gradlew
 RUN ./gradlew build -x test
 #remove plain jar, required by native compilations only
 RUN rm build/libs/*-plain.jar
