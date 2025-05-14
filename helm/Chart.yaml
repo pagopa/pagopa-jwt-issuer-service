@@ -7,4 +7,4 @@ description: Microservice that provides the creation of JWT tokens for pagopa to
 dependencies:
   - name: microservice-chart
     repository: "https://pagopa.github.io/aks-microservice-chart-blueprint"
-    version: 7.5.0
+    version: 8.0.0
