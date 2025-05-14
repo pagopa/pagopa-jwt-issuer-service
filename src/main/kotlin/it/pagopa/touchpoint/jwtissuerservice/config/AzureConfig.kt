@@ -1,7 +1,7 @@
 package it.pagopa.touchpoint.jwtissuerservice.config
 
 import com.azure.identity.DefaultAzureCredentialBuilder
-import com.azure.security.keyvault.keys.KeyClient
+import com.azure.security.keyvault.keys.KeyAsyncClient
 import com.azure.security.keyvault.keys.KeyClientBuilder
 import it.pagopa.touchpoint.jwtissuerservice.services.SecurityKeysService
 import org.springframework.beans.factory.annotation.Value
@@ -16,11 +16,11 @@ class AzureConfig {
     @Bean
     fun azureKeyVaultKeyClient(
         @Value("\${azure.keyvault.endpoint}") azureKeyVaultEndpoint: String
-    ): KeyClient {
+    ): KeyAsyncClient {
         return KeyClientBuilder()
             .vaultUrl(azureKeyVaultEndpoint)
             .credential(DefaultAzureCredentialBuilder().build())
-            .buildClient()
+            .buildAsyncClient()
     }
 
     @Bean
@@ -28,10 +28,10 @@ class AzureConfig {
         jwtKeysService: SecurityKeysService
     ): ApplicationListener<ApplicationReadyEvent> {
         return ApplicationListener {
-            println(jwtKeysService.getKey())
+            println(jwtKeysService.getKey().block())
             println(jwtKeysService.getPrivate())
-            println(jwtKeysService.getPublic())
-            println(jwtKeysService.getPrivate())
+            println(jwtKeysService.getPublic().block())
+            println(jwtKeysService.getPrivate().block())
         }
     }
 }
