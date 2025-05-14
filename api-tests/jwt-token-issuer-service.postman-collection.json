@@ -1,49 +1,12 @@
+
 {
 	"info": {
-		"_postman_id": "bd3bff5c-4f8f-4932-b56c-7a656fb49674",
+		"_postman_id": "ecf0df26-e59e-4f3d-987b-dd1ddfe09da4",
 		"name": "JWT token issuer service",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "23963988"
 	},
 	"item": [
-		{
-			"name": "Liveness health check",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							" pm.test(\"App should return 200 OK response to liveness url\", function () {",
-							"    pm.response.to.have.status(200);",
-							"    const responseJson = pm.response.json();",
-							"    const status = responseJson.status;",
-							"    pm.expect(status).to.be.eq(\"UP\");",
-							"});",
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "localhost:8080/actuator/health/liveness",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"actuator",
-						"health",
-						"liveness"
-					]
-				}
-			},
-			"response": []
-		},
 		{
 			"name": "Create new token",
 			"event": [
@@ -90,12 +53,10 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/tokens",
-					"protocol": "http",
+					"raw": "{{PROTOCOL}}{{HOST}}{{BASE_PATH}}/tokens",
 					"host": [
-						"localhost"
+						"{{PROTOCOL}}{{HOST}}{{BASE_PATH}}"
 					],
-					"port": "8080",
 					"path": [
 						"tokens"
 					]
@@ -116,12 +77,11 @@
 							"    pm.expect(responseJson.keys.length > 0).to.be.true;",
 							"    const key = responseJson.keys[0];",
 							"    pm.expect(key.alg).to.be.a(\"string\");",
-							"    pm.expect(key.alg).to.be.a(\"string\");",
-							"    pm.expect(key.alg).to.be.a(\"string\");",
-							"    pm.expect(key.alg).to.be.a(\"string\");",
-							"    pm.expect(key.alg).to.be.a(\"string\");",
-							"    pm.expect(key.alg).to.be.a(\"string\");",
-							"    pm.expect(key.alg).to.be.a(\"string\");",
+							"    pm.expect(key.kty).to.be.a(\"string\");",
+							"    pm.expect(key.use).to.be.a(\"string\");",
+							"    pm.expect(key.n).to.be.a(\"string\");",
+							"    pm.expect(key.e).to.be.a(\"string\");",
+							"    pm.expect(key.kid).to.be.a(\"string\");",
 							"",
 							"});",
 							""
@@ -135,12 +95,10 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/tokens/keys",
-					"protocol": "http",
+					"raw": "{{PROTOCOL}}{{HOST}}{{BASE_PATH}}/tokens/keys",
 					"host": [
-						"localhost"
+						"{{PROTOCOL}}{{HOST}}{{BASE_PATH}}"
 					],
-					"port": "8080",
 					"path": [
 						"tokens",
 						"keys"

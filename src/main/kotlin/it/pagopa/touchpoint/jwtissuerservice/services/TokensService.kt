@@ -7,6 +7,7 @@ import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.JWKSResponseDto
 import it.pagopa.touchpoint.jwtissuerservice.utils.JwtTokenUtils
 import java.security.interfaces.RSAPublicKey
 import java.time.Duration
+import java.util.Base64
 import org.springframework.stereotype.Service
 
 @Service
@@ -32,8 +33,10 @@ class TokensService(private val jwtTokenUtils: JwtTokenUtils) {
                             alg = it.format,
                             kty = JWKResponseDto.Kty.RSA,
                             use = "sig",
-                            n = it.modulus.toString(),
-                            e = it.publicExponent.toString(),
+                            n = Base64.getUrlEncoder().encodeToString(it.modulus.toByteArray()),
+                            e =
+                                Base64.getUrlEncoder()
+                                    .encodeToString(it.publicExponent.toByteArray()),
                             kid = jwtTokenUtils.kid,
                         )
                     }

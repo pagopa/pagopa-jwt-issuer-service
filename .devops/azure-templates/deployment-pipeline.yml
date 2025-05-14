@@ -113,7 +113,20 @@ stages:
                       ARGUMENTS: --timeout 5m0s --values helm/valuesOverrides/overrides-jvm-dev.yaml --values helm/valuesOverrides/${{ parameters.DOMAIN }}/overrides-dev.yaml
                     ${{ else }}:
                       ARGUMENTS: --timeout 5m0s --values helm/valuesOverrides/${{ parameters.DOMAIN }}/overrides-dev.yaml
-
+  - stage: "API_Test_DEV"
+    displayName: 'Running API test on green app'
+    dependsOn: Deploy_for_DEV
+    pool:
+      name: pagopa-dev-linux
+    jobs:
+      - job: newman_api_test
+        steps:
+          - checkout: pagopaCheckoutTests
+          - template: ./api-tests.yml
+            parameters:
+              COLLECTION_TEST_FILE: jwt-token-issuer-service.postman-collection.json
+              ENV_FILE: ${{ parameters.DOMAIN }}_dev.env.json
+              TEST_FILE_PREFIX: "dev"
   # --- END Deploy DEV --- #
 
   # --- START Deploy UAT --- #
@@ -228,6 +241,21 @@ stages:
                     ${{ else }}:
                       ARGUMENTS: --timeout 5m0s --values helm/valuesOverrides/${{ parameters.DOMAIN }}/overrides-uat.yaml
 
+  - stage: "API_Test_UAT_Blue"
+    displayName: 'Running API test on UAT blue app'
+    dependsOn: Deploy_UAT_Blue
+    pool:
+      name: pagopa-uat-linux
+    jobs:
+      - job: newman_api_test
+        steps:
+          - checkout: pagopaCheckoutTests
+          - template: ./api-tests.yml
+            parameters:
+              COLLECTION_TEST_FILE: jwt-token-issuer-service.postman-collection.json
+              ENV_FILE: ${{ parameters.DOMAIN }}_uat.env.json
+              TEST_FILE_PREFIX: "uat-blue"
+
   - stage: "GreenDeployment_WaitForApproval"
     displayName: "UAT green approval deployment"
     dependsOn: [ Get_Release_Version, Tag_Docker_Release]
@@ -316,6 +344,21 @@ stages:
                     ${{ else }}:
                       ARGUMENTS: --timeout 5m0s --values helm/valuesOverrides/${{ parameters.DOMAIN }}/overrides-uat.yaml
 
+  - stage: "API_Test_UAT_Green"
+    displayName: 'Running API test on UAT green app version'
+    dependsOn: Deploy_UAT_Green
+    pool:
+      name: pagopa-uat-linux
+    jobs:
+      - job: newman_api_test
+        steps:
+          - checkout: pagopaCheckoutTests
+          - template: ./api-tests.yml
+
+            parameters:
+              COLLECTION_TEST_FILE: jwt-token-issuer-service.postman-collection.json
+              ENV_FILE: ${{ parameters.DOMAIN }}-uat.env.json
+              TEST_FILE_PREFIX: "uat-green"
 
   # --- END Deploy UAT --- #
 

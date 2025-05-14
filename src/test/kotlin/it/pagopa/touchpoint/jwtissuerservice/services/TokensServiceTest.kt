@@ -15,6 +15,7 @@ import org.mockito.kotlin.given
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import java.util.Base64
 
 class TokensServiceTest {
 
@@ -68,8 +69,8 @@ class TokensServiceTest {
                             alg = publicKey.format,
                             kty = JWKResponseDto.Kty.RSA,
                             use = "sig",
-                            n = publicKey.modulus.toString(),
-                            e = publicKey.publicExponent.toString(),
+                            n = Base64.getUrlEncoder().encodeToString(publicKey.modulus.toByteArray()),
+                            e = Base64.getUrlEncoder().encodeToString(publicKey.publicExponent.toByteArray()),
                             kid = kid,
                         )
                     )
