@@ -81,3 +81,4 @@ stages:
                 API_TEST_FILE: "api-tests/jwt-token-issuer-service.postman-collection.json"
                 ENV_FILE: "api-tests/localhost.env.json"
                 TEST_FILE_PREFIX: "local"
+                USE_NEWMAN_DOCKER_IMAGE: false

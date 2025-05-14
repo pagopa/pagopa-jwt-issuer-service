@@ -76,6 +76,7 @@ stages:
               API_TEST_FILE: jwt-token-issuer-service.postman-collection.json
               ENV_FILE: ${{ parameters.DOMAIN }}_dev.env.json
               TEST_FILE_PREFIX: "dev"
+              USE_NEWMAN_DOCKER_IMAGE: true
   # --- END Deploy DEV --- #
 
   # --- START Deploy UAT --- #
@@ -203,6 +204,7 @@ stages:
               API_TEST_FILE: jwt-token-issuer-service.postman-collection.json
               ENV_FILE: ${{ parameters.DOMAIN }}_uat.env.json
               TEST_FILE_PREFIX: "uat-blue"
+              USE_NEWMAN_DOCKER_IMAGE: true
 
   - stage: "GreenDeployment_WaitForApproval"
     displayName: "UAT green approval deployment"
@@ -306,6 +308,7 @@ stages:
               API_TEST_FILE: jwt-token-issuer-service.postman-collection.json
               ENV_FILE: ${{ parameters.DOMAIN }}-uat.env.json
               TEST_FILE_PREFIX: "uat-green"
+              USE_NEWMAN_DOCKER_IMAGE: true
 
   # --- END Deploy UAT --- #
 
