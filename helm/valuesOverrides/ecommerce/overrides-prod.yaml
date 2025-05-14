@@ -1,0 +1,31 @@
+# overrides from helm/values-prod.yaml.
+# all the properties defined here will take precedence against values-prod.yaml file
+microservice-chart:
+  namespace: "ecommerce"
+  image:
+    repository: pagopapcommonacr.azurecr.io/pagopajwtissuerservice
+  ingress:
+    create: true
+    host: "weuprod.ecommerce.internal.platform.pagopa.it"
+    path: /pagopa-jwt-issuer-service/(.*)
+    servicePort: 8080
+  serviceAccount:
+    name: "ecommerce-workload-identity"
+  envConfig:
+    OTEL_SERVICE_NAME: "pagopa-ecommerce-jwt-issuer-service"
+    OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.elastic-system.svc:4317"
+  keyvault:
+    name: "pagopa-p-ecommerce-kv"
+    tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            labelSelector:
+              matchLabels:
+                app.kubernetes.io/instance: pagopajwtissuerservice
+            namespaces: [ "ecommerce" ]
+            topologyKey: topology.kubernetes.io/zone
+  azure:
+    workloadIdentityClientId: "d5614882-90dd-47a1-aad1-cdf295201469"
