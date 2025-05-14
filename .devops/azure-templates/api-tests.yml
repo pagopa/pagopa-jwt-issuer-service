@@ -9,7 +9,7 @@ parameters:
 
 steps:
   - script: |
-      yarn global add newman
+      npm install -g newman
     displayName: 'Newman installation'
   - script: |
       newman run ${{ parameters.API_TEST_FILE }} -e ${{ parameters.ENV_FILE }}  --ignore-redirects --reporters cli,junit --reporter-junit-export Results/${{ parameters.TEST_FILE_PREFIX }}-api-TEST.xml
