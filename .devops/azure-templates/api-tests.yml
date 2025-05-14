@@ -13,7 +13,7 @@ parameters:
 steps:
   - ${{ if eq(parameters['USE_NEWMAN_DOCKER_IMAGE'], False) }}:
       - script: |
-          npm install -g newman
+          yarn global add newman
         displayName: 'Newman installation'
       - script: |
           newman run ${{ parameters.API_TEST_FILE }} -e ${{ parameters.ENV_FILE }}  --ignore-redirects --reporters cli,junit --reporter-junit-export Results/${{ parameters.TEST_FILE_PREFIX }}-api-TEST.xml
