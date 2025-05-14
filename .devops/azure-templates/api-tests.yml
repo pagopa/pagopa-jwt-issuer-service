@@ -20,6 +20,7 @@ steps:
         displayName: 'Run api test'
   - ${{ else }}:
       - script: |
+          ls
           docker run -v .:/etc/newman -t postman/newman run ${{ parameters.API_TEST_FILE }} -e ${{ parameters.ENV_FILE }}  --ignore-redirects --reporters cli,junit --reporter-junit-export Results/${{ parameters.TEST_FILE_PREFIX }}-api-TEST.xml
         displayName: 'Run api test'
   - task: PublishTestResults@2
