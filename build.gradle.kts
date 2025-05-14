@@ -87,6 +87,8 @@ dependencies {
   testImplementation("org.jetbrains.kotlin:kotlin-test")
   testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
   testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test")
+  testImplementation("org.bouncycastle:bcpkix-jdk18on:1.80")
+  testImplementation("org.bouncycastle:bcprov-jdk18on:1.80")
   testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 

@@ -28,7 +28,7 @@ class AzureConfig {
         jwtKeysService: SecurityKeysService
     ): ApplicationListener<ApplicationReadyEvent> {
         return ApplicationListener {
-            println(jwtKeysService.getSecret().map { println(it.properties.contentType) }.block())
+            println(jwtKeysService.getSecret().map { println(it.value) }.block())
             println(jwtKeysService.getPublic().block())
             println(jwtKeysService.getPrivate().block())
         }
