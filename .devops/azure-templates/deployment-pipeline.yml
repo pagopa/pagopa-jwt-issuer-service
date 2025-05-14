@@ -417,7 +417,7 @@ stages:
                     DO_BLUE_GREEN_DEPLOY: false
                     ENV: "PROD"
                     KUBERNETES_SERVICE_CONN: $(PROD_KUBERNETES_SERVICE_CONN)
-                    NAMESPACE: checkout
+                    NAMESPACE: ${{ parameters.DOMAIN }}
                     APP_NAME: $(K8S_IMAGE_REPOSITORY_NAME)
                     VALUE_FILE: "helm/values-prod.yaml"
                     GREEN_VERSION: $(prod_version)${{ parameters.DOCKER_FILE_VERSION_SUFFIX }}
