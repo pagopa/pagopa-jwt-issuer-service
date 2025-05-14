@@ -7,6 +7,7 @@ import it.pagopa.touchpoint.jwtissuerservice.utils.JwtTokenUtils
 import java.security.KeyPairGenerator
 import java.security.interfaces.RSAPublicKey
 import java.time.Duration
+import java.util.Base64
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -15,7 +16,6 @@ import org.mockito.kotlin.given
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
-import java.util.Base64
 
 class TokensServiceTest {
 
@@ -69,8 +69,12 @@ class TokensServiceTest {
                             alg = publicKey.format,
                             kty = JWKResponseDto.Kty.RSA,
                             use = "sig",
-                            n = Base64.getUrlEncoder().encodeToString(publicKey.modulus.toByteArray()),
-                            e = Base64.getUrlEncoder().encodeToString(publicKey.publicExponent.toByteArray()),
+                            n =
+                                Base64.getUrlEncoder()
+                                    .encodeToString(publicKey.modulus.toByteArray()),
+                            e =
+                                Base64.getUrlEncoder()
+                                    .encodeToString(publicKey.publicExponent.toByteArray()),
                             kid = kid,
                         )
                     )
