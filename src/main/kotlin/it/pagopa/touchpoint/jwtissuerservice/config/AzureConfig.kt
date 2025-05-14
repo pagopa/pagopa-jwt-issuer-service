@@ -1,8 +1,8 @@
 package it.pagopa.touchpoint.jwtissuerservice.config
 
 import com.azure.identity.DefaultAzureCredentialBuilder
-import com.azure.security.keyvault.keys.KeyAsyncClient
-import com.azure.security.keyvault.keys.KeyClientBuilder
+import com.azure.security.keyvault.secrets.SecretAsyncClient
+import com.azure.security.keyvault.secrets.SecretClientBuilder
 import it.pagopa.touchpoint.jwtissuerservice.services.SecurityKeysService
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.context.event.ApplicationReadyEvent
@@ -14,10 +14,10 @@ import org.springframework.context.annotation.Configuration
 class AzureConfig {
 
     @Bean
-    fun azureKeyVaultKeyClient(
+    fun azureKeyVaultSecretClient(
         @Value("\${azure.keyvault.endpoint}") azureKeyVaultEndpoint: String
-    ): KeyAsyncClient {
-        return KeyClientBuilder()
+    ): SecretAsyncClient {
+        return SecretClientBuilder()
             .vaultUrl(azureKeyVaultEndpoint)
             .credential(DefaultAzureCredentialBuilder().build())
             .buildAsyncClient()
@@ -28,8 +28,7 @@ class AzureConfig {
         jwtKeysService: SecurityKeysService
     ): ApplicationListener<ApplicationReadyEvent> {
         return ApplicationListener {
-            println(jwtKeysService.getKey().block())
-            println(jwtKeysService.getPrivate())
+            println(jwtKeysService.getSecret().map { println(it.properties.contentType) }.block())
             println(jwtKeysService.getPublic().block())
             println(jwtKeysService.getPrivate().block())
         }
