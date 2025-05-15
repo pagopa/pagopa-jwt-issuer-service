@@ -4,5 +4,9 @@
     "allDeclaredMethods": true,
     "allDeclaredFields": true,
     "unsafeAllocated": true
+  },
+  {
+    "name": "com.azure.security.keyvault.secrets.implementation.models.DeletionRecoveryLevel[]",
+    "unsafeAllocated": true
   }
 ]
