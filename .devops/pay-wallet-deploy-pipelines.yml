@@ -1,0 +1,72 @@
+# Deploy to Azure Kubernetes Service:
+# - DEV
+# - UAT -> PROD
+# Build and push image to Azure Container Registry; Deploy to Azure Kubernetes Service
+# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
+
+parameters:
+  - name: "DEV_DEPLOY"
+    displayName: "Deploy on DEV environment"
+    type: boolean
+    default: True
+    values:
+      - False
+      - True
+  - name: "UAT_PROD_DEPLOY"
+    displayName: "Deploy on UAT environment with PROD promotion"
+    type: boolean
+    default: False
+    values:
+      - False
+      - True
+  - name: "SKIP_BUILD"
+    displayName: "Check this flag to skip build and proceed to deploy a docker image previously built"
+    type: boolean
+    default: False
+    values:
+      - False
+      - True
+  - name: "FORCE_REPLACE_DOCKER_IMAGE"
+    displayName: "Force the existing docker image to be replaced (latest tag)"
+    type: boolean
+    default: False
+    values:
+      - False
+      - True
+  - name: "NATIVE_COMPILATION"
+    displayName: "Boolean flag to use native compilation or JVM runtime for the output executable: activating this parameter native compilation will be used, jvm otherwise"
+    type: boolean
+    default: True
+    values:
+      - False
+      - True
+
+variables:
+
+  ${{ if eq(parameters['NATIVE_COMPILATION'], True) }}:
+      dockerFileName: "Dockerfile.native"
+      dockerFileVersionSuffix: ""
+  ${{ else }}:
+      dockerFileName: "Dockerfile.jvm"
+      dockerFileVersionSuffix: "-jvm"
+resources:
+  repositories:
+    - repository: pagopaCommons
+      type: github
+      name: pagopa/azure-pipeline-templates
+      ref: refs/tags/v6.14.0
+      endpoint: "io-azure-devops-github-ro"
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+  - template: azure-templates/deployment-pipeline.yml
+    parameters:
+      DEV_DEPLOY: ${{ parameters.DEV_DEPLOY }}
+      UAT_PROD_DEPLOY: ${{ parameters.UAT_PROD_DEPLOY }}
+      SKIP_BUILD: ${{ parameters.SKIP_BUILD }}
+      FORCE_REPLACE_DOCKER_IMAGE: ${{ parameters.FORCE_REPLACE_DOCKER_IMAGE }}
+      NATIVE_COMPILATION: ${{ parameters.NATIVE_COMPILATION }}
+      DOMAIN: pay-wallet
+      DOCKER_FILE_NAME: ${{ variables.dockerFileName }}
+      DOCKER_FILE_VERSION_SUFFIX: ${{ variables.dockerFileVersionSuffix }}
