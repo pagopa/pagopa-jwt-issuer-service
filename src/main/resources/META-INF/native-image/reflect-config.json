@@ -1,0 +1,7 @@
+[
+  {
+    "name": "com.azure.security.keyvault.secrets.implementation.models.DeletionRecoveryLevel",
+    "allDeclaredMethods": true,
+    "allDeclaredFields": true
+  }
+]
