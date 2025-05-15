@@ -71,8 +71,8 @@ microservice-chart:
     OTEL_LOGS_EXPORTER: none
     OTEL_TRACES_SAMPLER: "always_on"
     KEYSTORE_CACHE_NAME: "keyStore"
-    KEYSTORE_CACHE_MAXSIZE: 10
-    KEYSTORE_CACHE_TTL: 60
+    KEYSTORE_CACHE_MAXSIZE: "10"
+    KEYSTORE_CACHE_TTL: "60"
   nodeSelector: {}
   tolerations: []
   affinity:
