@@ -26,11 +26,11 @@ class ReactiveAzureKVSecurityKeysService(
     private val keystore = KeyStore.getInstance("PKCS12")
     private val certFactory = CertificateFactory.getInstance("X.509")
 
-    private fun getSecret(): Mono<KeyVaultSecret> {
+    fun getSecret(): Mono<KeyVaultSecret> {
         return secretClient.getSecret(azureSecretConfig.name)
     }
 
-    private fun getCerts(): Flux<KeyVaultCertificate> {
+    fun getCerts(): Flux<KeyVaultCertificate> {
         return certClient
             .listPropertiesOfCertificateVersions(azureSecretConfig.name)
             .filter { it.isEnabled }

@@ -15,9 +15,8 @@ microservice-chart:
     OTEL_SERVICE_NAME: "pagopa-ecommerce-jwt-issuer-service"
     OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.elastic-system.svc:4317"
     AZURE_KV_ENDPOINT: "https://pagopa-d-ecommerce-kv.vault.azure.net/"
-    SECRET_KEY_NAME: "testDeleteAfter"
-  envSecret:
-    SECRET_KEY_PASSWORD: "testDeleteAfterPass"
+    SECRET_KEY_NAME: "jwt-token-issuer-cert"
+    SECRET_KEY_PASSWORD: ""
   keyvault:
     name: "pagopa-d-ecommerce-kv"
     tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
