@@ -25,7 +25,7 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import reactor.core.publisher.Mono
 
-class SecurityKeysServiceTest {
+class ReactiveAzureKVSecurityKeysServiceTest {
     private val secretClient: SecretAsyncClient = mock()
     private val azureSecretConfig: AzureSecretConfigProperties =
         AzureSecretConfigProperties(name = "testName", password = "testPassword")
