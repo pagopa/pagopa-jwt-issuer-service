@@ -1,0 +1,27 @@
+# overrides from helm/values-uat.yaml.
+# all the properties defined here will take precedence against values-uat.yaml file
+microservice-chart:
+  namespace: "ecommerce"
+  canaryDelivery:
+    image:
+      repository: pagopaucommonacr.azurecr.io/pagopajwtissuerservice
+    envConfig:
+      OTEL_SERVICE_NAME: "pagopa-ecommerce-jwt-issuer-service-blue"
+  image:
+    repository: pagopaucommonacr.azurecr.io/pagopajwtissuerservice
+  ingress:
+    create: true
+    host: "weuuat.ecommerce.internal.uat.platform.pagopa.it"
+    path: /pagopa-jwt-issuer-service/(.*)
+    servicePort: 8080
+  serviceAccount:
+    name: "ecommerce-workload-identity"
+  envConfig:
+    OTEL_SERVICE_NAME: "pagopa-ecommerce-jwt-issuer-service"
+    OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.elastic-system.svc:4317"
+  keyvault:
+    name: "pagopa-u-ecommerce-kv"
+    tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
+  azure:
+    workloadIdentityClientId: "449c5b65-f368-487a-881a-b03676420c53"
+
