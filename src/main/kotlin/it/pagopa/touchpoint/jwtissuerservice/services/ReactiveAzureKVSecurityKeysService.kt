@@ -13,10 +13,10 @@ import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 
 @Component
-class SecurityKeysService(
+class ReactiveAzureKVSecurityKeysService(
     private val secretClient: SecretAsyncClient,
     private val azureSecretConfig: AzureSecretConfigProperties,
-) {
+) : IReactiveSecurityKeysService {
 
     fun getSecret(): Mono<KeyVaultSecret> {
         return secretClient.getSecret(azureSecretConfig.name)
@@ -35,14 +35,14 @@ class SecurityKeysService(
         }
     }
 
-    fun getPrivate(): Mono<PrivateKey> {
+    override fun getPrivate(): Mono<PrivateKey> {
         return this.getKeyStore().map {
             it.getKey(it.aliases().nextElement(), azureSecretConfig.password.toCharArray())
                 as PrivateKey
         }
     }
 
-    fun getPublic(): Mono<PublicKey> {
+    override fun getPublic(): Mono<PublicKey> {
         return this.getKeyStore().map { it.getCertificate(it.aliases().nextElement()).publicKey }
     }
 }

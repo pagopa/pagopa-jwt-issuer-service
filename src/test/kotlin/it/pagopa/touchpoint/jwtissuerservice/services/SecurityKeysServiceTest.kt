@@ -30,7 +30,10 @@ class SecurityKeysServiceTest {
     private val azureSecretConfig: AzureSecretConfigProperties =
         AzureSecretConfigProperties(name = "testName", password = "testPassword")
     private val securityKeysService =
-        SecurityKeysService(secretClient = secretClient, azureSecretConfig = azureSecretConfig)
+        ReactiveAzureKVSecurityKeysService(
+            secretClient = secretClient,
+            azureSecretConfig = azureSecretConfig,
+        )
 
     @Test
     fun `Should get secret successfully`() = runTest {
