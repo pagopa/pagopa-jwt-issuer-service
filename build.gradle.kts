@@ -60,6 +60,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-cache")
   implementation("com.github.ben-manes.caffeine:caffeine:3.2.0")
   implementation("com.azure:azure-security-keyvault-secrets:4.9.4")
+  implementation("com.azure:azure-security-keyvault-certificates:4.7.4")
   implementation("com.azure:azure-identity:1.16.0")
   implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
   implementation("org.openapitools:jackson-databind-nullable:0.2.6")

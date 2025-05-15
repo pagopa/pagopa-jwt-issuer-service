@@ -1,5 +1,6 @@
 package it.pagopa.touchpoint.jwtissuerservice.services
 
+import com.azure.security.keyvault.certificates.CertificateAsyncClient
 import com.azure.security.keyvault.secrets.SecretAsyncClient
 import com.azure.security.keyvault.secrets.models.KeyVaultSecret
 import it.pagopa.touchpoint.jwtissuerservice.config.properties.AzureSecretConfigProperties
@@ -27,11 +28,13 @@ import reactor.core.publisher.Mono
 
 class ReactiveAzureKVSecurityKeysServiceTest {
     private val secretClient: SecretAsyncClient = mock()
+    private val certClient: CertificateAsyncClient = mock()
     private val azureSecretConfig: AzureSecretConfigProperties =
         AzureSecretConfigProperties(name = "testName", password = "testPassword")
     private val securityKeysService =
         ReactiveAzureKVSecurityKeysService(
             secretClient = secretClient,
+            certClient = certClient,
             azureSecretConfig = azureSecretConfig,
         )
 
