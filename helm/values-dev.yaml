@@ -72,7 +72,7 @@ microservice-chart:
     OTEL_TRACES_SAMPLER: "always_on"
     KEYSTORE_CACHE_NAME: "keyStore"
     KEYSTORE_CACHE_MAXSIZE: "10"
-    KEYSTORE_CACHE_TTL: "60"
+    KEYSTORE_CACHE_TTL_MINS: "60"
     AZURE_MAX_RETRY: "3"
     AZURE_RETRY_DELAY_MILLIS: "500"
   nodeSelector: {}
