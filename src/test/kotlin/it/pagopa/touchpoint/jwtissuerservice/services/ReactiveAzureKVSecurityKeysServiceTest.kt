@@ -9,6 +9,7 @@ import it.pagopa.touchpoint.jwtissuerservice.config.properties.AzureSecretConfig
 import it.pagopa.touchpoint.jwtissuerservice.utils.AzureTestUtils
 import java.io.ByteArrayOutputStream
 import java.math.BigInteger
+import java.security.KeyPair
 import java.security.KeyPairGenerator
 import java.security.KeyStore
 import java.security.cert.X509Certificate
@@ -26,6 +27,7 @@ import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.*
 import reactor.core.publisher.Mono
+import reactor.test.StepVerifier
 
 class ReactiveAzureKVSecurityKeysServiceTest {
     private val azureTestUtils: AzureTestUtils = AzureTestUtils()
@@ -70,14 +72,18 @@ class ReactiveAzureKVSecurityKeysServiceTest {
         given { certClient.getCertificateVersion(anyString(), anyOrNull()) }
             .willReturn(Mono.just(keyVaultCertificate))
 
-        securityKeysService.getCerts().subscribe()
+        StepVerifier.create(securityKeysService.getCerts())
+            .expectNext(keyVaultCertificate)
+            .verifyComplete()
         verify(certClient, times(1)).getCertificateVersion(any(), anyOrNull())
     }
 
     @Test
     fun `Should get key store successfully`() = runTest {
         // pre-conditions
-        val keyStore = generatePKCS12Certificate("testAlias", azureSecretConfig.password)
+        val keyPair = getKeyPair()
+        val keyStore =
+            getKeyStoreWithPKCS12Certificate("testAlias", keyPair, azureSecretConfig.password)
         val secretTest =
             KeyVaultSecret(
                 "testName",
@@ -101,7 +107,9 @@ class ReactiveAzureKVSecurityKeysServiceTest {
     @Test
     fun `Should get private key successfully`() = runTest {
         // pre-conditions
-        val keyStore = generatePKCS12Certificate("testAlias", azureSecretConfig.password)
+        val keyPair = getKeyPair()
+        val keyStore =
+            getKeyStoreWithPKCS12Certificate("testAlias", keyPair, azureSecretConfig.password)
         val secretTest =
             KeyVaultSecret(
                 "testName",
@@ -121,23 +129,36 @@ class ReactiveAzureKVSecurityKeysServiceTest {
     @Test
     fun `Should get public key successfully`() = runTest {
         // pre-conditions
-        val keyStore = generatePKCS12Certificate("testAlias", azureSecretConfig.password)
-        val secretTest =
-            KeyVaultSecret(
-                "testName",
-                generatePKCS12CertificateAsBase64(keyStore, azureSecretConfig.password),
-            )
-        given { secretClient.getSecret(any()) }.willReturn(Mono.just(secretTest))
+        val keyPair1 = getKeyPair()
+        val keyPair2 = getKeyPair()
+        val certificate1 = generatePKCS12Certificate(keyPair1)
+        val certificate2 = generatePKCS12Certificate(keyPair2)
+        val certProperties1 = mock(CertificateProperties::class.java)
+        val certProperties2 = mock(CertificateProperties::class.java)
+        val keyVaultCertificate = mock(KeyVaultCertificate::class.java)
+        val keyVaultCertificate2 = mock(KeyVaultCertificate::class.java)
+        given { certProperties1.isEnabled }.willReturn(true)
+        given { certProperties2.isEnabled }.willReturn(true)
+        given { keyVaultCertificate.cer }.willReturn(certificate1.encoded)
+        given { keyVaultCertificate2.cer }.willReturn(certificate2.encoded)
 
-        val obtainedKeyStore = securityKeysService.getKeyStore().block()
-        assertThat(keyStore.getCertificate("testAlias").publicKey.encoded)
-            .isEqualTo(obtainedKeyStore?.getCertificate("testAlias")?.publicKey?.encoded)
+        given { certClient.listPropertiesOfCertificateVersions(any()) }
+            .willReturn(
+                azureTestUtils.getCertificatePropertiesPagedFlux(
+                    listOf(certProperties1, certProperties2)
+                )
+            )
+
+        given { certClient.getCertificateVersion(anyString(), anyOrNull()) }
+            .willReturn(Mono.just(keyVaultCertificate), Mono.just(keyVaultCertificate2))
+
+        StepVerifier.create(securityKeysService.getPublic())
+            .expectNext(certificate1.publicKey)
+            .expectNext(certificate2.publicKey)
+            .verifyComplete()
     }
 
-    private fun generatePKCS12Certificate(alias: String, password: String): KeyStore {
-        val keyPairGenerator = KeyPairGenerator.getInstance("RSA")
-        keyPairGenerator.initialize(2048)
-        val keyPair = keyPairGenerator.generateKeyPair()
+    private fun generatePKCS12Certificate(keyPair: KeyPair): X509Certificate {
 
         val startDate = Date()
         val endDate = Calendar.getInstance().apply { add(Calendar.YEAR, 1) }.time
@@ -159,6 +180,22 @@ class ReactiveAzureKVSecurityKeysServiceTest {
             JcaX509CertificateConverter()
                 .setProvider(BouncyCastleProvider())
                 .getCertificate(certHolder)
+
+        return certificate
+    }
+
+    private fun getKeyPair(): KeyPair {
+        val keyPairGenerator = KeyPairGenerator.getInstance("RSA")
+        keyPairGenerator.initialize(2048)
+        return keyPairGenerator.generateKeyPair()
+    }
+
+    private fun getKeyStoreWithPKCS12Certificate(
+        alias: String,
+        keyPair: KeyPair,
+        password: String,
+    ): KeyStore {
+        val certificate = this.generatePKCS12Certificate(keyPair)
 
         val keyStore = KeyStore.getInstance("PKCS12")
         keyStore.load(null, null)
