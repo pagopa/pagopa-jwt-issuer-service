@@ -35,6 +35,11 @@ object Deps {
   const val openTelemetryInstrumentationVersion = "2.14.0-alpha"
   const val springBootVersion = "3.4.5"
   const val jsonWebTokenVersion = "0.11.5"
+  const val bouncyCastleVersion = "1.80"
+  const val azureIdentityVersion = "1.16.0"
+  const val azureKeyVaultSecretsVersion = "4.9.4"
+  const val azureKeyVaultCertificatesVersion = "4.7.4"
+  const val caffeineVersion = "3.2.0"
 }
 
 repositories { mavenCentral() }
@@ -58,10 +63,10 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-validation")
   implementation("org.springframework.boot:spring-boot-starter-actuator")
   implementation("org.springframework.boot:spring-boot-starter-cache")
-  implementation("com.github.ben-manes.caffeine:caffeine:3.2.0")
-  implementation("com.azure:azure-security-keyvault-secrets:4.9.4")
-  implementation("com.azure:azure-security-keyvault-certificates:4.7.4")
-  implementation("com.azure:azure-identity:1.16.0")
+  implementation("com.github.ben-manes.caffeine:caffeine:${Deps.caffeineVersion}")
+  implementation("com.azure:azure-security-keyvault-secrets:${Deps.azureKeyVaultSecretsVersion}")
+  implementation("com.azure:azure-security-keyvault-certificates:${Deps.azureKeyVaultCertificatesVersion}")
+  implementation("com.azure:azure-identity:${Deps.azureIdentityVersion}")
   implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
   implementation("org.openapitools:jackson-databind-nullable:0.2.6")
   implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
@@ -88,8 +93,8 @@ dependencies {
   testImplementation("org.jetbrains.kotlin:kotlin-test")
   testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
   testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test")
-  testImplementation("org.bouncycastle:bcpkix-jdk18on:1.80")
-  testImplementation("org.bouncycastle:bcprov-jdk18on:1.80")
+  testImplementation("org.bouncycastle:bcpkix-jdk18on:${Deps.bouncyCastleVersion}")
+  testImplementation("org.bouncycastle:bcprov-jdk18on:${Deps.bouncyCastleVersion}")
   testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
