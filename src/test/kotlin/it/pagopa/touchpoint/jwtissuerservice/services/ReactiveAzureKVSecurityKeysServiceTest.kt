@@ -50,6 +50,18 @@ class ReactiveAzureKVSecurityKeysServiceTest {
     }
 
     @Test
+    fun `Should get certificates successfully`() = runTest {
+        // pre-conditions
+
+        val secretTest = KeyVaultSecret("testName", "testValue")
+        given { secretClient.getSecret(any()) }.willReturn(Mono.just(secretTest))
+
+        val obtainedSecret = securityKeysService.getSecret().block()
+        assertThat(obtainedSecret).isEqualTo(secretTest)
+        verify(secretClient, times(1)).getSecret("testName")
+    }
+
+    @Test
     fun `Should get key store successfully`() = runTest {
         // pre-conditions
         val keyStore = generatePKCS12Certificate("testAlias", azureSecretConfig.password)

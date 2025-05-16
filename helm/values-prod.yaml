@@ -81,6 +81,8 @@ microservice-chart:
     OTEL_METRICS_EXPORTER: otlp
     OTEL_LOGS_EXPORTER: none
     OTEL_TRACES_SAMPLER: "always_on"
+    AZURE_MAX_RETRY: "3"
+    AZURE_RETRY_DELAY_MILLIS: "500"
   nodeSelector: {}
   tolerations: []
   affinity:
