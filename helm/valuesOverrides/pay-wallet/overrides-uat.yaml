@@ -19,6 +19,9 @@ microservice-chart:
   envConfig:
     OTEL_SERVICE_NAME: "pagopa-pay-wallet-jwt-issuer-service"
     OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.otel.svc:4317"
+    AZURE_KV_ENDPOINT: "https://pagopa-u-pay-wallet-kv.vault.azure.net/"
+    SECRET_KEY_NAME: "jwt-token-issuer-cert"
+    SECRET_KEY_PASSWORD: ""
   keyvault:
     name: "pagopa-u-pay-wallet-kv"
     tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
