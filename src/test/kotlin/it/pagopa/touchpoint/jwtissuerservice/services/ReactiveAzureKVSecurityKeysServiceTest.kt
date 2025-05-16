@@ -26,11 +26,9 @@ import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.*
 import reactor.core.publisher.Mono
-import reactor.test.StepVerifier
 
 class ReactiveAzureKVSecurityKeysServiceTest {
-    private val azureTestUtils: AzureTestUtils =
-        AzureTestUtils()
+    private val azureTestUtils: AzureTestUtils = AzureTestUtils()
     private val secretClient: SecretAsyncClient = mock()
     private val certClient: CertificateAsyncClient = mock()
     private val azureSecretConfig: AzureSecretConfigProperties =
