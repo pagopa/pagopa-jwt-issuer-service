@@ -1,9 +1,12 @@
 package it.pagopa.touchpoint.jwtissuerservice.services
 
 import com.azure.security.keyvault.certificates.CertificateAsyncClient
+import com.azure.security.keyvault.certificates.models.CertificateProperties
+import com.azure.security.keyvault.certificates.models.KeyVaultCertificate
 import com.azure.security.keyvault.secrets.SecretAsyncClient
 import com.azure.security.keyvault.secrets.models.KeyVaultSecret
 import it.pagopa.touchpoint.jwtissuerservice.config.properties.AzureSecretConfigProperties
+import it.pagopa.touchpoint.jwtissuerservice.utils.AzureTestUtils
 import java.io.ByteArrayOutputStream
 import java.math.BigInteger
 import java.security.KeyPairGenerator
@@ -19,14 +22,15 @@ import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder
 import org.junit.jupiter.api.Test
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito.mock
-import org.mockito.kotlin.any
-import org.mockito.kotlin.given
-import org.mockito.kotlin.times
-import org.mockito.kotlin.verify
+import org.mockito.kotlin.*
 import reactor.core.publisher.Mono
+import reactor.test.StepVerifier
 
 class ReactiveAzureKVSecurityKeysServiceTest {
+    private val azureTestUtils: AzureTestUtils =
+        AzureTestUtils()
     private val secretClient: SecretAsyncClient = mock()
     private val certClient: CertificateAsyncClient = mock()
     private val azureSecretConfig: AzureSecretConfigProperties =
@@ -52,13 +56,24 @@ class ReactiveAzureKVSecurityKeysServiceTest {
     @Test
     fun `Should get certificates successfully`() = runTest {
         // pre-conditions
+        val certProperties1 = mock(CertificateProperties::class.java)
+        val certProperties2 = mock(CertificateProperties::class.java)
+        val keyVaultCertificate = mock(KeyVaultCertificate::class.java)
+        given { certProperties1.isEnabled }.willReturn(true)
+        given { certProperties2.isEnabled }.willReturn(false)
 
-        val secretTest = KeyVaultSecret("testName", "testValue")
-        given { secretClient.getSecret(any()) }.willReturn(Mono.just(secretTest))
+        given { certClient.listPropertiesOfCertificateVersions(any()) }
+            .willReturn(
+                azureTestUtils.getCertificatePropertiesPagedFlux(
+                    listOf(certProperties1, certProperties2)
+                )
+            )
 
-        val obtainedSecret = securityKeysService.getSecret().block()
-        assertThat(obtainedSecret).isEqualTo(secretTest)
-        verify(secretClient, times(1)).getSecret("testName")
+        given { certClient.getCertificateVersion(anyString(), anyOrNull()) }
+            .willReturn(Mono.just(keyVaultCertificate))
+
+        securityKeysService.getCerts().subscribe()
+        verify(certClient, times(1)).getCertificateVersion(any(), anyOrNull())
     }
 
     @Test
