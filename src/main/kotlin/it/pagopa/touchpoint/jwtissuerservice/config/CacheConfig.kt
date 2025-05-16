@@ -28,7 +28,7 @@ class CacheConfig(@Autowired private val cacheConfigProperties: CacheConfigPrope
     @Bean
     fun caffeineCacheBuilder(): Caffeine<Any, Any> {
         return Caffeine.newBuilder()
-            .expireAfterWrite(cacheConfigProperties.ttl, TimeUnit.MINUTES)
+            .expireAfterWrite(cacheConfigProperties.ttlMins, TimeUnit.MINUTES)
             .maximumSize(cacheConfigProperties.maxSize)
     }
 }
