@@ -6,22 +6,16 @@ import com.azure.security.keyvault.certificates.models.KeyVaultCertificate
 import com.azure.security.keyvault.secrets.SecretAsyncClient
 import com.azure.security.keyvault.secrets.models.KeyVaultSecret
 import it.pagopa.touchpoint.jwtissuerservice.config.properties.AzureSecretConfigProperties
+import it.pagopa.touchpoint.jwtissuerservice.models.PrivateKeyWithKid
+import it.pagopa.touchpoint.jwtissuerservice.models.PublicKeyWithKid
 import it.pagopa.touchpoint.jwtissuerservice.utils.AzureTestUtils
-import java.io.ByteArrayOutputStream
-import java.math.BigInteger
-import java.security.KeyPair
-import java.security.KeyPairGenerator
-import java.security.KeyStore
-import java.security.cert.X509Certificate
-import java.util.*
+import it.pagopa.touchpoint.jwtissuerservice.utils.KeyGenerationTestUtils.Companion.generatePKCS12Certificate
+import it.pagopa.touchpoint.jwtissuerservice.utils.KeyGenerationTestUtils.Companion.generatePKCS12CertificateAsBase64
+import it.pagopa.touchpoint.jwtissuerservice.utils.KeyGenerationTestUtils.Companion.getKeyPair
+import it.pagopa.touchpoint.jwtissuerservice.utils.KeyGenerationTestUtils.Companion.getKeyStoreWithPKCS12Certificate
+import it.pagopa.touchpoint.jwtissuerservice.utils.KeyGenerationTestUtils.Companion.getKid
 import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.assertThat
-import org.bouncycastle.asn1.x500.X500Name
-import org.bouncycastle.cert.X509CertificateHolder
-import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter
-import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder
-import org.bouncycastle.jce.provider.BouncyCastleProvider
-import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito.mock
@@ -115,15 +109,18 @@ class ReactiveAzureKVSecurityKeysServiceTest {
                 "testName",
                 generatePKCS12CertificateAsBase64(keyStore, azureSecretConfig.password),
             )
+        val privateKeyWithKid =
+            PrivateKeyWithKid(
+                getKid(keyStore.getCertificate(keyStore.aliases().nextElement()).encoded),
+                keyPair.private,
+            )
         given { secretClient.getSecret(any()) }.willReturn(Mono.just(secretTest))
 
-        val obtainedKeyStore = securityKeysService.getKeyStore().block()
-        assertThat(keyStore.getKey("testAlias", azureSecretConfig.password.toCharArray()).encoded)
-            .isEqualTo(
-                obtainedKeyStore
-                    ?.getKey("testAlias", azureSecretConfig.password.toCharArray())
-                    ?.encoded
-            )
+        StepVerifier.create(securityKeysService.getPrivate())
+            .expectNext(privateKeyWithKid)
+            .verifyComplete()
+
+        verify(secretClient, times(1)).getSecret(any())
     }
 
     @Test
@@ -133,6 +130,10 @@ class ReactiveAzureKVSecurityKeysServiceTest {
         val keyPair2 = getKeyPair()
         val certificate1 = generatePKCS12Certificate(keyPair1)
         val certificate2 = generatePKCS12Certificate(keyPair2)
+        val publicKeyWithKid1 =
+            PublicKeyWithKid(getKid(certificate1.encoded), certificate1.publicKey)
+        val publicKeyWithKid2 =
+            PublicKeyWithKid(getKid(certificate2.encoded), certificate2.publicKey)
         val certProperties1 = mock(CertificateProperties::class.java)
         val certProperties2 = mock(CertificateProperties::class.java)
         val keyVaultCertificate = mock(KeyVaultCertificate::class.java)
@@ -153,62 +154,8 @@ class ReactiveAzureKVSecurityKeysServiceTest {
             .willReturn(Mono.just(keyVaultCertificate), Mono.just(keyVaultCertificate2))
 
         StepVerifier.create(securityKeysService.getPublic())
-            .expectNext(certificate1.publicKey)
-            .expectNext(certificate2.publicKey)
+            .expectNext(publicKeyWithKid1)
+            .expectNext(publicKeyWithKid2)
             .verifyComplete()
-    }
-
-    private fun generatePKCS12Certificate(keyPair: KeyPair): X509Certificate {
-
-        val startDate = Date()
-        val endDate = Calendar.getInstance().apply { add(Calendar.YEAR, 1) }.time
-
-        val certBuilder =
-            JcaX509v3CertificateBuilder(
-                X500Name("CN=Test Certificate"),
-                BigInteger.valueOf(System.currentTimeMillis()),
-                startDate,
-                endDate,
-                X500Name("CN=Test Certificate"),
-                keyPair.public,
-            )
-
-        val contentSigner =
-            JcaContentSignerBuilder("SHA256WithRSAEncryption").build(keyPair.private)
-        val certHolder: X509CertificateHolder = certBuilder.build(contentSigner)
-        val certificate: X509Certificate =
-            JcaX509CertificateConverter()
-                .setProvider(BouncyCastleProvider())
-                .getCertificate(certHolder)
-
-        return certificate
-    }
-
-    private fun getKeyPair(): KeyPair {
-        val keyPairGenerator = KeyPairGenerator.getInstance("RSA")
-        keyPairGenerator.initialize(2048)
-        return keyPairGenerator.generateKeyPair()
-    }
-
-    private fun getKeyStoreWithPKCS12Certificate(
-        alias: String,
-        keyPair: KeyPair,
-        password: String,
-    ): KeyStore {
-        val certificate = this.generatePKCS12Certificate(keyPair)
-
-        val keyStore = KeyStore.getInstance("PKCS12")
-        keyStore.load(null, null)
-        keyStore.setKeyEntry(alias, keyPair.private, password.toCharArray(), arrayOf(certificate))
-
-        return keyStore
-    }
-
-    private fun generatePKCS12CertificateAsBase64(keyStore: KeyStore, password: String): String {
-        val byteArrayOutputStream = ByteArrayOutputStream()
-        keyStore.store(byteArrayOutputStream, password.toCharArray())
-        val keyStoreBytes = byteArrayOutputStream.toByteArray()
-
-        return Base64.getEncoder().encodeToString(keyStoreBytes)
     }
 }

@@ -1,12 +1,12 @@
 package it.pagopa.touchpoint.jwtissuerservice.services
 
-import java.security.PrivateKey
-import java.security.PublicKey
+import it.pagopa.touchpoint.jwtissuerservice.models.PrivateKeyWithKid
+import it.pagopa.touchpoint.jwtissuerservice.models.PublicKeyWithKid
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 interface IReactiveSecurityKeysService {
-    fun getPublic(): Flux<PublicKey>
+    fun getPublic(): Flux<PublicKeyWithKid>
 
-    fun getPrivate(): Mono<PrivateKey>
+    fun getPrivate(): Mono<PrivateKeyWithKid>
 }

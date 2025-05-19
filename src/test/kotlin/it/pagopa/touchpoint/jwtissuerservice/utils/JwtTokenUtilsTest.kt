@@ -2,6 +2,8 @@ package it.pagopa.touchpoint.jwtissuerservice.utils
 
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
+import it.pagopa.touchpoint.jwtissuerservice.models.PrivateKeyWithKid
+import it.pagopa.touchpoint.jwtissuerservice.utils.KeyGenerationTestUtils.Companion.getKeyPair
 import java.time.Duration
 import java.time.Instant
 import org.junit.jupiter.api.Assertions.*
@@ -16,6 +18,8 @@ class JwtTokenUtilsTest {
         // pre conditions
         val audience = "audience"
         val tokenDuration = Duration.ofMinutes(1)
+        val privateKey = getKeyPair()
+        val privateKeyWithKid = PrivateKeyWithKid("kid", privateKey.private)
         // public reserver claims that will be filtered out by app code
         val illegalPrivateClaims =
             mapOf(
@@ -38,16 +42,14 @@ class JwtTokenUtilsTest {
                 audience = audience,
                 tokenDuration = tokenDuration,
                 privateClaims = privateClaims,
+                privateKey = privateKeyWithKid,
             )
         val parsedToken =
-            Jwts.parserBuilder()
-                .setSigningKey(jwtTokenUtils.getKeys()[0])
-                .build()
-                .parse(generatedToken)
+            Jwts.parserBuilder().setSigningKey(privateKey.private).build().parse(generatedToken)
         val header = parsedToken.header
         val body = parsedToken.body as Claims
         // verify header claims
-        assertEquals(jwtTokenUtils.kid, header["kid"])
+        assertEquals(privateKeyWithKid.kid, header["kid"])
         assertEquals("RS256", header["alg"])
         // verify body claims
         val expirationClaim = body[Claims.EXPIRATION] as Int
