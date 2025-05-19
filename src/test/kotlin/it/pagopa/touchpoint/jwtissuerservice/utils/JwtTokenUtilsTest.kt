@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test
 
 class JwtTokenUtilsTest {
 
-    private val jwtTokenUtils = JwtTokenUtils()
+    private val jwtTokenUtils = JwtTokenUtils("jwtIssuer")
 
     @Test
     fun `Should generate token successfully filtering out public claims from input private ones`() {
@@ -59,7 +59,7 @@ class JwtTokenUtilsTest {
         assertEquals(tokenDuration, Duration.between(issuedAtInstant, expirationInstant))
         assertNotNull(body[Claims.ID])
         assertEquals(audience, body[Claims.AUDIENCE])
-        assertEquals("pagopa-jwt-issuer-service", body[Claims.ISSUER])
+        assertEquals("jwtIssuer", body[Claims.ISSUER])
         assertNull(body[Claims.SUBJECT])
         assertNull(body[Claims.NOT_BEFORE])
         legitPrivateClaims.forEach {
