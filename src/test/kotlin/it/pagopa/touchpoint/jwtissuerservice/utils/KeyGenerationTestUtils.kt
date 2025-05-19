@@ -55,7 +55,7 @@ class KeyGenerationTestUtils {
         @JvmStatic
         fun getKid(encodedCert: ByteArray): String {
             // Compute SHA-1 hash
-            val digest = MessageDigest.getInstance("SHA-1")
+            val digest = MessageDigest.getInstance("SHA-256")
             val hash = digest.digest(encodedCert)
 
             // Convert to Base64 URL-encoded string

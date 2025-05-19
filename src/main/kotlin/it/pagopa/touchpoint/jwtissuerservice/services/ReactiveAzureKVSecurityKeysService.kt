@@ -27,7 +27,7 @@ class ReactiveAzureKVSecurityKeysService(
 ) : IReactiveSecurityKeysService {
     private val keystore = KeyStore.getInstance("PKCS12")
     private val certFactory = CertificateFactory.getInstance("X.509")
-    private val digest = MessageDigest.getInstance("SHA-1")
+    private val digest = MessageDigest.getInstance("SHA-256")
 
     fun getSecret(): Mono<KeyVaultSecret> {
         return secretClient.getSecret(azureSecretConfig.name)
