@@ -37,7 +37,6 @@ class ReactiveAzureKVSecurityKeysService(
             .flatMap { certClient.getCertificateVersion(azureSecretConfig.name, it.version) }
     }
 
-    @Cacheable("keyStore")
     fun getKeyStore(): Mono<KeyStore> {
         return this.getSecret().map {
             val decodedPfx = Base64.getDecoder().decode(it.value)
@@ -49,6 +48,7 @@ class ReactiveAzureKVSecurityKeysService(
         }
     }
 
+    @Cacheable("#{cacheConfigProperties.name}", key = "'privateKey'")
     override fun getPrivate(): Mono<PrivateKey> {
         return this.getKeyStore().map {
             it.getKey(it.aliases().nextElement(), azureSecretConfig.password.toCharArray())
