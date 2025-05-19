@@ -71,7 +71,7 @@ class ReactiveAzureKVSecurityKeysService(
     }
 
     private fun getKid(encodedCert: ByteArray): String {
-        // Compute SHA-1 hash
+        // Compute SHA-256 hash
         val hash = digest.digest(encodedCert)
         // Convert to Base64 URL-encoded string
         return Base64.getUrlEncoder().withoutPadding().encodeToString(hash)
