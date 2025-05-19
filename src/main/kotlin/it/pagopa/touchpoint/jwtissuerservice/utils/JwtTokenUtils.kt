@@ -9,12 +9,10 @@ import java.time.Instant
 import java.util.Date
 import java.util.UUID
 import org.springframework.stereotype.Component
+import java.security.PrivateKey
 
 @Component
 class JwtTokenUtils {
-
-    private val keyGen = KeyPairGenerator.getInstance("RSA") // RSA key generator
-    private val keypair: KeyPair
     val kid = UUID.randomUUID().toString()
     private val publicClaims =
         setOf(
@@ -27,15 +25,11 @@ class JwtTokenUtils {
             Claims.NOT_BEFORE,
         )
 
-    init {
-        keyGen.initialize(2048)
-        keypair = keyGen.genKeyPair()
-    }
-
     fun generateJwtToken(
         audience: String,
         tokenDuration: Duration,
         privateClaims: Map<String, Any>,
+        privateKey: PrivateKey
     ): String {
         val now = Instant.now()
         val issuedAtDate = Date.from(now)
@@ -52,9 +46,7 @@ class JwtTokenUtils {
                 .setExpiration(expiryDate) // exp
                 .setAudience(audience) // aud
                 .setIssuer(issuer) // iss
-                .signWith(keypair.private)
+                .signWith(privateKey)
         return jwtBuilder.compact()
     }
-
-    fun getKeys() = listOf(keypair.public)
 }
