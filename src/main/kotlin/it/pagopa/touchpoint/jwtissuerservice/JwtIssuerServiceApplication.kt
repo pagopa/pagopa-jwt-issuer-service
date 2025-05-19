@@ -1,5 +1,6 @@
 package it.pagopa.touchpoint.jwtissuerservice
 
+import com.azure.security.keyvault.certificates.implementation.models.CertificateBundle
 import com.azure.security.keyvault.certificates.implementation.models.CertificateListResult
 import com.azure.security.keyvault.secrets.implementation.models.SecretAttributes
 import com.azure.security.keyvault.secrets.implementation.models.SecretBundle
@@ -17,6 +18,7 @@ import reactor.core.publisher.Hooks
     SecretBundle::class,
     SecretAttributes::class,
     CertificateListResult::class,
+    CertificateBundle::class
 )
 @EnableConfigurationProperties(
     AzureSecretConfigProperties::class,
