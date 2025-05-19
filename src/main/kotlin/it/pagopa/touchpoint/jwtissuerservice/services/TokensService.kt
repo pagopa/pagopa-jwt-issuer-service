@@ -5,6 +5,7 @@ import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.CreateTokenRespo
 import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.JWKResponseDto
 import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.JWKSResponseDto
 import it.pagopa.touchpoint.jwtissuerservice.utils.JwtTokenUtils
+import kotlinx.coroutines.reactive.awaitLast
 import kotlinx.coroutines.reactive.awaitSingle
 import java.security.interfaces.RSAPublicKey
 import java.time.Duration
@@ -28,22 +29,22 @@ class TokensService(private val jwtTokenUtils: JwtTokenUtils, private val reacti
     suspend fun getJwksKeys(): JWKSResponseDto =
         reactiveAzureKVSecurityKeysService
             .getPublic()
-            .collectList()
             .map { it as RSAPublicKey }
             .map {
-                JWKSResponseDto(
-                propertyKeys =
-                    listOf(
-                        JWKResponseDto(
-                            alg = it.format,
-                            kty = JWKResponseDto.Kty.RSA,
-                            use = "sig",
-                            n = it.modulus.toString(),
-                            e = it.publicExponent.toString(),
-                            kid = jwtTokenUtils.kid,
-                        )
-                    )
+                JWKResponseDto(
+                    alg = it.format,
+                    kty = JWKResponseDto.Kty.RSA,
+                    use = "sig",
+                    n = it.modulus.toString(),
+                    e = it.publicExponent.toString(),
+                    kid = jwtTokenUtils.kid,
                 )
-            }.awaitSingle()
+            }
+            .collectList()
+            .map {
+                JWKSResponseDto(
+                    propertyKeys = it
+                ) }
+            .awaitSingle()
 
 }
