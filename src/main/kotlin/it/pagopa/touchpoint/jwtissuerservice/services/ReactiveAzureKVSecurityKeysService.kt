@@ -48,7 +48,7 @@ class ReactiveAzureKVSecurityKeysService(
         }
     }
 
-    @Cacheable("#{cacheConfigProperties.name}", key = "'privateKey'")
+    @Cacheable("keyStore", key = "'privateKey'")
     override fun getPrivate(): Mono<PrivateKey> {
         return this.getKeyStore().map {
             it.getKey(it.aliases().nextElement(), azureSecretConfig.password.toCharArray())
