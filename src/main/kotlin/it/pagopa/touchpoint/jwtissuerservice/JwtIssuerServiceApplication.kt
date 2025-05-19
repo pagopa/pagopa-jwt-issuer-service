@@ -1,5 +1,6 @@
 package it.pagopa.touchpoint.jwtissuerservice
 
+import com.azure.security.keyvault.certificates.implementation.models.CertificateListResult
 import com.azure.security.keyvault.secrets.implementation.models.SecretAttributes
 import com.azure.security.keyvault.secrets.implementation.models.SecretBundle
 import it.pagopa.touchpoint.jwtissuerservice.config.properties.AzureKeyVaultClientConfigProperties
@@ -12,7 +13,11 @@ import org.springframework.boot.runApplication
 import reactor.core.publisher.Hooks
 
 @SpringBootApplication
-@RegisterReflectionForBinding(SecretBundle::class, SecretAttributes::class)
+@RegisterReflectionForBinding(
+    SecretBundle::class,
+    SecretAttributes::class,
+    CertificateListResult::class,
+)
 @EnableConfigurationProperties(
     AzureSecretConfigProperties::class,
     CacheConfigProperties::class,
