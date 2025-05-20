@@ -7,11 +7,10 @@ import java.time.Duration
 import java.time.Instant
 import java.util.Date
 import java.util.UUID
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 
 @Component
-class JwtTokenUtils(@Value("\${jwt.issuer}") private val jwtIssuer: String) {
+class JwtTokenUtils() {
 
     private val publicClaims =
         setOf(
@@ -29,12 +28,12 @@ class JwtTokenUtils(@Value("\${jwt.issuer}") private val jwtIssuer: String) {
         tokenDuration: Duration,
         privateClaims: Map<String, Any>,
         privateKey: PrivateKeyWithKid,
+        jwtIssuer: String,
     ): String {
         val now = Instant.now()
         val issuedAtDate = Date.from(now)
         val expiryDate = Date.from(now.plus(tokenDuration))
         val headerParams = mapOf("kid" to privateKey.kid)
-        val issuer = jwtIssuer
         val filteredPrivateClaims = privateClaims.filterNot { publicClaims.contains(it.key) }
         val jwtBuilder =
             Jwts.builder()
@@ -44,7 +43,7 @@ class JwtTokenUtils(@Value("\${jwt.issuer}") private val jwtIssuer: String) {
                 .setIssuedAt(issuedAtDate) // iat
                 .setExpiration(expiryDate) // exp
                 .setAudience(audience) // aud
-                .setIssuer(issuer) // iss
+                .setIssuer(jwtIssuer) // iss
                 .signWith(privateKey.privateKey)
         return jwtBuilder.compact()
     }

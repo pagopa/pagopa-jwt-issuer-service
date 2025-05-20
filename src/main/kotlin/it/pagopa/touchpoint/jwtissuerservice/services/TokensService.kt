@@ -10,12 +10,14 @@ import java.time.Duration
 import java.util.*
 import kotlinx.coroutines.reactive.awaitSingle
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
 @Service
 class TokensService(
     private val jwtTokenUtils: JwtTokenUtils,
     private val reactiveAzureKVSecurityKeysService: IReactiveSecurityKeysService,
+    @Value("\${jwt.issuer}") private val jwtIssuer: String,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -29,6 +31,7 @@ class TokensService(
                         tokenDuration = Duration.ofSeconds(createTokenRequest.duration.toLong()),
                         privateClaims = createTokenRequest.privateClaims,
                         privateKey = it,
+                        jwtIssuer = jwtIssuer,
                     )
                 )
             }

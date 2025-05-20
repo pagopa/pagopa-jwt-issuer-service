@@ -27,7 +27,11 @@ class TokensServiceTest {
     private val kvService: ReactiveAzureKVSecurityKeysService = mock()
 
     private val tokensService =
-        TokensService(jwtTokenUtils = jwtTokenUtils, reactiveAzureKVSecurityKeysService = kvService)
+        TokensService(
+            jwtTokenUtils = jwtTokenUtils,
+            reactiveAzureKVSecurityKeysService = kvService,
+            jwtIssuer = "jwtIssuer",
+        )
 
     @Test
     fun `Should generate token successfully`() = runTest {
@@ -51,6 +55,7 @@ class TokensServiceTest {
                     tokenDuration = any(),
                     privateClaims = any(),
                     privateKey = any(),
+                    jwtIssuer = any(),
                 )
             )
             .willReturn(token)
@@ -63,6 +68,7 @@ class TokensServiceTest {
                 tokenDuration = duration,
                 privateClaims = privateClaims,
                 privateKey = privateKeyWithKid,
+                jwtIssuer = "jwtIssuer",
             )
     }
 

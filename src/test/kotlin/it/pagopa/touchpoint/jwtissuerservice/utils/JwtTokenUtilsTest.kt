@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test
 
 class JwtTokenUtilsTest {
 
-    private val jwtTokenUtils = JwtTokenUtils("jwtIssuer")
+    private val jwtTokenUtils = JwtTokenUtils()
 
     @Test
     fun `Should generate token successfully filtering out public claims from input private ones`() {
@@ -43,6 +43,7 @@ class JwtTokenUtilsTest {
                 tokenDuration = tokenDuration,
                 privateClaims = privateClaims,
                 privateKey = privateKeyWithKid,
+                jwtIssuer = "jwtIssuer",
             )
         val parsedToken =
             Jwts.parserBuilder().setSigningKey(privateKey.private).build().parse(generatedToken)
