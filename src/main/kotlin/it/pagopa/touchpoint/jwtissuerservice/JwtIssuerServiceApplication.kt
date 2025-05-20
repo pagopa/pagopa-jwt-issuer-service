@@ -18,7 +18,7 @@ import reactor.core.publisher.Hooks
     SecretBundle::class,
     SecretAttributes::class,
     CertificateListResult::class,
-    CertificateBundle::class
+    CertificateBundle::class,
 )
 @EnableConfigurationProperties(
     AzureSecretConfigProperties::class,

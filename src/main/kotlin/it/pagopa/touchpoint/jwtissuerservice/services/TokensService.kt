@@ -9,6 +9,7 @@ import java.security.interfaces.RSAPublicKey
 import java.time.Duration
 import java.util.*
 import kotlinx.coroutines.reactive.awaitSingle
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
@@ -16,6 +17,7 @@ class TokensService(
     private val jwtTokenUtils: JwtTokenUtils,
     private val reactiveAzureKVSecurityKeysService: IReactiveSecurityKeysService,
 ) {
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     suspend fun generateToken(createTokenRequest: CreateTokenRequestDto): CreateTokenResponseDto =
         reactiveAzureKVSecurityKeysService
@@ -30,6 +32,7 @@ class TokensService(
                     )
                 )
             }
+            .doOnNext { logger.info("Token generated successfully") }
             .awaitSingle()
 
     suspend fun getJwksKeys(): JWKSResponseDto =
@@ -50,5 +53,8 @@ class TokensService(
             }
             .collectList()
             .map { JWKSResponseDto(propertyKeys = it) }
+            .doOnNext {
+                logger.info("Public keys list retrieved, number of keys: ${it.propertyKeys.size}")
+            }
             .awaitSingle()
 }
