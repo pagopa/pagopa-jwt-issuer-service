@@ -23,7 +23,6 @@ These are all environment variables needed by the application:
 | AZURE_RETRY_DELAY_MILLIS       | Delay between retries in milliseconds for Azure operations.                                | number  |                      |
 | SECRET_KEY_NAME                | The name of Azure Key Vault secret containing certificates                                 | string  |                      |
 | SECRET_KEY_PASSWORD            | The password of Azure Key Vault secret used to validate keystores                          | string  |                      |
-| KEYSTORE_CACHE_NAME            | Name of the cache application uses to store keystores                                      | string  |                      |
 | KEYSTORE_CACHE_MAXSIZE         | Maximum size of the cache application uses to store keystores                              | number  |                      |
 | KEYSTORE_CACHE_TTL_MINS        | Time to live of the cache application uses to store keystores                              | number  |                      |
 | ROOT_LOGGING_LEVEL             | Root logging level. Possible values are 'info', 'debug', 'trace'.                          | string  | info                 |
