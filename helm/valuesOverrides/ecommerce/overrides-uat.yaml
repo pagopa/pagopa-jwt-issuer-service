@@ -19,7 +19,7 @@ microservice-chart:
   envConfig:
     OTEL_SERVICE_NAME: "pagopa-ecommerce-jwt-issuer-service"
     OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.elastic-system.svc:4317"
-    AZURE_KV_ENDPOINT: "https://pagopa-u-pay-wallet-kv.vault.azure.net/"
+    AZURE_KV_ENDPOINT: "https://pagopa-u-ecommerce-kv.vault.azure.net/"
     SECRET_KEY_NAME: "jwt-token-issuer-cert"
     SECRET_KEY_PASSWORD: ""
     JWT_ISSUER: "pagopa-ecommerce-jwt-issuer-service"
