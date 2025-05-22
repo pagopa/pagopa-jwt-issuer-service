@@ -3,8 +3,10 @@ package it.pagopa.touchpoint.jwtissuerservice.services
 import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.CreateTokenRequestDto
 import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.JWKResponseDto
 import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.JWKSResponseDto
+import it.pagopa.touchpoint.jwtissuerservice.models.PrivateKeyWithKid
+import it.pagopa.touchpoint.jwtissuerservice.models.PublicKeyWithKid
 import it.pagopa.touchpoint.jwtissuerservice.utils.JwtTokenUtils
-import java.security.KeyPairGenerator
+import it.pagopa.touchpoint.jwtissuerservice.utils.KeyGenerationTestUtils.Companion.getKeyPair
 import java.security.interfaces.RSAPublicKey
 import java.time.Duration
 import java.util.Base64
@@ -16,12 +18,20 @@ import org.mockito.kotlin.given
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
 
 class TokensServiceTest {
 
     private val jwtTokenUtils: JwtTokenUtils = mock()
+    private val kvService: ReactiveAzureKVSecurityKeysService = mock()
 
-    private val tokensService = TokensService(jwtTokenUtils = jwtTokenUtils)
+    private val tokensService =
+        TokensService(
+            jwtTokenUtils = jwtTokenUtils,
+            reactiveAzureKVSecurityKeysService = kvService,
+            jwtIssuer = "jwtIssuer",
+        )
 
     @Test
     fun `Should generate token successfully`() = runTest {
@@ -36,11 +46,16 @@ class TokensServiceTest {
                 privateClaims = privateClaims,
             )
         val token = "jwtToken"
+        val privateKey = getKeyPair()
+        val privateKeyWithKid = PrivateKeyWithKid("kid", privateKey.private)
+        given(kvService.getPrivate()).willReturn(Mono.just(privateKeyWithKid))
         given(
                 jwtTokenUtils.generateJwtToken(
                     audience = any(),
                     tokenDuration = any(),
                     privateClaims = any(),
+                    privateKey = any(),
+                    jwtIssuer = any(),
                 )
             )
             .willReturn(token)
@@ -52,15 +67,18 @@ class TokensServiceTest {
                 audience = audience,
                 tokenDuration = duration,
                 privateClaims = privateClaims,
+                privateKey = privateKeyWithKid,
+                jwtIssuer = "jwtIssuer",
             )
     }
 
     @Test
     fun `Should retrieve Json Web Keys successfully`() = runTest {
         // pre-conditions
-        val keyGen = KeyPairGenerator.getInstance("RSA")
-        val publicKey = keyGen.genKeyPair().public as RSAPublicKey
+        val keyPair = getKeyPair()
         val kid = "keyId"
+        val publicKey: RSAPublicKey = keyPair.public as RSAPublicKey
+        val publicKeyWithKid = PublicKeyWithKid(kid, keyPair.public)
         val expectedJwksResponse =
             JWKSResponseDto(
                 propertyKeys =
@@ -79,12 +97,10 @@ class TokensServiceTest {
                         )
                     )
             )
-
-        given(jwtTokenUtils.getKeys()).willReturn(listOf(publicKey))
-        given(jwtTokenUtils.kid).willReturn(kid)
+        given(kvService.getPublic()).willReturn(Flux.just(publicKeyWithKid))
         // test
         val jwks = tokensService.getJwksKeys()
         assertEquals(expectedJwksResponse, jwks)
-        verify(jwtTokenUtils, times(1)).getKeys()
+        verify(kvService, times(1)).getPublic()
     }
 }

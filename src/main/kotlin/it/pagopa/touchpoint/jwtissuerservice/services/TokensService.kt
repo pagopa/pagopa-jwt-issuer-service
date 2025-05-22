@@ -7,38 +7,57 @@ import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.JWKSResponseDto
 import it.pagopa.touchpoint.jwtissuerservice.utils.JwtTokenUtils
 import java.security.interfaces.RSAPublicKey
 import java.time.Duration
-import java.util.Base64
+import java.util.*
+import kotlinx.coroutines.reactive.awaitSingle
+import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
 @Service
-class TokensService(private val jwtTokenUtils: JwtTokenUtils) {
+class TokensService(
+    private val jwtTokenUtils: JwtTokenUtils,
+    private val reactiveAzureKVSecurityKeysService: IReactiveSecurityKeysService,
+    @Value("\${jwt.issuer}") private val jwtIssuer: String,
+) {
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     suspend fun generateToken(createTokenRequest: CreateTokenRequestDto): CreateTokenResponseDto =
-        CreateTokenResponseDto(
-            jwtTokenUtils.generateJwtToken(
-                audience = createTokenRequest.audience,
-                tokenDuration = Duration.ofSeconds(createTokenRequest.duration.toLong()),
-                privateClaims = createTokenRequest.privateClaims,
-            )
-        )
+        reactiveAzureKVSecurityKeysService
+            .getPrivate()
+            .map {
+                CreateTokenResponseDto(
+                    jwtTokenUtils.generateJwtToken(
+                        audience = createTokenRequest.audience,
+                        tokenDuration = Duration.ofSeconds(createTokenRequest.duration.toLong()),
+                        privateClaims = createTokenRequest.privateClaims,
+                        privateKey = it,
+                        jwtIssuer = jwtIssuer,
+                    )
+                )
+            }
+            .doOnNext { logger.info("Token generated successfully") }
+            .awaitSingle()
 
     suspend fun getJwksKeys(): JWKSResponseDto =
-        JWKSResponseDto(
-            propertyKeys =
-                jwtTokenUtils
-                    .getKeys()
-                    .map { it as RSAPublicKey }
-                    .map {
-                        JWKResponseDto(
-                            alg = it.format,
-                            kty = JWKResponseDto.Kty.RSA,
-                            use = "sig",
-                            n = Base64.getUrlEncoder().encodeToString(it.modulus.toByteArray()),
-                            e =
-                                Base64.getUrlEncoder()
-                                    .encodeToString(it.publicExponent.toByteArray()),
-                            kid = jwtTokenUtils.kid,
-                        )
-                    }
-        )
+        reactiveAzureKVSecurityKeysService
+            .getPublic()
+            .map {
+                val rsaPublicKey = it.publicKey as RSAPublicKey
+                JWKResponseDto(
+                    alg = rsaPublicKey.format,
+                    kty = JWKResponseDto.Kty.RSA,
+                    use = "sig",
+                    n = Base64.getUrlEncoder().encodeToString(rsaPublicKey.modulus.toByteArray()),
+                    e =
+                        Base64.getUrlEncoder()
+                            .encodeToString(rsaPublicKey.publicExponent.toByteArray()),
+                    kid = it.kid,
+                )
+            }
+            .collectList()
+            .map { JWKSResponseDto(propertyKeys = it) }
+            .doOnNext {
+                logger.info("Public keys list retrieved, number of keys: ${it.propertyKeys.size}")
+            }
+            .awaitSingle()
 }

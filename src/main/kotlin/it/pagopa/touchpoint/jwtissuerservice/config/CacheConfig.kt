@@ -19,7 +19,7 @@ class CacheConfig(@Autowired private val cacheConfigProperties: CacheConfigPrope
     fun caffeineCacheManager(caffeine: Caffeine<Any, Any>): CacheManager {
         val caffeineCacheManager = CaffeineCacheManager()
         caffeineCacheManager.setCaffeine(caffeine)
-        caffeineCacheManager.setCacheNames(Collections.singleton(cacheConfigProperties.name))
+        caffeineCacheManager.setCacheNames(Collections.singleton("keyStore"))
         caffeineCacheManager.setAsyncCacheMode(true)
         caffeineCacheManager.isAllowNullValues = false
         return caffeineCacheManager

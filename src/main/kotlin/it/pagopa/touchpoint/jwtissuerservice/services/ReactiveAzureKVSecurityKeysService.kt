@@ -5,10 +5,12 @@ import com.azure.security.keyvault.certificates.models.KeyVaultCertificate
 import com.azure.security.keyvault.secrets.SecretAsyncClient
 import com.azure.security.keyvault.secrets.models.KeyVaultSecret
 import it.pagopa.touchpoint.jwtissuerservice.config.properties.AzureSecretConfigProperties
+import it.pagopa.touchpoint.jwtissuerservice.models.PrivateKeyWithKid
+import it.pagopa.touchpoint.jwtissuerservice.models.PublicKeyWithKid
 import java.io.ByteArrayInputStream
 import java.security.KeyStore
+import java.security.MessageDigest
 import java.security.PrivateKey
-import java.security.PublicKey
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
 import java.util.*
@@ -25,6 +27,7 @@ class ReactiveAzureKVSecurityKeysService(
 ) : IReactiveSecurityKeysService {
     private val keystore = KeyStore.getInstance("PKCS12")
     private val certFactory = CertificateFactory.getInstance("X.509")
+    private val digest = MessageDigest.getInstance("SHA-256")
 
     fun getSecret(): Mono<KeyVaultSecret> {
         return secretClient.getSecret(azureSecretConfig.name)
@@ -49,18 +52,28 @@ class ReactiveAzureKVSecurityKeysService(
     }
 
     @Cacheable("keyStore", key = "'privateKey'")
-    override fun getPrivate(): Mono<PrivateKey> {
+    override fun getPrivate(): Mono<PrivateKeyWithKid> {
         return this.getKeyStore().map {
-            it.getKey(it.aliases().nextElement(), azureSecretConfig.password.toCharArray())
-                as PrivateKey
+            val alias = it.aliases().nextElement()
+            PrivateKeyWithKid(
+                getKid(it.getCertificate(alias).encoded),
+                it.getKey(alias, azureSecretConfig.password.toCharArray()) as PrivateKey,
+            )
         }
     }
 
-    override fun getPublic(): Flux<PublicKey> {
+    override fun getPublic(): Flux<PublicKeyWithKid> {
         return this.getCerts().map {
             val x509Cert: X509Certificate =
                 certFactory.generateCertificate(ByteArrayInputStream(it.cer)) as X509Certificate
-            x509Cert.publicKey
+            PublicKeyWithKid(getKid(it.cer), x509Cert.publicKey)
         }
+    }
+
+    private fun getKid(encodedCert: ByteArray): String {
+        // Compute SHA-256 hash
+        val hash = digest.digest(encodedCert)
+        // Convert to Base64 URL-encoded string
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(hash)
     }
 }

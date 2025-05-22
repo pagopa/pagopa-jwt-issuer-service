@@ -1,5 +1,5 @@
 services:
-  pagopa-checkout-auth-service:
+  pagopa-jwt-issuer-service:
     container_name: pagopa-jwt-issuer-service
     build:
       dockerfile: "${DOCKER_FILE_NAME}"
