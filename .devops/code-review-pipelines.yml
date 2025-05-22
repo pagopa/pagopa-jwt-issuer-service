@@ -86,3 +86,8 @@ stages:
                 ENV_FILE: "api-tests/localhost.env.json"
                 TEST_FILE_PREFIX: "local"
                 USE_NEWMAN_DOCKER_IMAGE: false
+
+            - script: |
+                echo "Fetching Docker Compose logs..."
+                docker compose logs
+              displayName: 'Read Docker Compose Logs'
