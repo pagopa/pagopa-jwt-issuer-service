@@ -91,3 +91,4 @@ stages:
                 echo "Fetching Docker Compose logs..."
                 docker compose logs
               displayName: 'Read Docker Compose Logs'
+              condition: always()
