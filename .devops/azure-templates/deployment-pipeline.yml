@@ -244,8 +244,6 @@ stages:
   - stage: "API_Test_UAT_Blue"
     displayName: 'Running API test on UAT blue app'
     dependsOn: Deploy_UAT_Blue
-    pool:
-      name: pagopa-uat-linux
     jobs:
       - job: newman_api_test
         steps:
@@ -347,13 +345,10 @@ stages:
   - stage: "API_Test_UAT_Green"
     displayName: 'Running API test on UAT green app version'
     dependsOn: Deploy_UAT_Green
-    pool:
-      name: pagopa-uat-linux
     jobs:
       - job: newman_api_test
         steps:
           - template: ./api-tests.yml
-
             parameters:
               API_TEST_FILE: api-tests/jwt-token-issuer-service.postman-collection.json
               ENV_FILE: api-tests/${{ parameters.DOMAIN }}-uat.env.json
