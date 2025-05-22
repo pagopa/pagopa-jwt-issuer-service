@@ -2,7 +2,7 @@ services:
   pagopa-jwt-issuer-service:
     container_name: pagopa-jwt-issuer-service
     build:
-      dockerfile: "${DOCKER_FILE_NAME}"
+      dockerfile: "Dockerfile.jvm"
       context: .
     env_file:
       - ./.env
