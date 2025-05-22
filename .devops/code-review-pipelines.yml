@@ -69,8 +69,12 @@ stages:
             - script: cp .env.example .env
               displayName: 'Setup env'
 
-            - script: docker compose up -d
+            - task: AzureCLI@1
               displayName: 'Run app with docker-compose'
+              inputs:
+                azureSubscription: 'DEV-PAGOPA-SERVICE-CONN'
+                scriptLocation: inlineScript
+                inlineScript: docker compose up -d
 
             - script: |
                 timeout 180 bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:8080/actuator/health/liveness)" != "200" ]]; do sleep 5; done' || exit 1
