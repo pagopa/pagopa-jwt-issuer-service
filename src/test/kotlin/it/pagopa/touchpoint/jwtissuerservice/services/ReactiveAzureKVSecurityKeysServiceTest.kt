@@ -73,6 +73,32 @@ class ReactiveAzureKVSecurityKeysServiceTest {
     }
 
     @Test
+    fun `Should get all certificates that do not throw error`() = runTest {
+        // pre-conditions
+        val certProperties1 = mock(CertificateProperties::class.java)
+        val certProperties2 = mock(CertificateProperties::class.java)
+        val keyVaultCertificate = mock(KeyVaultCertificate::class.java)
+        given { certProperties1.isEnabled }.willReturn(true)
+        given { certProperties2.isEnabled }.willReturn(true)
+
+        given { certClient.listPropertiesOfCertificateVersions(any()) }
+            .willReturn(
+                azureTestUtils.getCertificatePropertiesPagedFlux(
+                    listOf(certProperties1, certProperties2)
+                )
+            )
+
+        given { certClient.getCertificateVersion(anyString(), anyOrNull()) }
+            .willReturn(Mono.error(RuntimeException("test error")))
+            .willReturn(Mono.just(keyVaultCertificate))
+
+        StepVerifier.create(securityKeysService.getCerts())
+            .expectNext(keyVaultCertificate)
+            .verifyComplete()
+        verify(certClient, times(2)).getCertificateVersion(any(), anyOrNull())
+    }
+
+    @Test
     fun `Should get key store successfully`() = runTest {
         // pre-conditions
         val keyPair = getKeyPair()
