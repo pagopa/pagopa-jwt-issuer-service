@@ -27,7 +27,6 @@ class ReactiveAzureKVSecurityKeysService(
 ) : IReactiveSecurityKeysService {
     private val keystore = KeyStore.getInstance("PKCS12")
     private val certFactory = CertificateFactory.getInstance("X.509")
-    private val digest = MessageDigest.getInstance("SHA-256")
 
     fun getSecret(): Mono<KeyVaultSecret> {
         return secretClient.getSecret(azureSecretConfig.name)
@@ -72,6 +71,7 @@ class ReactiveAzureKVSecurityKeysService(
 
     private fun getKid(encodedCert: ByteArray): String {
         // Compute SHA-256 hash
+        val digest = MessageDigest.getInstance("SHA-256")
         val hash = digest.digest(encodedCert)
         // Convert to Base64 URL-encoded string
         return Base64.getUrlEncoder().withoutPadding().encodeToString(hash)
