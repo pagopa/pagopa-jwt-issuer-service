@@ -58,10 +58,10 @@ microservice-chart:
         - all
   resources:
     requests:
-      memory: "256Mi"
+      memory: "128Mi"
       cpu: "150m"
     limits:
-      memory: "256Mi"
+      memory: "128Mi"
       cpu: "150m"
   autoscaling:
     enable: true
@@ -84,7 +84,7 @@ microservice-chart:
     OTEL_LOGS_EXPORTER: none
     OTEL_TRACES_SAMPLER: "always_on"
     KEYSTORE_CACHE_MAXSIZE: "10"
-    KEYSTORE_CACHE_TTL_MINS: "60"
+    KEYSTORE_CACHE_TTL_MINS: "1"
     AZURE_MAX_RETRY: "3"
     AZURE_RETRY_DELAY_MILLIS: "500"
   nodeSelector: {}
