@@ -142,7 +142,7 @@ stages:
               CONTAINER_REGISTRY_SERVICE_CONN: $(UAT_CONTAINER_REGISTRY_SERVICE_CONN)
               CONTAINER_REGISTRY_FQDN: $(UAT_CONTAINER_NAMESPACE)
               DOCKER_IMAGE_NAME: $(K8S_IMAGE_REPOSITORY_NAME)
-              DOCKER_IMAGE_TAG: $(Build.SourceVersion)${{ parameters.DOCKER_FILE_VERSION_SUFFIX }}
+              DOCKER_IMAGE_TAG: $(Build.SourceVersion)${{ parameters.DOCKER_FILE_VERSION_SUFFIX }}-soak
               FORCE_REPLACE_DOCKER_IMAGE: ${{ parameters.FORCE_REPLACE_DOCKER_IMAGE }}
               DOCKERFILE: ${{ parameters.DOCKER_FILE_NAME }}
   - stage: "Get_Release_Version"
@@ -176,7 +176,7 @@ stages:
             inputs:
               targetType: "inline"
               script: |
-                docker pull $(UAT_CONTAINER_NAMESPACE)/$(K8S_IMAGE_REPOSITORY_NAME):$(Build.SourceVersion)${{ parameters.DOCKER_FILE_VERSION_SUFFIX }}
+                docker pull $(UAT_CONTAINER_NAMESPACE)/$(K8S_IMAGE_REPOSITORY_NAME):$(Build.SourceVersion)${{ parameters.DOCKER_FILE_VERSION_SUFFIX }}-soak
                 docker tag $(UAT_CONTAINER_NAMESPACE)/$(K8S_IMAGE_REPOSITORY_NAME):$(Build.SourceVersion)${{ parameters.DOCKER_FILE_VERSION_SUFFIX }} $(UAT_CONTAINER_NAMESPACE)/$(K8S_IMAGE_REPOSITORY_NAME):$(app_version)${{ parameters.DOCKER_FILE_VERSION_SUFFIX }}-soak
                 docker push $(UAT_CONTAINER_NAMESPACE)/$(K8S_IMAGE_REPOSITORY_NAME):$(app_version)${{ parameters.DOCKER_FILE_VERSION_SUFFIX }}-soak
 
