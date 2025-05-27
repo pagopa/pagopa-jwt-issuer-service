@@ -25,8 +25,6 @@ class ReactiveAzureKVSecurityKeysService(
     private val certClient: CertificateAsyncClient,
     private val azureSecretConfig: AzureSecretConfigProperties,
 ) : IReactiveSecurityKeysService {
-    private val keystore = KeyStore.getInstance("PKCS12")
-    private val certFactory = CertificateFactory.getInstance("X.509")
 
     fun getSecret(): Mono<KeyVaultSecret> {
         return secretClient.getSecret(azureSecretConfig.name)
@@ -41,6 +39,7 @@ class ReactiveAzureKVSecurityKeysService(
 
     fun getKeyStore(): Mono<KeyStore> {
         return this.getSecret().map {
+            val keystore = KeyStore.getInstance("PKCS12")
             val decodedPfx = Base64.getDecoder().decode(it.value)
             keystore.load(
                 ByteArrayInputStream(decodedPfx),
@@ -63,6 +62,7 @@ class ReactiveAzureKVSecurityKeysService(
 
     override fun getPublic(): Flux<PublicKeyWithKid> {
         return this.getCerts().map {
+            val certFactory = CertificateFactory.getInstance("X.509")
             val x509Cert: X509Certificate =
                 certFactory.generateCertificate(ByteArrayInputStream(it.cer)) as X509Certificate
             PublicKeyWithKid(getKid(it.cer), x509Cert.publicKey)
