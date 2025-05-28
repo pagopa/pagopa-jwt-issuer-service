@@ -16,7 +16,7 @@ microservice-chart:
       tag: "latest"
   image:
     repository: ""
-    tag: "0.3.3-soak"
+    tag: "0.3.4"
     pullPolicy: Always
   livenessProbe:
     handlerType: httpGet
@@ -36,7 +36,6 @@ microservice-chart:
     periodSeconds: 10
   deployment:
     create: true
-    replicas: 3
   service:
     create: true
     type: ClusterIP
@@ -64,9 +63,9 @@ microservice-chart:
       memory: "128Mi"
       cpu: "150m"
   autoscaling:
-    enable: true
-    minReplica: 3
-    maxReplica: 7
+    enable: false
+    minReplica: 1
+    maxReplica: 5
     pollingInterval: 30 # seconds
     cooldownPeriod: 30 # seconds
     triggers:
@@ -84,7 +83,7 @@ microservice-chart:
     OTEL_LOGS_EXPORTER: none
     OTEL_TRACES_SAMPLER: "always_on"
     KEYSTORE_CACHE_MAXSIZE: "10"
-    KEYSTORE_CACHE_TTL_MINS: "1"
+    KEYSTORE_CACHE_TTL_MINS: "60"
     AZURE_MAX_RETRY: "3"
     AZURE_RETRY_DELAY_MILLIS: "500"
   nodeSelector: {}

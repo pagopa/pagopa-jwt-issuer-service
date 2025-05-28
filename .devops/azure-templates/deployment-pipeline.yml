@@ -133,6 +133,15 @@ stages:
   - stage: "Build_release_candidate"
     displayName: "Build release candidate"
     dependsOn: []
+    condition: and(
+      succeeded(),
+      eq(${{parameters.SKIP_BUILD}}, false),
+      eq(${{parameters.UAT_PROD_DEPLOY}}, true),
+      or(
+      eq(variables['Build.SourceBranch'], 'refs/heads/main'),
+      startsWith(variables['Build.SourceBranch'], 'refs/tags')
+      )
+      )
     jobs:
       - job: "build"
         displayName: "Build release candidate docker image"
@@ -142,7 +151,7 @@ stages:
               CONTAINER_REGISTRY_SERVICE_CONN: $(UAT_CONTAINER_REGISTRY_SERVICE_CONN)
               CONTAINER_REGISTRY_FQDN: $(UAT_CONTAINER_NAMESPACE)
               DOCKER_IMAGE_NAME: $(K8S_IMAGE_REPOSITORY_NAME)
-              DOCKER_IMAGE_TAG: $(Build.SourceVersion)${{ parameters.DOCKER_FILE_VERSION_SUFFIX }}-soak
+              DOCKER_IMAGE_TAG: $(Build.SourceVersion)${{ parameters.DOCKER_FILE_VERSION_SUFFIX }}
               FORCE_REPLACE_DOCKER_IMAGE: ${{ parameters.FORCE_REPLACE_DOCKER_IMAGE }}
               DOCKERFILE: ${{ parameters.DOCKER_FILE_NAME }}
   - stage: "Get_Release_Version"
@@ -176,13 +185,126 @@ stages:
             inputs:
               targetType: "inline"
               script: |
-                docker pull $(UAT_CONTAINER_NAMESPACE)/$(K8S_IMAGE_REPOSITORY_NAME):$(Build.SourceVersion)${{ parameters.DOCKER_FILE_VERSION_SUFFIX }}-soak
-                docker tag $(UAT_CONTAINER_NAMESPACE)/$(K8S_IMAGE_REPOSITORY_NAME):$(Build.SourceVersion)${{ parameters.DOCKER_FILE_VERSION_SUFFIX }}-soak $(UAT_CONTAINER_NAMESPACE)/$(K8S_IMAGE_REPOSITORY_NAME):$(app_version)${{ parameters.DOCKER_FILE_VERSION_SUFFIX }}-soak
-                docker push $(UAT_CONTAINER_NAMESPACE)/$(K8S_IMAGE_REPOSITORY_NAME):$(app_version)${{ parameters.DOCKER_FILE_VERSION_SUFFIX }}-soak
+                docker pull $(UAT_CONTAINER_NAMESPACE)/$(K8S_IMAGE_REPOSITORY_NAME):$(Build.SourceVersion)${{ parameters.DOCKER_FILE_VERSION_SUFFIX }}
+                docker tag $(UAT_CONTAINER_NAMESPACE)/$(K8S_IMAGE_REPOSITORY_NAME):$(Build.SourceVersion)${{ parameters.DOCKER_FILE_VERSION_SUFFIX }} $(UAT_CONTAINER_NAMESPACE)/$(K8S_IMAGE_REPOSITORY_NAME):$(app_version)${{ parameters.DOCKER_FILE_VERSION_SUFFIX }}
+                docker push $(UAT_CONTAINER_NAMESPACE)/$(K8S_IMAGE_REPOSITORY_NAME):$(app_version)${{ parameters.DOCKER_FILE_VERSION_SUFFIX }}
+
+  - stage: "Deploy_UAT_Blue"
+    displayName: "UAT blue deployment"
+    dependsOn: [Tag_Docker_Release, Get_Release_Version]
+    condition: |
+      and(
+        eq(${{parameters.UAT_PROD_DEPLOY}}, true),
+        in(dependencies.Tag_Docker_Release.result, 'Succeeded', 'Skipped'),
+        or(
+          eq(variables['Build.SourceBranch'], 'refs/heads/main'),
+          startsWith(variables['Build.SourceBranch'], 'refs/tags')
+        )
+      )
+    variables:
+      app_version: $[ stageDependencies.Get_Release_Version.get_version.outputs['chart_current_version.appVersion'] ]
+    jobs:
+      - deployment: "Blue_deployment"
+        displayName: "Blue deployment"
+        pool:
+          name: pagopa-uat-linux
+        environment: "UAT"
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                  displayName: "Checkout"
+                - task: KubectlInstaller@0
+                - task: Bash@3
+                  name: update_chart_version
+                  displayName: "Setup helm microservice chart"
+                  inputs:
+                    targetType: "inline"
+                    script: |
+                      helm repo add microservice-chart https://pagopa.github.io/aks-microservice-chart-blueprint
+                      helm dep build helm
+                - template: ./helm-microservice-chart-deploy.yml
+                  parameters:
+                    DO_DEPLOY: true
+                    DO_BLUE_GREEN_DEPLOY: true
+                    ENV: "UAT"
+                    KUBERNETES_SERVICE_CONN: $(UAT_KUBERNETES_SERVICE_CONN)
+                    NAMESPACE: ${{ parameters.DOMAIN }}
+                    APP_NAME: beta-$(K8S_IMAGE_REPOSITORY_NAME)
+                    VALUE_FILE: "helm/values-uat.yaml"
+                    GREEN_VERSION: $(app_version)${{ parameters.DOCKER_FILE_VERSION_SUFFIX }}
+                    BLUE_VERSION: $(app_version)${{ parameters.DOCKER_FILE_VERSION_SUFFIX }}
+                    #for jvm build add --values option targeting containing overrides from native helm values, such as required resources etc
+                    ${{ if eq(parameters['NATIVE_COMPILATION'], False) }}:
+                      ARGUMENTS: --timeout 5m0s --values helm/valuesOverrides/overrides-jvm-uat.yaml --values helm/valuesOverrides/${{ parameters.DOMAIN }}/overrides-uat.yaml
+                    ${{ else }}:
+                      ARGUMENTS: --timeout 5m0s --values helm/valuesOverrides/${{ parameters.DOMAIN }}/overrides-uat.yaml
+
+  - stage: "API_Test_UAT_Blue"
+    displayName: 'Running API test on UAT blue app'
+    dependsOn: Deploy_UAT_Blue
+    pool:
+      name: pagopa-uat-linux
+    jobs:
+      - job: newman_api_test
+        steps:
+          - template: ./api-tests.yml
+            parameters:
+              API_TEST_FILE: api-tests/jwt-token-issuer-service.postman-collection.json
+              ENV_FILE: api-tests/${{ parameters.DOMAIN }}-uat.env.json
+              TEST_FILE_PREFIX: "uat-blue"
+              USE_NEWMAN_DOCKER_IMAGE: true
+          # uninstall helm release used for blue instance
+          - task: HelmDeploy@0
+            displayName: Un-install UAT blue version
+            continueOnError: true
+            inputs:
+              kubernetesServiceEndpoint: $(UAT_KUBERNETES_SERVICE_CONN)
+              namespace: ${{ parameters.DOMAIN }}
+              command: uninstall
+              arguments: beta-$(K8S_IMAGE_REPOSITORY_NAME)
+
+  - stage: "GreenDeployment_WaitForApproval"
+    displayName: "UAT green approval deployment"
+    dependsOn: [ Get_Release_Version, Tag_Docker_Release]
+    condition: |
+      and(
+        eq(${{parameters.UAT_PROD_DEPLOY}}, true),
+        in(dependencies.Tag_Docker_Release.result, 'Succeeded', 'Skipped'),
+        or(
+          eq(variables['Build.SourceBranch'], 'refs/heads/main'),
+          startsWith(variables['Build.SourceBranch'], 'refs/tags')
+        )
+      )
+    variables:
+      app_version: $[ stageDependencies.Get_Release_Version.get_version.outputs['chart_current_version.appVersion'] ]
+    jobs:
+      - job: GreenDeployment_WaitForApproval
+        displayName: Manual blue deploy approval
+        pool: server
+        timeoutInMinutes: 4320 # 3 days
+        steps:
+          - task: ManualValidation@0
+            timeoutInMinutes: 4320 # 3 days
+            inputs:
+              notifyUsers: $(APPROVE_TOUCHPOINT_MAIL)
+              instructions: "Please approve or reject UAT blue green promotions for version $(app_version)"
+              onTimeout: "reject"
 
   - stage: "Deploy_UAT_Green"
     displayName: "UAT green deployment"
-    dependsOn: [Get_Release_Version, Tag_Docker_Release]
+    dependsOn: [GreenDeployment_WaitForApproval, Get_Release_Version, Tag_Docker_Release]
+    condition: |
+      and(
+        eq(${{parameters.UAT_PROD_DEPLOY}}, true),
+        in(dependencies.Tag_Docker_Release.result, 'Succeeded', 'Skipped'),
+        in(dependencies.GreenDeployment_WaitForApproval.result, 'Succeeded', 'Skipped'),
+        or(
+          eq(variables['Build.SourceBranch'], 'refs/heads/main'),
+          startsWith(variables['Build.SourceBranch'], 'refs/tags')
+        )
+      )
     variables:
       app_version: $[ stageDependencies.Get_Release_Version.get_version.outputs['chart_current_version.appVersion'] ]
     jobs:
@@ -215,12 +337,180 @@ stages:
                     NAMESPACE: ${{ parameters.DOMAIN }}
                     APP_NAME: $(K8S_IMAGE_REPOSITORY_NAME)
                     VALUE_FILE: "helm/values-uat.yaml"
-                    GREEN_VERSION: $(app_version)${{ parameters.DOCKER_FILE_VERSION_SUFFIX }}-soak
+                    GREEN_VERSION: $(app_version)${{ parameters.DOCKER_FILE_VERSION_SUFFIX }}
                     #for jvm build add --values option targeting containing overrides from native helm values, such as required resources etc
                     ${{ if eq(parameters['NATIVE_COMPILATION'], False) }}:
                       ARGUMENTS: --timeout 5m0s --values helm/valuesOverrides/overrides-jvm-uat.yaml --values helm/valuesOverrides/${{ parameters.DOMAIN }}/overrides-uat.yaml
                     ${{ else }}:
                       ARGUMENTS: --timeout 5m0s --values helm/valuesOverrides/${{ parameters.DOMAIN }}/overrides-uat.yaml
 
+  - stage: "API_Test_UAT_Green"
+    displayName: 'Running API test on UAT green app version'
+    dependsOn: Deploy_UAT_Green
+    pool:
+      name: pagopa-uat-linux
+    jobs:
+      - job: newman_api_test
+        steps:
+          - template: ./api-tests.yml
+
+            parameters:
+              API_TEST_FILE: api-tests/jwt-token-issuer-service.postman-collection.json
+              ENV_FILE: api-tests/${{ parameters.DOMAIN }}-uat.env.json
+              TEST_FILE_PREFIX: "uat-green"
+              USE_NEWMAN_DOCKER_IMAGE: true
 
   # --- END Deploy UAT --- #
+
+  # --- START Deploy PROD --- #
+  - stage: "Prod_WaitForApproval"
+    displayName: "PROD approval deployment"
+    dependsOn: [ Deploy_UAT_Green, Get_Release_Version ]
+    condition: |
+      and(
+        eq(${{parameters.UAT_PROD_DEPLOY}}, true),
+        in(dependencies.Deploy_UAT_Green.result, 'Succeeded', 'SucceededWithIssues')
+      )
+    variables:
+      app_version: $[ stageDependencies.Get_Release_Version.get_version.outputs['chart_current_version.appVersion'] ]
+    jobs:
+      - job: Prod_Approval
+        displayName: Manual prod deploy approval
+        pool: server
+        timeoutInMinutes: 4320 # 3 days
+        steps:
+          - task: ManualValidation@0
+            timeoutInMinutes: 4320 # 3 days
+            inputs:
+              notifyUsers: $(APPROVE_TOUCHPOINT_MAIL)
+              instructions: "Please approve or reject PROD promotions for release $(app_version)"
+              onTimeout: "reject"
+
+  # --- START Deploy PROD --- #
+  - stage: "Build_PROD_Green"
+    displayName: "PROD green Build"
+    dependsOn: [ Prod_WaitForApproval, Get_Release_Version ]
+    variables:
+      prod_version: $[ stageDependencies.Get_Release_Version.get_version.outputs['chart_current_version.appVersion'] ]
+    condition: |
+      and(
+        eq(${{parameters.UAT_PROD_DEPLOY}}, true),
+        eq(dependencies.Prod_WaitForApproval.result, 'Succeeded')
+      )
+    jobs:
+      - job: "PROD_image"
+        displayName: "Build PROD image"
+        steps:
+          - task: Docker@2
+            displayName: "docker login for UAT"
+            inputs:
+              containerRegistry: $(UAT_CONTAINER_REGISTRY_SERVICE_CONN)
+              command: "login"
+          - task: Bash@3
+            displayName: "docker tag new version for PROD"
+            inputs:
+              targetType: "inline"
+              script: |
+                docker pull $(UAT_CONTAINER_NAMESPACE)/$(K8S_IMAGE_REPOSITORY_NAME):$(prod_version)${{ parameters.DOCKER_FILE_VERSION_SUFFIX }}
+          - task: Docker@2
+            displayName: "docker login for PROD"
+            inputs:
+              containerRegistry: $(PROD_CONTAINER_REGISTRY_SERVICE_CONN)
+              command: "login"
+          - task: Bash@3
+            displayName: "docker tag new version for PROD"
+            inputs:
+              targetType: "inline"
+              script: |
+                docker tag $(UAT_CONTAINER_NAMESPACE)/$(K8S_IMAGE_REPOSITORY_NAME):$(prod_version)${{ parameters.DOCKER_FILE_VERSION_SUFFIX }} $(PROD_CONTAINER_NAMESPACE)/$(K8S_IMAGE_REPOSITORY_NAME):$(prod_version)${{ parameters.DOCKER_FILE_VERSION_SUFFIX }}
+                docker push $(PROD_CONTAINER_NAMESPACE)/$(K8S_IMAGE_REPOSITORY_NAME):$(prod_version)${{ parameters.DOCKER_FILE_VERSION_SUFFIX }}
+  - stage: "Deploy_PROD_Green"
+    displayName: "PROD green deployment"
+    dependsOn: [ Build_PROD_Green, Get_Release_Version ]
+    condition: |
+      and(
+        eq(${{parameters.UAT_PROD_DEPLOY}}, true),
+        eq(dependencies.Build_PROD_Green.result, 'Succeeded')
+      )
+    variables:
+      prod_version: $[ stageDependencies.Get_Release_Version.get_version.outputs['chart_current_version.appVersion'] ]
+    jobs:
+      - deployment: "Green_PROD_deployment"
+        displayName: "Green PROD deployment"
+        pool:
+          name: pagopa-prod-linux
+        environment: "PROD"
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                  displayName: "Checkout"
+                - task: Bash@3
+                  name: update_chart_version
+                  displayName: "Setup helm microservice chart"
+                  inputs:
+                    targetType: "inline"
+                    script: |
+                      helm repo add microservice-chart https://pagopa.github.io/aks-microservice-chart-blueprint
+                      helm dep build helm
+                - template: ./helm-microservice-chart-deploy.yml
+                  parameters:
+                    DO_DEPLOY: true
+                    DO_BLUE_GREEN_DEPLOY: false
+                    ENV: "PROD"
+                    KUBERNETES_SERVICE_CONN: $(PROD_KUBERNETES_SERVICE_CONN)
+                    NAMESPACE: ${{ parameters.DOMAIN }}
+                    APP_NAME: $(K8S_IMAGE_REPOSITORY_NAME)
+                    VALUE_FILE: "helm/values-prod.yaml"
+                    GREEN_VERSION: $(prod_version)${{ parameters.DOCKER_FILE_VERSION_SUFFIX }}
+                    #for jvm build add --values option targeting containing overrides from native helm values, such as required resources etc
+                    ${{ if eq(parameters['NATIVE_COMPILATION'], False) }}:
+                      ARGUMENTS: --timeout 5m0s --values helm/valuesOverrides/overrides-jvm-prod.yaml --values helm/valuesOverrides/${{ parameters.DOMAIN }}/overrides-prod.yaml
+                    ${{ else }}:
+                      ARGUMENTS: --timeout 5m0s --values helm/valuesOverrides/${{ parameters.DOMAIN }}/overrides-prod.yaml
+  # --- END Deploy PROD --- #
+
+  # --- START ROLLBACK PROD --- #
+  - stage: "Prod_RollbackForApproval"
+    displayName: "PROD ROLLBACK"
+    dependsOn: [ Deploy_PROD_Green, Get_Release_Version ]
+    condition: |
+      and(
+        eq(${{parameters.UAT_PROD_DEPLOY}}, true),
+        in(dependencies.Deploy_PROD_Green.result, 'Succeeded', 'SucceededWithIssues', 'Failed', 'Skipped', 'Canceled')
+      )
+    variables:
+      app_version: $[ stageDependencies.Get_Release_Version.get_version.outputs['chart_current_version.appVersion'] ]
+    jobs:
+      - job: Prod_Rollback_Approval
+        displayName: Manual prod rollback approval
+        pool: server
+        steps:
+          - task: ManualValidation@0
+            timeoutInMinutes: 30
+            inputs:
+              notifyUsers: $(APPROVE_TOUCHPOINT_MAIL)
+              instructions: "Please approve or reject PROD rollback for release $(app_version)"
+              onTimeout: "skip"
+  - stage: "Prod_RollbackToLatestRelease"
+    displayName: "PROD rollback to the latest Release"
+    dependsOn: [ Prod_RollbackForApproval ]
+    condition: succeeded()
+    jobs:
+      - job: Prod_Rollback
+        pool:
+          name: pagopa-prod-linux
+        steps:
+          - task: HelmDeploy@0
+            displayName: Helm Rollback PROD
+            inputs:
+              kubernetesServiceEndpoint: $(PROD_KUBERNETES_SERVICE_CONN)
+              namespace: checkout
+              command: rollback
+              chartName: $(K8S_IMAGE_REPOSITORY_NAME)
+              releaseName: $(K8S_IMAGE_REPOSITORY_NAME)
+              install: true
+              waitForExecution: true
+              arguments: $(K8S_IMAGE_REPOSITORY_NAME)
+  # --- END ROLLBACK PROD --- #
