@@ -7,6 +7,7 @@ import it.pagopa.touchpoint.jwtissuerservice.models.PrivateKeyWithKid
 import it.pagopa.touchpoint.jwtissuerservice.models.PublicKeyWithKid
 import it.pagopa.touchpoint.jwtissuerservice.utils.JwtTokenUtils
 import it.pagopa.touchpoint.jwtissuerservice.utils.KeyGenerationTestUtils.Companion.getKeyPair
+import java.math.BigInteger
 import java.security.interfaces.RSAPublicKey
 import java.time.Duration
 import java.util.Base64
@@ -87,12 +88,8 @@ class TokensServiceTest {
                             alg = publicKey.format,
                             kty = JWKResponseDto.Kty.RSA,
                             use = "sig",
-                            n =
-                                Base64.getUrlEncoder()
-                                    .encodeToString(publicKey.modulus.toByteArray()),
-                            e =
-                                Base64.getUrlEncoder()
-                                    .encodeToString(publicKey.publicExponent.toByteArray()),
+                            n = base64UrlEncodeUnsigned(publicKey.modulus),
+                            e = base64UrlEncodeUnsigned(publicKey.publicExponent),
                             kid = kid,
                         )
                     )
@@ -102,5 +99,16 @@ class TokensServiceTest {
         val jwks = tokensService.getJwksKeys()
         assertEquals(expectedJwksResponse, jwks)
         verify(kvService, times(1)).getPublic()
+    }
+
+    private fun base64UrlEncodeUnsigned(value: BigInteger): String {
+        var bytes = value.toByteArray()
+
+        // Remove leading 0x00 if present
+        if (bytes.size > 1 && bytes[0] == 0.toByte()) {
+            bytes = bytes.copyOfRange(1, bytes.size)
+        }
+
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes)
     }
 }

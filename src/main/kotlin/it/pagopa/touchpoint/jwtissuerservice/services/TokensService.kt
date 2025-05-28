@@ -5,6 +5,7 @@ import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.CreateTokenRespo
 import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.JWKResponseDto
 import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.JWKSResponseDto
 import it.pagopa.touchpoint.jwtissuerservice.utils.JwtTokenUtils
+import java.math.BigInteger
 import java.security.interfaces.RSAPublicKey
 import java.time.Duration
 import java.util.*
@@ -47,10 +48,8 @@ class TokensService(
                     alg = rsaPublicKey.format,
                     kty = JWKResponseDto.Kty.RSA,
                     use = "sig",
-                    n = Base64.getUrlEncoder().encodeToString(rsaPublicKey.modulus.toByteArray()),
-                    e =
-                        Base64.getUrlEncoder()
-                            .encodeToString(rsaPublicKey.publicExponent.toByteArray()),
+                    n = base64UrlEncodeUnsigned(rsaPublicKey.modulus),
+                    e = base64UrlEncodeUnsigned(rsaPublicKey.publicExponent),
                     kid = it.kid,
                 )
             }
@@ -60,4 +59,15 @@ class TokensService(
                 logger.info("Public keys list retrieved, number of keys: ${it.propertyKeys.size}")
             }
             .awaitSingle()
+
+    private fun base64UrlEncodeUnsigned(value: BigInteger): String {
+        var bytes = value.toByteArray()
+
+        // Remove leading 0x00 if present
+        if (bytes.size > 1 && bytes[0] == 0.toByte()) {
+            bytes = bytes.copyOfRange(1, bytes.size)
+        }
+
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes)
+    }
 }
