@@ -18,8 +18,7 @@ class WellKnownController() : WellKnownApi {
                 idTokenSigningAlgValuesSupported = listOf("RS256"),
                 responseTypesSupported = listOf("code"),
                 authorizationEndpoint = "https://not-supported",
-                issuer =
-                    "https://weudev.ecommerce.internal.dev.platform.pagopa.it/pagopa-jwt-issuer-service",
+                issuer = "pagopa-ecommerce-jwt-issuer-service",
             )
         )
     }
