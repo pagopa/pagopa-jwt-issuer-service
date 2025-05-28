@@ -18,6 +18,7 @@ microservice-chart:
     SECRET_KEY_NAME: "jwt-token-issuer-cert"
     SECRET_KEY_PASSWORD: ""
     JWT_ISSUER: "pagopa-ecommerce-jwt-issuer-service"
+    WELL_KNOWN_OPENID_CONFIGURATION_BASE_PATH: "https://weudev.ecommerce.internal.dev.platform.pagopa.it/pagopa-jwt-issuer-service"
   keyvault:
     name: "pagopa-d-ecommerce-kv"
     tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"

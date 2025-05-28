@@ -18,15 +18,13 @@ class WellKnownControllerTest {
     fun `Should return openid configuration info successfully`() {
         val expectedResponse =
             OpenIDDiscoveryResponseDto(
-                jwksUri =
-                    "https://weudev.ecommerce.internal.dev.platform.pagopa.it/pagopa-jwt-issuer-service/tokens/keys",
+                jwksUri = "https://localhost/tokens/keys",
                 subjectTypesSupported = listOf("public"),
-                tokenEndpoint =
-                    "https://weudev.ecommerce.internal.dev.platform.pagopa.it/pagopa-jwt-issuer-service/tokens",
+                tokenEndpoint = "https://localhost/tokens",
                 idTokenSigningAlgValuesSupported = listOf("RS256"),
                 responseTypesSupported = listOf("code"),
                 authorizationEndpoint = "https://not-supported",
-                issuer = "pagopa-ecommerce-jwt-issuer-service",
+                issuer = "jwtIssuer",
             )
         webClient
             .get()
