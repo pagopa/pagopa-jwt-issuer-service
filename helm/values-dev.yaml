@@ -45,11 +45,11 @@ microservice-chart:
         - all
   resources:
     requests:
-      memory: "256Mi"
-      cpu: "150m"
+      memory: "128Mi"
+      cpu: "100m"
     limits:
-      memory: "256Mi"
-      cpu: "150m"
+      memory: "128Mi"
+      cpu: "100m"
   autoscaling:
     enable: false
     minReplica: 1
