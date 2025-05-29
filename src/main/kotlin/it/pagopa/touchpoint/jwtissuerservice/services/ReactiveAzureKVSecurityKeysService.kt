@@ -14,6 +14,7 @@ import java.security.PrivateKey
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
 import java.util.*
+import org.slf4j.LoggerFactory
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
@@ -27,7 +28,7 @@ class ReactiveAzureKVSecurityKeysService(
 ) : IReactiveSecurityKeysService {
     private val keystore = KeyStore.getInstance("PKCS12")
     private val certFactory = CertificateFactory.getInstance("X.509")
-    private val digest = MessageDigest.getInstance("SHA-256")
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     fun getSecret(): Mono<KeyVaultSecret> {
         return secretClient.getSecret(azureSecretConfig.name)
@@ -37,7 +38,14 @@ class ReactiveAzureKVSecurityKeysService(
         return certClient
             .listPropertiesOfCertificateVersions(azureSecretConfig.name)
             .filter { it.isEnabled }
-            .flatMap { certClient.getCertificateVersion(azureSecretConfig.name, it.version) }
+            .flatMap {
+                certClient
+                    .getCertificateVersion(azureSecretConfig.name, it.version)
+                    .onErrorResume { exception ->
+                        logger.error("Failed to retrieve certificate version", exception)
+                        Mono.empty()
+                    }
+            }
     }
 
     fun getKeyStore(): Mono<KeyStore> {
@@ -72,6 +80,7 @@ class ReactiveAzureKVSecurityKeysService(
 
     private fun getKid(encodedCert: ByteArray): String {
         // Compute SHA-256 hash
+        val digest = MessageDigest.getInstance("SHA-256")
         val hash = digest.digest(encodedCert)
         // Convert to Base64 URL-encoded string
         return Base64.getUrlEncoder().withoutPadding().encodeToString(hash)
