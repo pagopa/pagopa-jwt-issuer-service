@@ -1,10 +1,9 @@
-
 {
 	"info": {
-		"_postman_id": "ecf0df26-e59e-4f3d-987b-dd1ddfe09da4",
+		"_postman_id": "3bcd30fd-5f4d-4181-bb76-ae3a1f128c23",
 		"name": "JWT token issuer service",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "23963988"
+		"_exporter_id": "36392360"
 	},
 	"item": [
 		{
@@ -102,6 +101,48 @@
 					"path": [
 						"tokens",
 						"keys"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Well known",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							" pm.test(\"GET tokens/.well-known/openid-configuration should return 200 with valid config\", function () {",
+							"    pm.response.to.have.status(200);",
+							"    const responseJson = pm.response.json();",
+							"    // Check it's an object and contains expected OpenID config fields",
+							"    pm.expect(responseJson).to.be.an(\"object\");",
+							"    pm.expect(responseJson).to.have.property(\"issuer\");",
+							"    pm.expect(responseJson).to.have.property(\"jwks_uri\");",
+							"    ",
+							"    pm.expect(responseJson.jwks_uri).to.be.a(\"string\").and.to.include(\"/tokens/keys\");",
+							"    pm.expect(responseJson.issuer).to.be.a(\"string\").and.to.include(\"jwt-issuer-service\");",
+							"",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{PROTOCOL}}{{HOST}}{{BASE_PATH}}/.well-known/openid-configuration",
+					"host": [
+						"{{PROTOCOL}}{{HOST}}{{BASE_PATH}}"
+					],
+					"path": [
+						".well-known",
+						"openid-configuration"
 					]
 				}
 			},
