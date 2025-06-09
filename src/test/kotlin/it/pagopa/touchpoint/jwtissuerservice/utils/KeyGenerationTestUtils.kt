@@ -46,9 +46,16 @@ class KeyGenerationTestUtils {
         }
 
         @JvmStatic
-        fun getKeyPair(): KeyPair {
+        fun getKeyPairEC(): KeyPair {
             val keyPairGenerator = KeyPairGenerator.getInstance("EC")
             keyPairGenerator.initialize(ECGenParameterSpec("secp256r1"))
+            return keyPairGenerator.generateKeyPair()
+        }
+
+        @JvmStatic
+        fun getKeyPairRSA(): KeyPair {
+            val keyPairGenerator = KeyPairGenerator.getInstance("RSA")
+            keyPairGenerator.initialize(2048)
             return keyPairGenerator.generateKeyPair()
         }
 

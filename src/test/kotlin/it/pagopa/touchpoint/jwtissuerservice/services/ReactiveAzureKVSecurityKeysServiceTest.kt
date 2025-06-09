@@ -11,7 +11,7 @@ import it.pagopa.touchpoint.jwtissuerservice.models.PublicKeyWithKid
 import it.pagopa.touchpoint.jwtissuerservice.utils.AzureTestUtils
 import it.pagopa.touchpoint.jwtissuerservice.utils.KeyGenerationTestUtils.Companion.generatePKCS12Certificate
 import it.pagopa.touchpoint.jwtissuerservice.utils.KeyGenerationTestUtils.Companion.generatePKCS12CertificateAsBase64
-import it.pagopa.touchpoint.jwtissuerservice.utils.KeyGenerationTestUtils.Companion.getKeyPair
+import it.pagopa.touchpoint.jwtissuerservice.utils.KeyGenerationTestUtils.Companion.getKeyPairEC
 import it.pagopa.touchpoint.jwtissuerservice.utils.KeyGenerationTestUtils.Companion.getKeyStoreWithPKCS12Certificate
 import it.pagopa.touchpoint.jwtissuerservice.utils.KeyGenerationTestUtils.Companion.getKid
 import kotlinx.coroutines.test.runTest
@@ -101,7 +101,7 @@ class ReactiveAzureKVSecurityKeysServiceTest {
     @Test
     fun `Should get key store successfully`() = runTest {
         // pre-conditions
-        val keyPair = getKeyPair()
+        val keyPair = getKeyPairEC()
         val keyStore =
             getKeyStoreWithPKCS12Certificate("testAlias", keyPair, azureSecretConfig.password)
         val secretTest =
@@ -127,7 +127,7 @@ class ReactiveAzureKVSecurityKeysServiceTest {
     @Test
     fun `Should get private key successfully`() = runTest {
         // pre-conditions
-        val keyPair = getKeyPair()
+        val keyPair = getKeyPairEC()
         val keyStore =
             getKeyStoreWithPKCS12Certificate("testAlias", keyPair, azureSecretConfig.password)
         val secretTest =
@@ -152,8 +152,8 @@ class ReactiveAzureKVSecurityKeysServiceTest {
     @Test
     fun `Should get public key successfully`() = runTest {
         // pre-conditions
-        val keyPair1 = getKeyPair()
-        val keyPair2 = getKeyPair()
+        val keyPair1 = getKeyPairEC()
+        val keyPair2 = getKeyPairEC()
         val certificate1 = generatePKCS12Certificate(keyPair1)
         val certificate2 = generatePKCS12Certificate(keyPair2)
         val publicKeyWithKid1 =

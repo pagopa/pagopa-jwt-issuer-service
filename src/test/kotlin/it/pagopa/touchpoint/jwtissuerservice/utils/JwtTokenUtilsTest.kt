@@ -3,7 +3,7 @@ package it.pagopa.touchpoint.jwtissuerservice.utils
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
 import it.pagopa.touchpoint.jwtissuerservice.models.PrivateKeyWithKid
-import it.pagopa.touchpoint.jwtissuerservice.utils.KeyGenerationTestUtils.Companion.getKeyPair
+import it.pagopa.touchpoint.jwtissuerservice.utils.KeyGenerationTestUtils.Companion.getKeyPairEC
 import java.time.Duration
 import java.time.Instant
 import org.junit.jupiter.api.Assertions.*
@@ -18,7 +18,7 @@ class JwtTokenUtilsTest {
         // pre conditions
         val audience = "audience"
         val tokenDuration = Duration.ofMinutes(1)
-        val privateKey = getKeyPair()
+        val privateKey = getKeyPairEC()
         val privateKeyWithKid = PrivateKeyWithKid("kid", privateKey.private)
         // public reserver claims that will be filtered out by app code
         val illegalPrivateClaims =
