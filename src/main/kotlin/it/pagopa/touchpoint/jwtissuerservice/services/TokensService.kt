@@ -7,13 +7,13 @@ import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.JWKSResponseDto
 import it.pagopa.touchpoint.jwtissuerservice.utils.JwtTokenUtils
 import java.math.BigInteger
 import java.security.interfaces.ECPublicKey
+import java.security.interfaces.RSAPublicKey
 import java.time.Duration
 import java.util.*
 import kotlinx.coroutines.reactive.awaitSingle
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import java.security.interfaces.RSAPublicKey
 
 @Service
 class TokensService(
