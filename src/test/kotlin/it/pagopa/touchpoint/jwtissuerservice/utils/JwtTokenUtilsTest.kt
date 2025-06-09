@@ -46,12 +46,12 @@ class JwtTokenUtilsTest {
                 jwtIssuer = "jwtIssuer",
             )
         val parsedToken =
-            Jwts.parserBuilder().setSigningKey(privateKey.private).build().parse(generatedToken)
+            Jwts.parserBuilder().setSigningKey(privateKey.public).build().parse(generatedToken)
         val header = parsedToken.header
         val body = parsedToken.body as Claims
         // verify header claims
         assertEquals(privateKeyWithKid.kid, header["kid"])
-        assertEquals("RS256", header["alg"])
+        assertEquals("ES256", header["alg"])
         // verify body claims
         val expirationClaim = body[Claims.EXPIRATION] as Int
         val issuedAtClaim = body[Claims.ISSUED_AT] as Int

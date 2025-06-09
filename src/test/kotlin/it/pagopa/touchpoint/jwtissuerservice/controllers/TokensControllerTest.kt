@@ -112,11 +112,12 @@ class TokensControllerTest {
                     listOf(
                         JWKResponseDto(
                             alg = "alg",
-                            kty = JWKResponseDto.Kty.RSA,
+                            kty = JWKResponseDto.Kty.EC,
                             use = "use",
-                            n = "n",
-                            e = "e",
+                            x = "x",
+                            y = "y",
                             kid = "kid",
+                            crv = "crv",
                         )
                     )
             )

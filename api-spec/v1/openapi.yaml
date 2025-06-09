@@ -101,26 +101,29 @@ components:
       type: object
       description: JSON Web Key response object
       oneOf:
-        - $ref: '#/components/schemas/RsaJwkResponse'
-    RsaJwkResponse:
+        - $ref: '#/components/schemas/EcJwkResponse'
+    EcJwkResponse:
       type: object
       properties:
         alg:
           type: string
           description: cryptographic algorithm used with the key
+        crv:
+          type: string
+          description: Curve used, e.g., P-256, P-384, P-521
         kty:
           type: string
-          description: the family of cryptographic used with the key. fixed value `RSA`
-          enum: [RSA]
+          description: the family of cryptographic used with the key. fixed value `EC`
+          enum: [ EC ]
         use:
           type: string
           description: how the key was meant to be used
-        n:
+        x:
           type: string
-          description: Modulus of RSA key
-        e:
+          description: X coordinate (Base64URL-encoded)
+        y:
           type: string
-          description: Exponent for RSA key
+          description: Y coordinate (Base64URL-encoded)
         kid:
           type: string
           description: unique identifier for the key
@@ -128,9 +131,10 @@ components:
         - alg
         - kty
         - use
-        - n
-        - e
         - kid
+        - x
+        - y
+        - crv
     OpenIDDiscoveryResponse:
       type: object
       description: 'The OpenID configuration document as defined by the specification: http://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata (used to configure this service with openid validators)'

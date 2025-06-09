@@ -8,7 +8,7 @@ import it.pagopa.touchpoint.jwtissuerservice.models.PublicKeyWithKid
 import it.pagopa.touchpoint.jwtissuerservice.utils.JwtTokenUtils
 import it.pagopa.touchpoint.jwtissuerservice.utils.KeyGenerationTestUtils.Companion.getKeyPair
 import java.math.BigInteger
-import java.security.interfaces.RSAPublicKey
+import java.security.interfaces.ECPublicKey
 import java.time.Duration
 import java.util.Base64
 import kotlinx.coroutines.test.runTest
@@ -78,18 +78,19 @@ class TokensServiceTest {
         // pre-conditions
         val keyPair = getKeyPair()
         val kid = "keyId"
-        val publicKey: RSAPublicKey = keyPair.public as RSAPublicKey
+        val publicKey: ECPublicKey = keyPair.public as ECPublicKey
         val publicKeyWithKid = PublicKeyWithKid(kid, keyPair.public)
         val expectedJwksResponse =
             JWKSResponseDto(
                 propertyKeys =
                     listOf(
                         JWKResponseDto(
-                            alg = publicKey.format,
-                            kty = JWKResponseDto.Kty.RSA,
+                            alg = "ES${publicKey.params.curve.field.fieldSize}",
+                            kty = JWKResponseDto.Kty.EC,
                             use = "sig",
-                            n = base64UrlEncodeUnsigned(publicKey.modulus),
-                            e = base64UrlEncodeUnsigned(publicKey.publicExponent),
+                            crv = "P-${publicKey.params.curve.field.fieldSize}",
+                            x = base64UrlEncodeUnsigned(publicKey.w.affineX),
+                            y = base64UrlEncodeUnsigned(publicKey.w.affineY),
                             kid = kid,
                         )
                     )
