@@ -9,6 +9,7 @@ import it.pagopa.touchpoint.jwtissuerservice.utils.JwtTokenUtils
 import it.pagopa.touchpoint.jwtissuerservice.utils.KeyGenerationTestUtils.Companion.getKeyPairEC
 import it.pagopa.touchpoint.jwtissuerservice.utils.KeyGenerationTestUtils.Companion.getKeyPairRSA
 import java.math.BigInteger
+import java.security.PublicKey
 import java.security.interfaces.ECPublicKey
 import java.security.interfaces.RSAPublicKey
 import java.time.Duration
@@ -16,6 +17,7 @@ import java.util.Base64
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.any
 import org.mockito.kotlin.given
 import org.mockito.kotlin.mock
@@ -112,6 +114,18 @@ class TokensServiceTest {
         // test
         val jwks = tokensService.getJwksKeys()
         assertEquals(expectedJwksResponse, jwks)
+        verify(kvService, times(1)).getPublic()
+    }
+
+    @Test
+    fun `Should throw exception on invalid public key`() = runTest {
+        // pre-conditions
+        val mockPublicKey = mock<PublicKey>()
+        val mockPublicKeyWithKid = PublicKeyWithKid("mockKid", mockPublicKey)
+        given(kvService.getPublic()).willReturn(Flux.just(mockPublicKeyWithKid))
+        // test
+        assertThrows<IllegalArgumentException> { tokensService.getJwksKeys() }
+
         verify(kvService, times(1)).getPublic()
     }
 
