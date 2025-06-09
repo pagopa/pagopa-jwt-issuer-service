@@ -22,7 +22,7 @@ microservice-chart:
     AZURE_KV_ENDPOINT: "https://pagopa-u-ecommerce-kv.vault.azure.net/"
     SECRET_KEY_NAME: "jwt-token-issuer-cert"
     SECRET_KEY_PASSWORD: ""
-    JWT_ISSUER: "pagopa-ecommerce-jwt-issuer-service"
+    JWT_ISSUER: "ecom-jwt-issuer-service"
     WELL_KNOWN_OPENID_CONFIGURATION_BASE_PATH: "https://weuuat.ecommerce.internal.uat.platform.pagopa.it/pagopa-jwt-issuer-service"
   keyvault:
     name: "pagopa-u-ecommerce-kv"

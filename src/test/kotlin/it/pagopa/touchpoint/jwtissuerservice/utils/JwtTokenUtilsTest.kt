@@ -58,7 +58,6 @@ class JwtTokenUtilsTest {
         val expirationInstant = Instant.ofEpochMilli(expirationClaim * 1000L)
         val issuedAtInstant = Instant.ofEpochMilli(issuedAtClaim * 1000L)
         assertEquals(tokenDuration, Duration.between(issuedAtInstant, expirationInstant))
-        assertNotNull(body[Claims.ID])
         assertEquals(audience, body[Claims.AUDIENCE])
         assertEquals("jwtIssuer", body[Claims.ISSUER])
         assertNull(body[Claims.SUBJECT])

@@ -23,7 +23,7 @@ microservice-chart:
     AZURE_KV_ENDPOINT: "https://pagopa-u-pay-wallet-kv.vault.azure.net/"
     SECRET_KEY_NAME: "jwt-token-issuer-cert"
     SECRET_KEY_PASSWORD: ""
-    JWT_ISSUER: "pagopa-pay-wallet-jwt-issuer-service"
+    JWT_ISSUER: "pw-jwt-issuer-service"
     WELL_KNOWN_OPENID_CONFIGURATION_BASE_PATH: "https://itnuat.pay-wallet.internal.uat.platform.pagopa.it/pagopa-jwt-issuer-service"
   keyvault:
     name: "pagopa-u-pay-wallet-kv"
