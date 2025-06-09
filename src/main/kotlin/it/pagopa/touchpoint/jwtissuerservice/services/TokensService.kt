@@ -13,6 +13,7 @@ import kotlinx.coroutines.reactive.awaitSingle
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
+import java.security.interfaces.RSAPublicKey
 
 @Service
 class TokensService(
@@ -52,6 +53,15 @@ class TokensService(
                             crv = "P-${publicKey.params.curve.field.fieldSize}",
                             x = base64UrlEncodeUnsigned(publicKey.w.affineX),
                             y = base64UrlEncodeUnsigned(publicKey.w.affineY),
+                            kid = it.kid,
+                        )
+                    is RSAPublicKey ->
+                        JWKResponseDto(
+                            alg = publicKey.format,
+                            kty = JWKResponseDto.Kty.RSA,
+                            use = "sig",
+                            n = base64UrlEncodeUnsigned(publicKey.modulus),
+                            e = base64UrlEncodeUnsigned(publicKey.publicExponent),
                             kid = it.kid,
                         )
                     else ->
