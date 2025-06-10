@@ -100,7 +100,7 @@ components:
     JWKResponse:
       type: object
       description: JSON Web Key response object
-      allOf:
+      oneOf:
         - $ref: '#/components/schemas/EcJwkResponse'
         - $ref: '#/components/schemas/RsaJwkResponse'
       properties:
