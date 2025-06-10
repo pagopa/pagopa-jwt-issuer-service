@@ -22,7 +22,7 @@ class WellKnownController(
                 jwksUri = "$wellKnownOpenidConfigurationBasePath/tokens/keys",
                 subjectTypesSupported = listOf("public"),
                 tokenEndpoint = "$wellKnownOpenidConfigurationBasePath/tokens",
-                idTokenSigningAlgValuesSupported = listOf("RS256"),
+                idTokenSigningAlgValuesSupported = listOf("RS256", "ES256"),
                 responseTypesSupported = listOf("code"),
                 authorizationEndpoint = "https://not-supported",
                 issuer = jwtIssuer,

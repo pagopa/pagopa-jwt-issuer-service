@@ -21,7 +21,7 @@ class WellKnownControllerTest {
                 jwksUri = "https://localhost/tokens/keys",
                 subjectTypesSupported = listOf("public"),
                 tokenEndpoint = "https://localhost/tokens",
-                idTokenSigningAlgValuesSupported = listOf("RS256"),
+                idTokenSigningAlgValuesSupported = listOf("RS256", "ES256"),
                 responseTypesSupported = listOf("code"),
                 authorizationEndpoint = "https://not-supported",
                 issuer = "jwtIssuer",

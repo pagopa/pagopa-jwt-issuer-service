@@ -7,6 +7,7 @@ import java.security.KeyPairGenerator
 import java.security.KeyStore
 import java.security.MessageDigest
 import java.security.cert.X509Certificate
+import java.security.spec.ECGenParameterSpec
 import java.util.*
 import org.bouncycastle.asn1.x500.X500Name
 import org.bouncycastle.cert.X509CertificateHolder
@@ -34,8 +35,7 @@ class KeyGenerationTestUtils {
                     keyPair.public,
                 )
 
-            val contentSigner =
-                JcaContentSignerBuilder("SHA256WithRSAEncryption").build(keyPair.private)
+            val contentSigner = JcaContentSignerBuilder("SHA256withECDSA").build(keyPair.private)
             val certHolder: X509CertificateHolder = certBuilder.build(contentSigner)
             val certificate: X509Certificate =
                 JcaX509CertificateConverter()
@@ -46,7 +46,14 @@ class KeyGenerationTestUtils {
         }
 
         @JvmStatic
-        fun getKeyPair(): KeyPair {
+        fun getKeyPairEC(): KeyPair {
+            val keyPairGenerator = KeyPairGenerator.getInstance("EC")
+            keyPairGenerator.initialize(ECGenParameterSpec("secp256r1"))
+            return keyPairGenerator.generateKeyPair()
+        }
+
+        @JvmStatic
+        fun getKeyPairRSA(): KeyPair {
             val keyPairGenerator = KeyPairGenerator.getInstance("RSA")
             keyPairGenerator.initialize(2048)
             return keyPairGenerator.generateKeyPair()
