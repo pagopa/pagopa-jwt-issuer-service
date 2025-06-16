@@ -6,14 +6,18 @@ import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.JWKSResponseDto
 import it.pagopa.touchpoint.jwtissuerservice.models.PrivateKeyWithKid
 import it.pagopa.touchpoint.jwtissuerservice.models.PublicKeyWithKid
 import it.pagopa.touchpoint.jwtissuerservice.utils.JwtTokenUtils
-import it.pagopa.touchpoint.jwtissuerservice.utils.KeyGenerationTestUtils.Companion.getKeyPair
+import it.pagopa.touchpoint.jwtissuerservice.utils.KeyGenerationTestUtils.Companion.getKeyPairEC
+import it.pagopa.touchpoint.jwtissuerservice.utils.KeyGenerationTestUtils.Companion.getKeyPairRSA
 import java.math.BigInteger
+import java.security.PublicKey
+import java.security.interfaces.ECPublicKey
 import java.security.interfaces.RSAPublicKey
 import java.time.Duration
 import java.util.Base64
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.any
 import org.mockito.kotlin.given
 import org.mockito.kotlin.mock
@@ -47,7 +51,7 @@ class TokensServiceTest {
                 privateClaims = privateClaims,
             )
         val token = "jwtToken"
-        val privateKey = getKeyPair()
+        val privateKey = getKeyPairEC()
         val privateKeyWithKid = PrivateKeyWithKid("kid", privateKey.private)
         given(kvService.getPrivate()).willReturn(Mono.just(privateKeyWithKid))
         given(
@@ -76,28 +80,52 @@ class TokensServiceTest {
     @Test
     fun `Should retrieve Json Web Keys successfully`() = runTest {
         // pre-conditions
-        val keyPair = getKeyPair()
+        val keyPair = getKeyPairEC()
+        val rsaKeyPair = getKeyPairRSA()
         val kid = "keyId"
-        val publicKey: RSAPublicKey = keyPair.public as RSAPublicKey
+        val publicKey: ECPublicKey = keyPair.public as ECPublicKey
+        val rsaPublicKey: RSAPublicKey = rsaKeyPair.public as RSAPublicKey
         val publicKeyWithKid = PublicKeyWithKid(kid, keyPair.public)
+        val rsaPublicKeyWithKid = PublicKeyWithKid(kid, rsaKeyPair.public)
         val expectedJwksResponse =
             JWKSResponseDto(
                 propertyKeys =
                     listOf(
                         JWKResponseDto(
+                            alg = "ES${publicKey.params.curve.field.fieldSize}",
+                            kty = JWKResponseDto.Kty.EC,
+                            use = "sig",
+                            crv = "P-${publicKey.params.curve.field.fieldSize}",
+                            x = base64UrlEncodeUnsigned(publicKey.w.affineX),
+                            y = base64UrlEncodeUnsigned(publicKey.w.affineY),
+                            kid = kid,
+                        ),
+                        JWKResponseDto(
                             alg = publicKey.format,
                             kty = JWKResponseDto.Kty.RSA,
                             use = "sig",
-                            n = base64UrlEncodeUnsigned(publicKey.modulus),
-                            e = base64UrlEncodeUnsigned(publicKey.publicExponent),
+                            n = base64UrlEncodeUnsigned(rsaPublicKey.modulus),
+                            e = base64UrlEncodeUnsigned(rsaPublicKey.publicExponent),
                             kid = kid,
-                        )
+                        ),
                     )
             )
-        given(kvService.getPublic()).willReturn(Flux.just(publicKeyWithKid))
+        given(kvService.getPublic()).willReturn(Flux.just(publicKeyWithKid, rsaPublicKeyWithKid))
         // test
         val jwks = tokensService.getJwksKeys()
         assertEquals(expectedJwksResponse, jwks)
+        verify(kvService, times(1)).getPublic()
+    }
+
+    @Test
+    fun `Should throw exception on invalid public key`() = runTest {
+        // pre-conditions
+        val mockPublicKey = mock<PublicKey>()
+        val mockPublicKeyWithKid = PublicKeyWithKid("mockKid", mockPublicKey)
+        given(kvService.getPublic()).willReturn(Flux.just(mockPublicKeyWithKid))
+        // test
+        assertThrows<IllegalArgumentException> { tokensService.getJwksKeys() }
+
         verify(kvService, times(1)).getPublic()
     }
 

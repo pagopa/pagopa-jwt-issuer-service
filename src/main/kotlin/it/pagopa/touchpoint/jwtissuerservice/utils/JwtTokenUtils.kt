@@ -6,7 +6,6 @@ import it.pagopa.touchpoint.jwtissuerservice.models.PrivateKeyWithKid
 import java.time.Duration
 import java.time.Instant
 import java.util.Date
-import java.util.UUID
 import org.springframework.stereotype.Component
 
 @Component
@@ -39,7 +38,6 @@ class JwtTokenUtils() {
             Jwts.builder()
                 .setHeaderParams(headerParams)
                 .setClaims(filteredPrivateClaims)
-                .setId(UUID.randomUUID().toString()) // jti
                 .setIssuedAt(issuedAtDate) // iat
                 .setExpiration(expiryDate) // exp
                 .setAudience(audience) // aud

@@ -101,26 +101,54 @@ components:
       type: object
       description: JSON Web Key response object
       oneOf:
+        - $ref: '#/components/schemas/EcJwkResponse'
         - $ref: '#/components/schemas/RsaJwkResponse'
+      properties:
+        kty:
+          type: string
+          description: the family of cryptographic used with the key.
+          enum: [ EC, RSA ]
+    EcJwkResponse:
+      type: object
+      properties:
+        alg:
+          type: string
+          description: cryptographic algorithm used with the key
+        crv:
+          type: string
+          description: Curve used, e.g., P-256, P-384, P-521
+        use:
+          type: string
+          description: how the key was meant to be used
+        x:
+          type: string
+          description: X coordinate (Base64URL-encoded)
+        y:
+          type: string
+          description: Y coordinate (Base64URL-encoded)
+        kid:
+          type: string
+          description: unique identifier for the key
+      required:
+        - alg
+        - use
+        - kid
+        - kty
     RsaJwkResponse:
       type: object
       properties:
         alg:
           type: string
           description: cryptographic algorithm used with the key
-        kty:
-          type: string
-          description: the family of cryptographic used with the key. fixed value `RSA`
-          enum: [RSA]
         use:
           type: string
           description: how the key was meant to be used
         n:
           type: string
-          description: Modulus of RSA key
+          description: Modulus of RSA key (Base64URL-encoded)
         e:
           type: string
-          description: Exponent for RSA key
+          description: Exponent for RSA key (Base64URL-encoded)
         kid:
           type: string
           description: unique identifier for the key
@@ -128,8 +156,6 @@ components:
         - alg
         - kty
         - use
-        - n
-        - e
         - kid
     OpenIDDiscoveryResponse:
       type: object
