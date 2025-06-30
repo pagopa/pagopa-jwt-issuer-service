@@ -20,6 +20,9 @@ microservice-chart:
     SECRET_KEY_PASSWORD: ""
     JWT_ISSUER: "pw-jwt-issuer-service"
     WELL_KNOWN_OPENID_CONFIGURATION_BASE_PATH: "https://itndev.pay-wallet.internal.dev.platform.pagopa.it/pagopa-jwt-issuer-service"
+  envSecret:
+    SECURITY_API_KEY_PRIMARY: pay-wallet-jwt-issuer-service-primary-api-key
+    SECURITY_API_KEY_SECONDARY: pay-wallet-jwt-issuer-service-secondary-api-key
   keyvault:
     name: "pagopa-d-pay-wallet-kv"
     tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
