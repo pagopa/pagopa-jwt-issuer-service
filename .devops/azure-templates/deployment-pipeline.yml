@@ -61,8 +61,10 @@ parameters:
     displayName: "Docker file name suffix to be used during acr image push"
     type: string
   - name: SERVICE_API_KEY_DEV
+    displayName: "Jwt issuer API key used for dev environment"
     type: string
   - name: SERVICE_API_KEY_UAT
+    displayName: "Jwt issuer API key used for uat environment"
     type: string
 
 # --- START Deploy DEV --- #
