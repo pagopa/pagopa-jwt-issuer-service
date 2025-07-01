@@ -40,7 +40,13 @@
 			],
 			"request": {
 				"method": "POST",
-				"header": [],
+				"header": [
+					{
+						"key": "x-api-key",
+						"value": "{{API-KEY}}",
+						"type": "text"
+					}
+				],
 				"body": {
 					"mode": "raw",
 					"raw": "{\n    \"audience\": \"audience\",\n    \"duration\": 30,\n    \"privateClaims\": {\n        \"customClaim1\": \"value1\",\n        \"customClaim2\": \"value2\"\n    }\n}",
