@@ -60,6 +60,10 @@ parameters:
   - name: DOCKER_FILE_VERSION_SUFFIX
     displayName: "Docker file name suffix to be used during acr image push"
     type: string
+  - name: SERVICE_API_KEY_DEV
+    type: string
+  - name: SERVICE_API_KEY_UAT
+    type: string
 
 # --- START Deploy DEV --- #
 stages:
@@ -127,6 +131,7 @@ stages:
               ENV_FILE: api-tests/${{ parameters.DOMAIN }}-dev.env.json
               TEST_FILE_PREFIX: "dev"
               USE_NEWMAN_DOCKER_IMAGE: true
+              SERVICE_API_KEY: ${{ parameters.SERVICE_API_KEY_DEV }}
   # --- END Deploy DEV --- #
 
   # --- START Deploy UAT --- #
@@ -255,6 +260,7 @@ stages:
               ENV_FILE: api-tests/${{ parameters.DOMAIN }}-uat.env.json
               TEST_FILE_PREFIX: "uat-blue"
               USE_NEWMAN_DOCKER_IMAGE: true
+              SERVICE_API_KEY: ${{ parameters.SERVICE_API_KEY_UAT }}
           # uninstall helm release used for blue instance
           - task: HelmDeploy@0
             displayName: Un-install UAT blue version

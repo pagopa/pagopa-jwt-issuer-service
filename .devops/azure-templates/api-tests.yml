@@ -8,6 +8,8 @@ parameters:
     type: string
   - name: "USE_NEWMAN_DOCKER_IMAGE"
     type: boolean
+  - name: "SERVICE_API_KEY"
+    type: string
 
 
 steps:
@@ -16,7 +18,7 @@ steps:
           yarn global add newman
         displayName: 'Newman installation'
       - script: |
-          newman run ${{ parameters.API_TEST_FILE }} -e ${{ parameters.ENV_FILE }}  --ignore-redirects --reporters cli,junit --reporter-junit-export Results/${{ parameters.TEST_FILE_PREFIX }}-api-TEST.xml
+          newman run ${{ parameters.API_TEST_FILE }} -e ${{ parameters.ENV_FILE }} --env-var API-KEY=${{ parameters.SERVICE_API_KEY }} --ignore-redirects --reporters cli,junit --reporter-junit-export Results/${{ parameters.TEST_FILE_PREFIX }}-api-TEST.xml
         displayName: 'Run api test'
   - ${{ else }}:
       - script: |
