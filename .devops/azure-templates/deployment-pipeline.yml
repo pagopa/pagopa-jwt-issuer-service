@@ -367,6 +367,7 @@ stages:
               ENV_FILE: api-tests/${{ parameters.DOMAIN }}-uat.env.json
               TEST_FILE_PREFIX: "uat-green"
               USE_NEWMAN_DOCKER_IMAGE: true
+              SERVICE_API_KEY: ${{ parameters.SERVICE_API_KEY_UAT }}
 
   # --- END Deploy UAT --- #
 
