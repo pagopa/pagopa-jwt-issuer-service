@@ -13,17 +13,20 @@ parameters:
 
 
 steps:
+  - script: |
+      NEWMAN_TEST_RUN=run ${{ parameters.API_TEST_FILE }} -e ${{ parameters.ENV_FILE }} --env-var API-KEY=${{ parameters.SERVICE_API_KEY }} --ignore-redirects --reporters cli,junit --reporter-junit-export Results/${{ parameters.TEST_FILE_PREFIX }}-api-TEST.xml
+      echo "Newman run command: [$NEWMAN_TEST_RUN]"
+    displayName: 'Newman installation'
   - ${{ if eq(parameters['USE_NEWMAN_DOCKER_IMAGE'], False) }}:
       - script: |
           yarn global add newman
         displayName: 'Newman installation'
       - script: |
-          newman run ${{ parameters.API_TEST_FILE }} -e ${{ parameters.ENV_FILE }} --env-var API-KEY=${{ parameters.SERVICE_API_KEY }} --ignore-redirects --reporters cli,junit --reporter-junit-export Results/${{ parameters.TEST_FILE_PREFIX }}-api-TEST.xml
+          newman $NEWMAN_TEST_RUN
         displayName: 'Run api test'
   - ${{ else }}:
       - script: |
-          ls
-          docker run -v .:/etc/newman -t postman/newman run ${{ parameters.API_TEST_FILE }} -e ${{ parameters.ENV_FILE }}  --ignore-redirects --reporters cli,junit --reporter-junit-export Results/${{ parameters.TEST_FILE_PREFIX }}-api-TEST.xml
+          docker run -v .:/etc/newman -t postman/newman $NEWMAN_TEST_RUN
         displayName: 'Run api test'
   - task: PublishTestResults@2
     condition: succeededOrFailed()
