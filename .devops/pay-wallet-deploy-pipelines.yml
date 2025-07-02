@@ -70,3 +70,5 @@ stages:
       DOMAIN: pay-wallet
       DOCKER_FILE_NAME: ${{ variables.dockerFileName }}
       DOCKER_FILE_VERSION_SUFFIX: ${{ variables.dockerFileVersionSuffix }}
+      SERVICE_API_KEY_DEV: $(SERVICE_API_KEY_DEV)
+      SERVICE_API_KEY_UAT: $(SERVICE_API_KEY_UAT)
