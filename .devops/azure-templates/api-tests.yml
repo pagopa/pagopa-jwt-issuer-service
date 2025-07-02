@@ -15,7 +15,7 @@ parameters:
 steps:
   - checkout: self
     displayName: "Checkout repo"
-    #clean: false
+    clean: false
   - script: |
       NEWMAN_TEST_RUN="run ${{ parameters.API_TEST_FILE }} -e ${{ parameters.ENV_FILE }} --env-var API-KEY=${{ parameters.SERVICE_API_KEY }} --ignore-redirects --reporters cli,junit --reporter-junit-export Results/${{ parameters.TEST_FILE_PREFIX }}-api-TEST.xml"
       echo "Newman run command: [$NEWMAN_TEST_RUN]"
