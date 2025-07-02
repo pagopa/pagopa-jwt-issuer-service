@@ -69,6 +69,94 @@
 			"response": []
 		},
 		{
+			"name": "Create new token - 401 missing api key",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							" pm.test(\"POST tokens should return 401 - missing api key\", function () {",
+							"    pm.response.to.have.status(401);",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"audience\": \"audience\",\n    \"duration\": 30,\n    \"privateClaims\": {\n        \"customClaim1\": \"value1\",\n        \"customClaim2\": \"value2\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{PROTOCOL}}{{HOST}}{{BASE_PATH}}/tokens",
+					"host": [
+						"{{PROTOCOL}}{{HOST}}{{BASE_PATH}}"
+					],
+					"path": [
+						"tokens"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create new token - 401 invali api key",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							" pm.test(\"POST tokens should return 401 - invalid api key\", function () {",
+							"    pm.response.to.have.status(401);",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "x-api-key",
+						"value": "invalid-key",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"audience\": \"audience\",\n    \"duration\": 30,\n    \"privateClaims\": {\n        \"customClaim1\": \"value1\",\n        \"customClaim2\": \"value2\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{PROTOCOL}}{{HOST}}{{BASE_PATH}}/tokens",
+					"host": [
+						"{{PROTOCOL}}{{HOST}}{{BASE_PATH}}"
+					],
+					"path": [
+						"tokens"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Retrieve keys",
 			"event": [
 				{
