@@ -4,7 +4,7 @@ microservice-chart:
   fullnameOverride: "pagopa-jwt-issuer-service"
   image:
     repository: ""
-    tag: "0.5.0"
+    tag: "0.6.0"
     pullPolicy: Always
   livenessProbe:
     handlerType: httpGet
