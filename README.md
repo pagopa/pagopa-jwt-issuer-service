@@ -26,6 +26,9 @@ These are all environment variables needed by the application:
 | KEYSTORE_CACHE_MAXSIZE                    | Maximum size of the cache application uses to store keystores                | number  |         |
 | KEYSTORE_CACHE_TTL_MINS                   | Time to live of the cache application uses to store keystores                | number  |         |
 | ROOT_LOGGING_LEVEL                        | Root logging level. Possible values are 'info', 'debug', 'trace'.            | string  | info    |
+| SECURITY_API_KEY_SECURED_PATHS            | Secured paths for API Key                                                    | string  |         |
+| SECURITY_API_KEY_PRIMARY                  | Primary API Key used to secure jwt-issuer service's APIs                     | string  |         |
+| SECURITY_API_KEY_SECONDARY                | Secondary API Key used to secure jwt-issuer service's APIs                   | string  |         |
 | WELL_KNOWN_OPENID_CONFIGURATION_BASE_PATH | Base path used to expose an OpenID Connect Provider’s configuration metadata | string  |         |
 
 An example configuration of these environment variables is in the `.env.example` file.

@@ -82,3 +82,4 @@ stages:
                 ENV_FILE: "api-tests/localhost.env.json"
                 TEST_FILE_PREFIX: "local"
                 USE_NEWMAN_DOCKER_IMAGE: false
+                SERVICE_API_KEY: "PRIMARY-KEY"

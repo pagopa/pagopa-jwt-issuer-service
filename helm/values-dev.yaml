@@ -74,6 +74,7 @@ microservice-chart:
     KEYSTORE_CACHE_TTL_MINS: "60"
     AZURE_MAX_RETRY: "3"
     AZURE_RETRY_DELAY_MILLIS: "500"
+    SECURITY_API_KEY_SECURED_PATHS: "/tokens"
   nodeSelector: {}
   tolerations: []
   affinity:
@@ -86,5 +87,4 @@ microservice-chart:
                 values:
                   - user
   secretProviderClass:
-    #TODO set to true
-    create: false
+    create: true

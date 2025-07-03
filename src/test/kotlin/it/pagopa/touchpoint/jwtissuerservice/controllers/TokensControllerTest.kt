@@ -43,6 +43,7 @@ class TokensControllerTest {
         webClient
             .post()
             .uri("/tokens")
+            .header("x-api-key", "primary-key")
             .bodyValue(createTokenRequestDto)
             .exchange()
             .expectStatus()
@@ -50,6 +51,45 @@ class TokensControllerTest {
             .expectBody(CreateTokenResponseDto::class.java)
             .consumeWith { assertEquals(createTokenResponseDto, it.responseBody) }
         verify(tokensService, times(1)).generateToken(createTokenRequestDto)
+    }
+
+    @Test
+    fun `Should not generate token successfully if api key is missing`() = runTest {
+        // pre-conditions
+        val createTokenRequestDto =
+            CreateTokenRequestDto(
+                audience = "audience",
+                duration = 10,
+                privateClaims = mapOf("key" to "value"),
+            )
+
+        webClient
+            .post()
+            .uri("/tokens")
+            .bodyValue(createTokenRequestDto)
+            .exchange()
+            .expectStatus()
+            .isUnauthorized
+    }
+
+    @Test
+    fun `Should not generate token successfully if api key is invalid`() = runTest {
+        // pre-conditions
+        val createTokenRequestDto =
+            CreateTokenRequestDto(
+                audience = "audience",
+                duration = 10,
+                privateClaims = mapOf("key" to "value"),
+            )
+
+        webClient
+            .post()
+            .uri("/tokens")
+            .header("x-api-key", "invalid-key")
+            .bodyValue(createTokenRequestDto)
+            .exchange()
+            .expectStatus()
+            .isUnauthorized
     }
 
     @Test
@@ -64,6 +104,7 @@ class TokensControllerTest {
         webClient
             .post()
             .uri("/tokens")
+            .header("x-api-key", "secondary-key")
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue("{}")
             .exchange()
@@ -94,6 +135,7 @@ class TokensControllerTest {
         webClient
             .post()
             .uri("/tokens")
+            .header("x-api-key", "primary-key")
             .bodyValue(createTokenRequestDto)
             .exchange()
             .expectStatus()

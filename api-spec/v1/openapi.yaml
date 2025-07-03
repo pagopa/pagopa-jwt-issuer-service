@@ -59,6 +59,8 @@ paths:
       operationId: createJwtToken
       summary: Create a new JWT token
       description: Create a new signed JWT token with input specified claims
+      security:
+        - ApiKeyAuth: [ ]
       requestBody:
         required: true
         content:
@@ -86,6 +88,11 @@ paths:
                 $ref: '#/components/schemas/ProblemJson'
 
 components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
   schemas:
     JWKSResponse:
       type: object
