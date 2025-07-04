@@ -7,6 +7,9 @@ microservice-chart:
       repository: pagopauitncoreacr.azurecr.io/pagopajwtissuerservice
     envConfig:
       OTEL_SERVICE_NAME: "pagopa-pay-wallet-jwt-issuer-service-blue"
+    envSecret:
+      SECURITY_API_KEY_PRIMARY: pay-wallet-jwt-issuer-service-primary-api-key
+      SECURITY_API_KEY_SECONDARY: pay-wallet-jwt-issuer-service-secondary-api-key
   image:
     repository: pagopauitncoreacr.azurecr.io/pagopajwtissuerservice
   ingress:
