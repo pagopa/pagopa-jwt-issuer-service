@@ -82,7 +82,7 @@ class ReactiveAzureKVSecurityKeysServiceTest {
         val certProperties2 = mock(CertificateProperties::class.java)
         val keyVaultCertificate = mock(KeyVaultCertificate::class.java)
         given { certProperties1.isEnabled }.willReturn(true)
-        given { certProperties2.isEnabled }.willReturn(false)
+        given { certProperties2.isEnabled }.willReturn(true)
         given { certProperties1.expiresOn }.willReturn(OffsetDateTime.now().plusHours(1))
         given { certProperties2.expiresOn }.willReturn(OffsetDateTime.now().minusHours(1))
 
