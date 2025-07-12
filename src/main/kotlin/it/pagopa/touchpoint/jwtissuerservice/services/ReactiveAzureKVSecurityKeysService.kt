@@ -38,7 +38,9 @@ class ReactiveAzureKVSecurityKeysService(
     fun getCerts(): Flux<KeyVaultCertificate> {
         return certClient
             .listPropertiesOfCertificateVersions(azureSecretConfig.name)
-            .filter { it.isEnabled && OffsetDateTime.now().isBefore(it.expiresOn) }
+            .filter {
+                it.isEnabled && (it.expiresOn == null || it.expiresOn.isAfter(OffsetDateTime.now()))
+            }
             .flatMap {
                 certClient
                     .getCertificateVersion(azureSecretConfig.name, it.version)
