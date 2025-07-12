@@ -14,6 +14,7 @@ import it.pagopa.touchpoint.jwtissuerservice.utils.KeyGenerationTestUtils.Compan
 import it.pagopa.touchpoint.jwtissuerservice.utils.KeyGenerationTestUtils.Companion.getKeyPairEC
 import it.pagopa.touchpoint.jwtissuerservice.utils.KeyGenerationTestUtils.Companion.getKeyStoreWithPKCS12Certificate
 import it.pagopa.touchpoint.jwtissuerservice.utils.KeyGenerationTestUtils.Companion.getKid
+import java.time.OffsetDateTime
 import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -55,6 +56,35 @@ class ReactiveAzureKVSecurityKeysServiceTest {
         val keyVaultCertificate = mock(KeyVaultCertificate::class.java)
         given { certProperties1.isEnabled }.willReturn(true)
         given { certProperties2.isEnabled }.willReturn(false)
+        given { certProperties1.expiresOn }.willReturn(OffsetDateTime.now().plusHours(1))
+        given { certProperties2.expiresOn }.willReturn(OffsetDateTime.now().minusHours(1))
+
+        given { certClient.listPropertiesOfCertificateVersions(any()) }
+            .willReturn(
+                azureTestUtils.getCertificatePropertiesPagedFlux(
+                    listOf(certProperties1, certProperties2)
+                )
+            )
+
+        given { certClient.getCertificateVersion(anyString(), anyOrNull()) }
+            .willReturn(Mono.just(keyVaultCertificate))
+
+        StepVerifier.create(securityKeysService.getCerts())
+            .expectNext(keyVaultCertificate)
+            .verifyComplete()
+        verify(certClient, times(1)).getCertificateVersion(any(), anyOrNull())
+    }
+
+    @Test
+    fun `Should only get not expired certificates`() = runTest {
+        // pre-conditions
+        val certProperties1 = mock(CertificateProperties::class.java)
+        val certProperties2 = mock(CertificateProperties::class.java)
+        val keyVaultCertificate = mock(KeyVaultCertificate::class.java)
+        given { certProperties1.isEnabled }.willReturn(true)
+        given { certProperties2.isEnabled }.willReturn(true)
+        given { certProperties1.expiresOn }.willReturn(OffsetDateTime.now().plusHours(1))
+        given { certProperties2.expiresOn }.willReturn(OffsetDateTime.now().minusHours(1))
 
         given { certClient.listPropertiesOfCertificateVersions(any()) }
             .willReturn(
@@ -80,6 +110,8 @@ class ReactiveAzureKVSecurityKeysServiceTest {
         val keyVaultCertificate = mock(KeyVaultCertificate::class.java)
         given { certProperties1.isEnabled }.willReturn(true)
         given { certProperties2.isEnabled }.willReturn(true)
+        given { certProperties1.expiresOn }.willReturn(OffsetDateTime.now().plusHours(1))
+        given { certProperties2.expiresOn }.willReturn(OffsetDateTime.now().plusHours(1))
 
         given { certClient.listPropertiesOfCertificateVersions(any()) }
             .willReturn(
@@ -166,6 +198,8 @@ class ReactiveAzureKVSecurityKeysServiceTest {
         val keyVaultCertificate2 = mock(KeyVaultCertificate::class.java)
         given { certProperties1.isEnabled }.willReturn(true)
         given { certProperties2.isEnabled }.willReturn(true)
+        given { certProperties1.expiresOn }.willReturn(OffsetDateTime.now().plusHours(1))
+        given { certProperties2.expiresOn }.willReturn(OffsetDateTime.now().plusHours(1))
         given { keyVaultCertificate.cer }.willReturn(certificate1.encoded)
         given { keyVaultCertificate2.cer }.willReturn(certificate2.encoded)
 
