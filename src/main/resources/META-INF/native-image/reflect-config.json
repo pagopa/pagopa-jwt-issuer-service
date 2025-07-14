@@ -28,5 +28,16 @@
   {
     "name": "com.azure.security.keyvault.certificates.models.CertificatePolicyAction[]",
     "unsafeAllocated": true
+  },
+  {
+    "name": "com.azure.security.keyvault.certificates.models.CertificateProperties",
+    "allDeclaredMethods": true,
+    "allDeclaredConstructors": true,
+    "allDeclaredFields": true
+  },
+  {
+    "name": "com.azure.security.keyvault.certificates.implementation.models.CertificateAttributes",
+    "allDeclaredFields": true,
+    "allPublicMethods": true
   }
 ]

@@ -39,12 +39,15 @@ class ReactiveAzureKVSecurityKeysService(
         return certClient
             .listPropertiesOfCertificateVersions(azureSecretConfig.name)
             .doOnNext {
-                logger.info(
-                    "CertificateProperties - name: {}, version: {}, enabled: {}, expiresOn: {}",
+                logger.debug(
+                    "CertificateProperties - name: {}, version: {}, enabled: {}, expiresOn: {}, notBefore: {}, createdOn: {}, updatedOn: {}",
                     it.name,
                     it.version,
                     it.isEnabled,
                     it.expiresOn,
+                    it.notBefore,
+                    it.createdOn,
+                    it.updatedOn,
                 )
             }
             .filter {
