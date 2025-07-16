@@ -13,6 +13,7 @@ import java.security.MessageDigest
 import java.security.PrivateKey
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
+import java.time.OffsetDateTime
 import java.util.*
 import org.slf4j.LoggerFactory
 import org.springframework.cache.annotation.Cacheable
@@ -37,7 +38,21 @@ class ReactiveAzureKVSecurityKeysService(
     fun getCerts(): Flux<KeyVaultCertificate> {
         return certClient
             .listPropertiesOfCertificateVersions(azureSecretConfig.name)
-            .filter { it.isEnabled }
+            .doOnNext {
+                logger.debug(
+                    "CertificateProperties - name: {}, version: {}, enabled: {}, expiresOn: {}, notBefore: {}, createdOn: {}, updatedOn: {}",
+                    it.name,
+                    it.version,
+                    it.isEnabled,
+                    it.expiresOn,
+                    it.notBefore,
+                    it.createdOn,
+                    it.updatedOn,
+                )
+            }
+            .filter {
+                it.isEnabled && (it.expiresOn == null || it.expiresOn.isAfter(OffsetDateTime.now()))
+            }
             .flatMap {
                 certClient
                     .getCertificateVersion(azureSecretConfig.name, it.version)
