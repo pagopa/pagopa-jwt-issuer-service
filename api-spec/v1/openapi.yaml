@@ -3,8 +3,22 @@ info:
   version: 0.0.1
   title: Pagopa jwt token issuer service api
   description: Microservice that handle JWT token creation and method to verify those tokens
+  contact:
+    name: pagoPA - Touchpoints team
+    url: https://www.pagopa.it/
+    email: info@pagopa.it
+  license:
+    name: EUPL-1.2
+    url: https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
 servers:
   - url: https://${host}
+    variables:
+      host:
+          description: The hostname of the API server
+          default: api.dev.platform.pagopa.it
+          enum:
+            - api.dev.platform.pagopa.it
+            - api.uat.platform.pagopa.it
 tags:
   - name: jwtIssuer
     description: Api's used to generate new token and retrieve key to verify those generated tokens
@@ -86,7 +100,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
-
+security:
+  - ApiKeyAuth: []
 components:
   securitySchemes:
     ApiKeyAuth:
