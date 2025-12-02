@@ -63,9 +63,9 @@ microservice-chart:
       memory: "128Mi"
       cpu: "150m"
   autoscaling:
-    enable: false
-    minReplica: 1
-    maxReplica: 5
+    enable: true
+    minReplica: 3
+    maxReplica: 10
     pollingInterval: 30 # seconds
     cooldownPeriod: 30 # seconds
     triggers:
@@ -86,7 +86,7 @@ microservice-chart:
     KEYSTORE_CACHE_TTL_MINS: "60"
     AZURE_MAX_RETRY: "3"
     AZURE_RETRY_DELAY_MILLIS: "500"
-    SECURITY_API_KEY_SECURED_PATHS: "/tokens"
+    SECURITY_API_KEY_SECURED_PATHS: ""
   nodeSelector: {}
   tolerations: []
   affinity:
