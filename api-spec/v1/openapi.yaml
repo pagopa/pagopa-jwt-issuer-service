@@ -125,8 +125,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
-security:
-  - ApiKeyAuth: []
+#security:
+#  - ApiKeyAuth: []
 components:
   securitySchemes:
     ApiKeyAuth:
