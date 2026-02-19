@@ -1,4 +1,16 @@
 services:
+  akv-emulator:
+    container_name: akv-emulator
+    image: decioc/akv-emulator
+    environment:
+      - SECRETS_DIR=/external-data
+      - CERTIFICATES_DIR=/external-data
+    volumes:
+      - ./data:/external-data:ro
+    ports:
+      - "3000:3000"
+    networks:
+      - pagopa-jwt-issuer-net
   pagopa-jwt-issuer-service:
     container_name: pagopa-jwt-issuer-service
     build:
@@ -8,6 +20,8 @@ services:
       - ./.env
     ports:
       - "8080:8080"
+    depends_on:
+      - akv-emulator
     networks:
       - pagopa-jwt-issuer-net
 networks:
