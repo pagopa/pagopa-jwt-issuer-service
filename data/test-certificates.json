@@ -1,0 +1,22 @@
+[
+  {
+    "cer": "MIIBiDCCAS+gAwIBAgIUUkEncA4Bfl5pZxXCfSle5UDpazUwCgYIKoZIzj0EAwIwGjEYMBYGA1UEAwwPdGVzdC1qd3QtaXNzdWVyMB4XDTI2MDIxOTEzMzkzOVoXDTM2MDIxNzEzMzkzOVowGjEYMBYGA1UEAwwPdGVzdC1qd3QtaXNzdWVyMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEgLu2sgC710/CCW9YwS1RQYmRkOf9h6NotiDoZ4oEpqLUDBkmXC2T5v81C04Qf2kTxhhC2iandICC8jGVgxGPhKNTMFEwHQYDVR0OBBYEFJCJQnXRRwxL6rlDTSGLbkTRViHdMB8GA1UdIwQYMBaAFJCJQnXRRwxL6rlDTSGLbkTRViHdMA8GA1UdEwEB/wQFMAMBAf8wCgYIKoZIzj0EAwIDRwAwRAIgYvCtBlrdPwHeNQEaq9I7HBmUEFZ0bHEsv9C2sFZdahwCIGyl5aSQyAdh4RLHGWFNzjzerrTTrHq9cKU77x1L0q5U",
+    "keyId": "https://akv-emulator/keys/testName/1",
+    "secretId": "https://akv-emulator/secrets/testName/1",
+    "properties": {
+      "vaultUrl": "http://akv-emulator:3000/",
+      "version": "1",
+      "name": "testName",
+      "enabled": true,
+      "notBefore": "2024-01-01T00:00:00Z",
+      "expiresOn": "2036-01-01T00:00:00Z",
+      "createdOn": "2024-01-01T00:00:00Z",
+      "updatedOn": "2024-01-01T00:00:00Z",
+      "recoveryLevel": "Recoverable+Purgeable",
+      "id": "testName-v1",
+      "tags": {},
+      "x509Thumbprint": "test-thumbprint",
+      "recoverableDays": 90
+    }
+  }
+]
