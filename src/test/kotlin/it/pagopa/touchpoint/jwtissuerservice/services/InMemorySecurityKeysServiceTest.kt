@@ -58,8 +58,6 @@ class InMemorySecurityKeysServiceTest {
 
     @Test
     fun `Should return exactly one public key`() = runTest {
-        StepVerifier.create(service.getPublic())
-            .expectNextCount(1)
-            .verifyComplete()
+        StepVerifier.create(service.getPublic()).expectNextCount(1).verifyComplete()
     }
 }
