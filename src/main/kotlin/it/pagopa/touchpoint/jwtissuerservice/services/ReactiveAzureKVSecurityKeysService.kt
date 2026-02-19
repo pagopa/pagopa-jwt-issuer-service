@@ -17,11 +17,13 @@ import java.time.OffsetDateTime
 import java.util.*
 import org.slf4j.LoggerFactory
 import org.springframework.cache.annotation.Cacheable
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 @Component
+@Profile("!local")
 class ReactiveAzureKVSecurityKeysService(
     private val secretClient: SecretAsyncClient,
     private val certClient: CertificateAsyncClient,
