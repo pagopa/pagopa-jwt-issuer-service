@@ -5,10 +5,13 @@ services:
     environment:
       - SECRETS_DIR=/external-data
       - CERTIFICATES_DIR=/external-data
+      - SSL_KEY_PATH=/tls/ec-key.pem
+      - SSL_CERT_PATH=/tls/ec-cert.pem
     volumes:
       - ./data:/external-data:ro
+      - ./certs:/tls:ro
     ports:
-      - "3000:3000"
+      - "3443:3443"
     networks:
       - pagopa-jwt-issuer-net
   pagopa-jwt-issuer-service:
@@ -18,6 +21,11 @@ services:
       context: .
     env_file:
       - ./.env
+    volumes:
+      - ./certs/truststore.jks:/certs/truststore.jks:ro
+    command:
+      - "-Djavax.net.ssl.trustStore=/certs/truststore.jks"
+      - "-Djavax.net.ssl.trustStorePassword=changeit"
     ports:
       - "8080:8080"
     depends_on:
