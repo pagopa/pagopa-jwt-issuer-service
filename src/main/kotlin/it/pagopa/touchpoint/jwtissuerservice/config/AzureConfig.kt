@@ -24,8 +24,9 @@ class AzureConfig(
 ) {
 
     /**
-     * This returns the mock credentials if the env var is set to true (safe default to false) for integration tests,
-     * in which case we use TokenCredential to generate a static dummy token (there is no validation in the akv-emulator)
+     * Returns mock credentials for integration tests with the akv-emulator (which performs no
+     * authentication), or real Azure AD credentials for production. Controlled by the
+     * `azure.keyvault.mock-credentials` property (default: false).
      */
     private fun buildCredential(): TokenCredential {
         if (azureKeyVaultClientConfigProperties.mockCredentials) {
