@@ -3,13 +3,13 @@ services:
     container_name: akv-emulator
     image: decioc/akv-emulator
     environment:
-      - SECRETS_DIR=/external-data
-      - CERTIFICATES_DIR=/external-data
-      - SSL_KEY_PATH=/tls/ec-key.pem
-      - SSL_CERT_PATH=/tls/ec-cert.pem
+      - SECRETS_DIR=/test-data
+      - CERTIFICATES_DIR=/test-data
+      - SSL_KEY_PATH=/test-certs/ec-key.pem
+      - SSL_CERT_PATH=/test-certs/ec-cert.pem
     volumes:
-      - ./data:/external-data:ro
-      - ./certs:/tls:ro
+      - ./local-testing/test-data:/test-data:ro
+      - ./local-testing/test-certs:/test-certs:ro
     ports:
       - "3443:3443"
     networks:
@@ -22,9 +22,9 @@ services:
     env_file:
       - ./.env
     volumes:
-      - ./certs/truststore.jks:/certs/truststore.jks:ro
+      - ./local-testing/test-certs/truststore.jks:/test-certs/truststore.jks:ro
     command:
-      - "-Djavax.net.ssl.trustStore=/certs/truststore.jks"
+      - "-Djavax.net.ssl.trustStore=/test-certs/truststore.jks"
       - "-Djavax.net.ssl.trustStorePassword=changeit"
     ports:
       - "8080:8080"
