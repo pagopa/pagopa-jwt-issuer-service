@@ -159,6 +159,3 @@ gradle-app.setting
 
 # End of https://www.toptal.com/developers/gitignore/api/intellij+all,kotlin,java,gradle
 /.env
-
-# Test certificate generation artifacts (private keys)
-/certs/
