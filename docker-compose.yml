@@ -1,4 +1,19 @@
 services:
+  akv-emulator:
+    container_name: akv-emulator
+    image: decioc/akv-emulator
+    environment:
+      - SECRETS_DIR=/test-data
+      - CERTIFICATES_DIR=/test-data
+      - SSL_KEY_PATH=/test-certs/ec-key.pem
+      - SSL_CERT_PATH=/test-certs/ec-cert.pem
+    volumes:
+      - ./local-testing/test-data:/test-data:ro
+      - ./local-testing/test-certs:/test-certs:ro
+    ports:
+      - "3443:3443"
+    networks:
+      - pagopa-jwt-issuer-net
   pagopa-jwt-issuer-service:
     container_name: pagopa-jwt-issuer-service
     build:
@@ -6,8 +21,15 @@ services:
       context: .
     env_file:
       - ./.env
+    volumes:
+      - ./local-testing/test-certs/truststore.jks:/test-certs/truststore.jks:ro
+    command:
+      - "-Djavax.net.ssl.trustStore=/test-certs/truststore.jks"
+      - "-Djavax.net.ssl.trustStorePassword=changeit"
     ports:
       - "8080:8080"
+    depends_on:
+      - akv-emulator
     networks:
       - pagopa-jwt-issuer-net
 networks:
