@@ -7,4 +7,5 @@ data class AzureKeyVaultClientConfigProperties(
     val endpoint: String,
     val maxRetries: Int,
     val retryDelayMillis: Long,
+    val mockCredentials: Boolean = false,
 )
