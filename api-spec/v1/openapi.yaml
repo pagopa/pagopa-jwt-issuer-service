@@ -3,8 +3,23 @@ info:
   version: 0.0.1
   title: Pagopa jwt token issuer service api
   description: Microservice that handle JWT token creation and method to verify those tokens
+  contact:
+    name: pagoPA - Touchpoints team
+    url: https://www.pagopa.it/
+  license:
+    name: EUPL-1.2
+    url: https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
 servers:
   - url: https://${host}
+    variables:
+      host:
+          description: The hostname of the API server
+          default: weuprod.ecommerce.internal.platform.pagopa.it
+          enum:
+            - weudev.ecommerce.internal.dev.platform.pagopa.it
+            - weuuat.ecommerce.internal.uat.platform.pagopa.it
+            - weuprod.ecommerce.internal.platform.pagopa.it
+
 tags:
   - name: jwtIssuer
     description: Api's used to generate new token and retrieve key to verify those generated tokens
@@ -32,6 +47,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
   /tokens/keys:
     get:
       tags:
@@ -46,6 +73,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/JWKSResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
         '500':
           description: Internal server error
           content:
@@ -80,13 +113,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
         '500':
           description: Internal server error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemJson'
-
+#security:
+#  - ApiKeyAuth: []
 components:
   securitySchemes:
     ApiKeyAuth:
