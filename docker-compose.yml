@@ -1,7 +1,7 @@
 services:
   akv-emulator:
     container_name: akv-emulator
-    image: decioc/akv-emulator
+    image: decioc/akv-emulator@sha256:45377974098672c198282991bd1d1ab899e02cece9c2fb0ed3ac936d23b000b7
     environment:
       - SECRETS_DIR=/test-data
       - CERTIFICATES_DIR=/test-data
