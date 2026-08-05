@@ -23,7 +23,7 @@ class ExceptionHandler {
 
     @ExceptionHandler(RestApiException::class)
     fun handleException(e: RestApiException): ResponseEntity<ProblemJsonDto> {
-        JWTIssuerTracingUtils.withErrorMdc(e) { logger.error("Exception processing request") }
+        JWTIssuerTracingUtils.withErrorMdc(e) { logger.error("Rest Exception processing request") }
         return ResponseEntity.status(e.httpStatus)
             .body(
                 ProblemJsonDto(

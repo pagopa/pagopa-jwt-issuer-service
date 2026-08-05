@@ -38,11 +38,16 @@ class TokensService(
                     )
                 )
             }
-            .doOnNext {
-                JWTIssuerTracingUtils.withContextDetailsMdc(createTokenRequest.privateClaims) {
-                    logger.info("Token generated successfully")
-                }
+            .contextWrite { context ->
+                JWTIssuerTracingUtils.enrichContextForJwtIssuer(
+                    createTokenRequest.privateClaims.getValue("transactionId"),
+                    null,
+                    null,
+                    createTokenRequest.privateClaims.getValue("walletId"),
+                    context,
+                )
             }
+            .doOnNext { logger.info("Token generated successfully") }
             .awaitSingle()
 
     suspend fun getJwksKeys(): JWKSResponseDto =

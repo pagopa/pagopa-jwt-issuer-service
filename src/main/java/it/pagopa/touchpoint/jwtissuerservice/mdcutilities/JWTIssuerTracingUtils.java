@@ -66,6 +66,7 @@ public class JWTIssuerTracingUtils {
                                                     String transactionId,
                                                     String rptIds,
                                                     String paymentTokens,
+                                                    String walletId,
                                                     Context reactorContext
     ) {
         return reactorContext
@@ -77,8 +78,8 @@ public class JWTIssuerTracingUtils {
                 )
                 .put(
                         TracingEntry.CTX_WALLET_ID.getKey(),
-                        transactionId != null
-                                ? transactionId
+                        walletId != null
+                                ? walletId
                                 : TracingEntry.CTX_WALLET_ID.getDefaultValue()
                 )
                 .put(
