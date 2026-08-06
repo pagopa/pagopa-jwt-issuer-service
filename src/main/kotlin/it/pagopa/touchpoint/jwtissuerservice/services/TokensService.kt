@@ -41,13 +41,17 @@ class TokensService(
             .contextWrite { context ->
                 JWTIssuerTracingUtils.enrichContextForJwtIssuer(
                     createTokenRequest.privateClaims["transactionId"],
-                    "rptId",
-                    "paymentTokens",
+                    createTokenRequest.privateClaims["rptIds"],
+                    createTokenRequest.privateClaims["paymentTokens"],
                     createTokenRequest.privateClaims["walletId"],
                     context,
                 )
             }
-            .doOnNext { logger.info("Token generated successfully") }
+            .doOnNext {
+                JWTIssuerTracingUtils.withContextDetailsMdc(createTokenRequest.privateClaims) {
+                    logger.info("Token generated successfully")
+                }
+            }
             .awaitSingle()
 
     suspend fun getJwksKeys(): JWKSResponseDto =
