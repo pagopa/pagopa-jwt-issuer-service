@@ -26,10 +26,10 @@ public class JWTIssuerTracingUtils {
      * written locally in MDC (for example by {@link #withErrorMdc}).
      */
     public enum TracingEntry {
-        CTX_TRANSACTION_ID("ctx.transaction.id", "{transactionId-not-found}", true),
-        CTX_WALLET_ID("ctx.wallet.id", "{walletId-not-found}", true),
-        CTX_RPT_IDS("ctx.rpt.ids", "{rptIds-not-found}", true),
-        CTX_PAYMENT_TOKENS("ctx.payment.tokens", "{paymentTokens-not-found}", true),
+        CTX_TRANSACTION_ID("ctx.transaction.id", "{transactionId-not-found}", false),
+        CTX_WALLET_ID("ctx.wallet.id", "{walletId-not-found}", false),
+        CTX_RPT_IDS("ctx.rpt.ids", "{rptIds-not-found}", false),
+        CTX_PAYMENT_TOKENS("ctx.payment.tokens", "{paymentTokens-not-found}", false),
         DEPENDENCY("dependency", "{dependency-not-found}", false),
         ERROR_TYPE("error.type", "{errorType-not-found}", false),
         ERROR_MESSAGE("error.message", "{errorMessage-not-found}", false);
