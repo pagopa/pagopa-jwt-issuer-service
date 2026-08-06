@@ -40,10 +40,10 @@ class TokensService(
             }
             .contextWrite { context ->
                 JWTIssuerTracingUtils.enrichContextForJwtIssuer(
-                    createTokenRequest.privateClaims["transactionId"],
-                    createTokenRequest.privateClaims["rptIds"],
-                    createTokenRequest.privateClaims["paymentTokens"],
-                    createTokenRequest.privateClaims["walletId"],
+                    createTokenRequest.privateClaims.get("transactionId"),
+                    createTokenRequest.privateClaims.get("rptIds"),
+                    createTokenRequest.privateClaims.get("paymentTokens"),
+                    createTokenRequest.privateClaims.get("walletId"),
                     context,
                 )
             }
