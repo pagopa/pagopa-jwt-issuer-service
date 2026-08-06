@@ -38,15 +38,6 @@ class TokensService(
                     )
                 )
             }
-            .contextWrite { context ->
-                JWTIssuerTracingUtils.enrichContextForJwtIssuer(
-                    createTokenRequest.privateClaims["transactionId"],
-                    createTokenRequest.privateClaims["rptIds"],
-                    createTokenRequest.privateClaims["paymentTokens"],
-                    createTokenRequest.privateClaims["walletId"],
-                    context,
-                )
-            }
             .doOnNext {
                 JWTIssuerTracingUtils.withContextDetailsMdc(createTokenRequest.privateClaims) {
                     logger.info("Token generated successfully")
