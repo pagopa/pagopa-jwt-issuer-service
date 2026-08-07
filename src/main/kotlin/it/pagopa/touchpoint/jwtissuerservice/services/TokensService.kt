@@ -4,7 +4,6 @@ import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.CreateTokenReque
 import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.CreateTokenResponseDto
 import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.JWKResponseDto
 import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.JWKSResponseDto
-import it.pagopa.touchpoint.jwtissuerservice.mdcutilities.JWTIssuerTracingUtils
 import it.pagopa.touchpoint.jwtissuerservice.utils.JwtTokenUtils
 import java.math.BigInteger
 import java.security.interfaces.ECPublicKey

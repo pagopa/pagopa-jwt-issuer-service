@@ -20,6 +20,7 @@ import org.springframework.http.MediaType
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.reactive.server.WebTestClient
+import reactor.core.publisher.Mono
 
 @WebFluxTest(TokensController::class)
 @TestPropertySource(locations = ["classpath:application.test.properties"])
@@ -39,7 +40,7 @@ class TokensControllerTest {
             )
         val createTokenResponseDto = CreateTokenResponseDto(token = "token")
 
-        given(tokensService.generateToken(any())).willReturn(createTokenResponseDto)
+        given(tokensService.generateToken(any())).willReturn(Mono.just(createTokenResponseDto))
         webClient
             .post()
             .uri("/tokens")

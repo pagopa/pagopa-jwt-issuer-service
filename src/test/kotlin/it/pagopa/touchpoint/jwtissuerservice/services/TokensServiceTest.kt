@@ -14,6 +14,7 @@ import java.security.interfaces.ECPublicKey
 import java.security.interfaces.RSAPublicKey
 import java.time.Duration
 import java.util.Base64
+import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -65,7 +66,7 @@ class TokensServiceTest {
             )
             .willReturn(token)
         // test
-        val generateTokenResponse = tokensService.generateToken(createTokenRequestDto)
+        val generateTokenResponse = tokensService.generateToken(createTokenRequestDto).awaitSingle()
         assertEquals(token, generateTokenResponse.token)
         verify(jwtTokenUtils, times(1))
             .generateJwtToken(

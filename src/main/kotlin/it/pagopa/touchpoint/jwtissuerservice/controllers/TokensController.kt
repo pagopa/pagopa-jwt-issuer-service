@@ -15,7 +15,8 @@ class TokensController(private val tokensService: TokensService) : TokensApi {
     override suspend fun createJwtToken(
         createTokenRequestDto: CreateTokenRequestDto
     ): ResponseEntity<CreateTokenResponseDto> =
-        tokensService.generateToken(createTokenRequestDto)
+        tokensService
+            .generateToken(createTokenRequestDto)
             .contextWrite { context ->
                 JWTIssuerTracingUtils.enrichContextForJwtIssuer(
                     createTokenRequestDto.privateClaims["transactionId"],
@@ -24,7 +25,8 @@ class TokensController(private val tokensService: TokensService) : TokensApi {
                     context,
                 )
             }
-            .map { v -> ResponseEntity.ok(v) }.awaitSingle()
+            .map { v -> ResponseEntity.ok(v) }
+            .awaitSingle()
 
     override suspend fun getTokenPublicKeys(): ResponseEntity<JWKSResponseDto> =
         ResponseEntity.ok(tokensService.getJwksKeys())
