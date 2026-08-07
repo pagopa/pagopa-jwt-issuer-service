@@ -15,6 +15,7 @@ import kotlinx.coroutines.reactive.awaitSingle
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
+import reactor.core.publisher.Mono
 
 @Service
 class TokensService(
@@ -24,7 +25,7 @@ class TokensService(
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    suspend fun generateToken(createTokenRequest: CreateTokenRequestDto): CreateTokenResponseDto =
+    fun generateToken(createTokenRequest: CreateTokenRequestDto): Mono<CreateTokenResponseDto> =
         reactiveAzureKVSecurityKeysService
             .getPrivate()
             .map {
@@ -38,15 +39,8 @@ class TokensService(
                     )
                 )
             }
-            .contextWrite { context ->
-                JWTIssuerTracingUtils.enrichContextForJwtIssuer(
-                    createTokenRequest.privateClaims["transactionId"],
-                    createTokenRequest.privateClaims["orderId"],
-                    createTokenRequest.privateClaims["walletId"],
-                    context,
-                )
-            }
-            .awaitSingle()
+            .doOnError { logger.error("Token generation error") }
+            .doOnNext { logger.info("Token generated successfully") }
 
     suspend fun getJwksKeys(): JWKSResponseDto =
         reactiveAzureKVSecurityKeysService

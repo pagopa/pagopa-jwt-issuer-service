@@ -47,8 +47,6 @@ class JwtTokenUtils() {
                 .setIssuer(jwtIssuer) // iss
                 .signWith(privateKey.privateKey)
 
-        val jwtToken = jwtBuilder.compact()
-        logger.info("Token generated successfully")
-        return jwtToken
+        return jwtBuilder.compact()
     }
 }
