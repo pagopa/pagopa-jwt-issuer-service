@@ -15,7 +15,7 @@ import reactor.util.context.Context;
  * Helper that copies selected values from Reactor Context to MDC for each
  * signal.
  */
-class MDCContextLifter<T> implements CoreSubscriber<T> {
+public class MDCContextLifter<T> implements CoreSubscriber<T> {
 
     CoreSubscriber<T> coreSubscriber;
 

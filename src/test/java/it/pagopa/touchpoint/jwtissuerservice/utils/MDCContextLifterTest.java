@@ -1,0 +1,143 @@
+/*
+ * package it.pagopa.touchpoint.jwtissuerservice.utils;
+ *
+ * import
+ * it.pagopa.touchpoint.jwtissuerservice.mdcutilities.JWTIssuerTracingUtils;
+ * import it.pagopa.touchpoint.jwtissuerservice.mdcutilities.MDCContextLifter;
+ * import it.pagopa.touchpoint.jwtissuerservice.mdcutilities.
+ * MDCContextLifterConfiguration; import org.jetbrains.annotations.NotNull;
+ * import org.junit.jupiter.api.AfterEach; import org.junit.jupiter.api.Test;
+ * import org.reactivestreams.Subscription; import org.slf4j.MDC; import
+ * reactor.core.CoreSubscriber; import reactor.util.context.Context;
+ *
+ * import java.util.HashSet;
+ *
+ * import static org.junit.jupiter.api.Assertions.assertEquals; import static
+ * org.junit.jupiter.api.Assertions.assertNull; import static
+ * org.junit.jupiter.api.Assertions.assertSame; import static
+ * org.junit.jupiter.api.Assertions.assertThrows; import static
+ * org.junit.jupiter.api.Assertions.assertTrue;
+ *
+ * class MDCContextLifterTest {
+ *
+ * private static final Subscription NO_OP_SUBSCRIPTION = new Subscription() {
+ *
+ * @Override public void request(long n) { // no-op }
+ *
+ * @Override public void cancel() { // no-op } };
+ *
+ * @AfterEach void clearMdc() { MDC.clear();
+ * JWTIssuerTracingUtils.getContextBounded().clear(); }
+ *
+ * @Test void shouldDelegateOnSubscribe() { RecordingSubscriber coreSubscriber =
+ * new RecordingSubscriber(Context.empty()); MDCContextLifter<String> lifter =
+ * new MDCContextLifter<>(coreSubscriber);
+ *
+ * lifter.onSubscribe(NO_OP_SUBSCRIPTION);
+ *
+ * assertSame(NO_OP_SUBSCRIPTION, coreSubscriber.subscription); }
+ *
+ * @Test void shouldCopyContextToMdcOnNext() {
+ * HashSet<JWTIssuerTracingUtils.TracingEntry> entries = new HashSet<>();
+ * entries.add(JWTIssuerTracingUtils.TracingEntry.CTX_TRANSACTION_ID);
+ * entries.add(JWTIssuerTracingUtils.TracingEntry.CTX_WALLET_ID);
+ * entries.add(JWTIssuerTracingUtils.TracingEntry.CTX_PAYMENT_TOKENS);
+ * entries.add(JWTIssuerTracingUtils.TracingEntry.CTX_RPT_IDS);
+ *
+ * JWTIssuerTracingUtils.setContextBounded(entries);
+ *
+ * RecordingSubscriber coreSubscriber = new RecordingSubscriber( Context.of(
+ * JWTIssuerTracingUtils.TracingEntry.CTX_TRANSACTION_ID.getKey(),
+ * "transaction-id", JWTIssuerTracingUtils.TracingEntry.CTX_WALLET_ID.getKey(),
+ * "wallet-id", JWTIssuerTracingUtils.TracingEntry.CTX_PAYMENT_TOKENS.getKey(),
+ * "payment-tokens", JWTIssuerTracingUtils.TracingEntry.CTX_RPT_IDS.getKey(),
+ * "rpt-ids" ) ); MDCContextLifter<String> lifter = new
+ * MDCContextLifter<>(coreSubscriber);
+ *
+ * lifter.onNext("payload");
+ *
+ * assertEquals("payload", coreSubscriber.nextValue);
+ * assertEquals("transaction-id", coreSubscriber.capturedTransactionId);
+ * assertEquals("ACTION", coreSubscriber.capturedEventAction); assertEquals(
+ * JWTIssuerTracingUtils.TracingEntry.CTX_EVENT_CODE.getDefaultValue(),
+ * coreSubscriber.capturedEventCode );
+ * assertNull(coreSubscriber.capturedDependency); }
+ *
+ * @Test void shouldClearMdcWhenContextIsEmptyOnNext() { RecordingSubscriber
+ * coreSubscriber = new RecordingSubscriber(Context.empty());
+ * MDCContextLifter<String> lifter = new MDCContextLifter<>(coreSubscriber);
+ * MDC.put("to-clear", "value");
+ *
+ * lifter.onNext("payload");
+ *
+ * assertEquals("payload", coreSubscriber.nextValue);
+ * assertNull(MDC.get("to-clear")); }
+ *
+ * @Test void shouldAlwaysClearMdcOnError() { RecordingSubscriber coreSubscriber
+ * = new RecordingSubscriber(
+ * Context.of(JWTIssuerTracingUtils.TracingEntry.CTX_TRANSACTION_ID.getKey(),
+ * "transaction-id") ); RuntimeException expected = new
+ * RuntimeException("delegate-error"); RuntimeException failure = new
+ * RuntimeException("upstream"); coreSubscriber.onErrorToThrow = expected;
+ * MDCContextLifter<String> lifter = new MDCContextLifter<>(coreSubscriber);
+ *
+ * RuntimeException thrown = assertThrows(RuntimeException.class, () ->
+ * lifter.onError(failure));
+ *
+ * assertSame(expected, thrown); assertSame(failure, coreSubscriber.lastError);
+ * assertNull(MDC.get(JWTIssuerTracingUtils.TracingEntry.CTX_TRANSACTION_ID.
+ * getKey())); }
+ *
+ * @Test void shouldAlwaysClearMdcOnComplete() { RecordingSubscriber
+ * coreSubscriber = new RecordingSubscriber(
+ * Context.of(JWTIssuerTracingUtils.TracingEntry.CTX_TRANSACTION_ID.getKey(),
+ * "transaction-id") ); RuntimeException expected = new
+ * RuntimeException("delegate-complete-error"); coreSubscriber.onCompleteToThrow
+ * = expected; MDCContextLifterConfiguration<String> lifter = new
+ * MDCContextLifterConfiguration<>(coreSubscriber);
+ *
+ * RuntimeException thrown = assertThrows(RuntimeException.class,
+ * lifter::onComplete);
+ *
+ * assertSame(expected, thrown); assertTrue(coreSubscriber.completed);
+ * assertNull(MDC.get(JWTIssuerTracingUtils.TracingEntry.CTX_TRANSACTION_ID.
+ * getKey())); }
+ *
+ * @Test void shouldDelegateCurrentContext() { Context context =
+ * Context.of("key", "value"); RecordingSubscriber coreSubscriber = new
+ * RecordingSubscriber(context); MDCContextLifter<String> lifter = new
+ * MDCContextLifter<>(coreSubscriber);
+ *
+ * Context result = lifter.currentContext();
+ *
+ * assertSame(context, result); }
+ *
+ * private static class RecordingSubscriber implements CoreSubscriber<String> {
+ *
+ * private final @NotNull Context context; private Subscription subscription;
+ * private String nextValue; private RuntimeException onErrorToThrow; private
+ * RuntimeException onCompleteToThrow; private Throwable lastError; private
+ * boolean completed; private String capturedTransactionId; private String
+ * capturedDependency;
+ *
+ * private RecordingSubscriber(@NotNull Context context) { this.context =
+ * context; }
+ *
+ * @Override public void onSubscribe(@NotNull Subscription subscription) {
+ * this.subscription = subscription; }
+ *
+ * @Override public void onNext(String value) { this.nextValue = value;
+ * this.capturedTransactionId =
+ * MDC.get(JWTIssuerTracingUtils.TracingEntry.CTX_TRANSACTION_ID.getKey());
+ * this.capturedDependency =
+ * MDC.get(JWTIssuerTracingUtils.TracingEntry.DEPENDENCY.getKey()); }
+ *
+ * @Override public void onError(@NotNull Throwable throwable) { this.lastError
+ * = throwable; if (onErrorToThrow != null) { throw onErrorToThrow; } }
+ *
+ * @Override public void onComplete() { this.completed = true; if
+ * (onCompleteToThrow != null) { throw onCompleteToThrow; } }
+ *
+ * @Override public @NotNull Context currentContext() { return context; } } }
+ *
+ */

@@ -5,10 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.MDC;
 import reactor.util.context.Context;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class JWTIssuerTracingUtils {
     private static final String CTX_DETAILS_KEY = "ctx.details";
@@ -26,10 +23,11 @@ public class JWTIssuerTracingUtils {
      * written locally in MDC (for example by {@link #withErrorMdc}).
      */
     public enum TracingEntry {
-        CTX_TRANSACTION_ID("ctx.transaction.id", "{transactionId-not-found}", false),
-        CTX_WALLET_ID("ctx.wallet.id", "{walletId-not-found}", false),
-        CTX_RPT_IDS("ctx.rpt.ids", "{rptIds-not-found}", false),
-        CTX_PAYMENT_TOKENS("ctx.payment.tokens", "{paymentTokens-not-found}", false),
+        CTX_TRANSACTION_ID("ctx.transaction.id", "{transactionId-not-found}", true),
+        CTX_ORDER_ID("ctx.order.id", "{orderId-not-found}", true),
+        CTX_WALLET_ID("ctx.wallet.id", "{walletId-not-found}", true),
+        CTX_RPT_IDS("ctx.rpt.ids", "{rptIds-not-found}", true),
+        CTX_PAYMENT_TOKENS("ctx.payment.tokens", "{paymentTokens-not-found}", true),
         DEPENDENCY("dependency", "{dependency-not-found}", false),
         ERROR_TYPE("error.type", "{errorType-not-found}", false),
         ERROR_MESSAGE("error.message", "{errorMessage-not-found}", false);
@@ -61,39 +59,81 @@ public class JWTIssuerTracingUtils {
         }
     }
 
+    /**
+     * Enrich Reactor Context with tracing entries in a fully generic way.
+     *
+     * <p>
+     * This method accepts a map of {@link TracingEntry} enum keys with their
+     * corresponding values. Each entry is added to the context with its value or
+     * default value if null. Any future TracingEntry additions are automatically
+     * supported without method changes.
+     *
+     * @param tracingEntries map of TracingEntry to value; null values use defaults
+     * @param reactorContext the context to enrich
+     * @return enriched context with all tracing entries
+     */
+    public static Context enrichContextForJwtIssuer(
+                                                    Map<TracingEntry, String> tracingEntries,
+                                                    Context reactorContext
+    ) {
+        Context enrichedContext = reactorContext;
+        if (tracingEntries != null) {
+            for (Map.Entry<TracingEntry, String> entry : tracingEntries.entrySet()) {
+                enrichedContext = enrichedContext.put(
+                        entry.getKey().getKey(),
+                        entry.getValue() != null
+                                ? entry.getValue()
+                                : entry.getKey().getDefaultValue()
+                );
+            }
+        }
+        return enrichedContext;
+    }
+
     /** Enrich Reactor Context with JwtIssuer metadata used by MDC/logging hooks. */
     public static Context enrichContextForJwtIssuer(
                                                     String transactionId,
+                                                    String orderId,
                                                     String rptIds,
                                                     String paymentTokens,
                                                     String walletId,
                                                     Context reactorContext
     ) {
-        return reactorContext
-                .put(
-                        TracingEntry.CTX_TRANSACTION_ID.getKey(),
-                        transactionId != null
-                                ? transactionId
-                                : TracingEntry.CTX_TRANSACTION_ID.getDefaultValue()
-                )
-                .put(
-                        TracingEntry.CTX_WALLET_ID.getKey(),
-                        walletId != null
-                                ? walletId
-                                : TracingEntry.CTX_WALLET_ID.getDefaultValue()
-                )
-                .put(
-                        TracingEntry.CTX_RPT_IDS.getKey(),
-                        rptIds != null
-                                ? rptIds
-                                : TracingEntry.CTX_RPT_IDS.getDefaultValue()
-                )
-                .put(
-                        TracingEntry.CTX_PAYMENT_TOKENS.getKey(),
-                        paymentTokens != null
-                                ? paymentTokens
-                                : TracingEntry.CTX_PAYMENT_TOKENS.getDefaultValue()
-                );
+
+        Map<TracingEntry, String> tracingEntries = new HashMap<>();
+        if (transactionId != null) {
+            tracingEntries.put(
+                    TracingEntry.CTX_TRANSACTION_ID,
+                    transactionId
+            );
+        }
+        if (orderId != null) {
+            tracingEntries.put(
+                    TracingEntry.CTX_ORDER_ID,
+                    orderId
+            );
+        }
+        if (walletId != null) {
+            tracingEntries.put(
+                    TracingEntry.CTX_WALLET_ID,
+                    walletId
+            );
+        }
+        if (rptIds != null) {
+            tracingEntries.put(
+                    TracingEntry.CTX_RPT_IDS,
+                    rptIds
+            );
+        }
+
+        if (paymentTokens != null) {
+            tracingEntries.put(
+                    TracingEntry.CTX_PAYMENT_TOKENS,
+                    paymentTokens
+            );
+        }
+
+        return enrichContextForJwtIssuer(tracingEntries, reactorContext);
     }
 
     /**
