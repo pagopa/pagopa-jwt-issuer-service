@@ -51,10 +51,8 @@ public class MDCContextLifterTest {
         void shouldCopyContextToMdcOnNext() {
             HashSet<JWTIssuerTracingUtils.TracingEntry> entries = new HashSet<>();
             entries.add(JWTIssuerTracingUtils.TracingEntry.CTX_TRANSACTION_ID);
-            entries.add(JWTIssuerTracingUtils.TracingEntry.CTX_ORDER_ID);
+            entries.add(JWTIssuerTracingUtils.TracingEntry.CTX_AUTHORIZATION_REQUEST_ID);
             entries.add(JWTIssuerTracingUtils.TracingEntry.CTX_WALLET_ID);
-            entries.add(JWTIssuerTracingUtils.TracingEntry.CTX_PAYMENT_TOKENS);
-            entries.add(JWTIssuerTracingUtils.TracingEntry.CTX_RPT_IDS);
 
             RecordingSubscriber coreSubscriber = new RecordingSubscriber(
                     Context.of(
@@ -62,10 +60,8 @@ public class MDCContextLifterTest {
                             "transaction-id",
                             JWTIssuerTracingUtils.TracingEntry.CTX_WALLET_ID.getKey(),
                             "wallet-id",
-                            JWTIssuerTracingUtils.TracingEntry.CTX_PAYMENT_TOKENS.getKey(),
-                            "payment-tokens",
-                            JWTIssuerTracingUtils.TracingEntry.CTX_RPT_IDS.getKey(),
-                            "rpt-ids"
+                            JWTIssuerTracingUtils.TracingEntry.CTX_AUTHORIZATION_REQUEST_ID.getKey(),
+                            "wallet-id"
                     )
             );
             MDCContextLifter<String> lifter = new MDCContextLifter<>(coreSubscriber);

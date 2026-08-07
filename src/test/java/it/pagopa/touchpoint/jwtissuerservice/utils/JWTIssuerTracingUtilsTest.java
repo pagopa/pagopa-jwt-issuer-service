@@ -30,7 +30,7 @@ public class JWTIssuerTracingUtilsTest {
 
         // test
         Context enrichedContext = JWTIssuerTracingUtils
-                .enrichContextForJwtIssuer(null, null, null, null, null, reactorContext);
+                .enrichContextForJwtIssuer(null, null, null, reactorContext);
 
         // assertions
         assertSame(reactorContext, enrichedContext);
@@ -61,8 +61,6 @@ public class JWTIssuerTracingUtilsTest {
     void shouldExposeExpectedTracingEntryKeys() {
         assertEquals("ctx.transaction.id", JWTIssuerTracingUtils.TracingEntry.CTX_TRANSACTION_ID.getKey());
         assertEquals("ctx.wallet.id", JWTIssuerTracingUtils.TracingEntry.CTX_WALLET_ID.getKey());
-        assertEquals("ctx.rpt.ids", JWTIssuerTracingUtils.TracingEntry.CTX_RPT_IDS.getKey());
-        assertEquals("ctx.payment.tokens", JWTIssuerTracingUtils.TracingEntry.CTX_PAYMENT_TOKENS.getKey());
         assertEquals("dependency", JWTIssuerTracingUtils.TracingEntry.DEPENDENCY.getKey());
         assertEquals("error.type", JWTIssuerTracingUtils.TracingEntry.ERROR_TYPE.getKey());
         assertEquals("error.message", JWTIssuerTracingUtils.TracingEntry.ERROR_MESSAGE.getKey());
@@ -72,8 +70,6 @@ public class JWTIssuerTracingUtilsTest {
     void shouldExposeExpectedTracingEntryDefaultValues() {
         assertEquals("ctx.transaction.id", JWTIssuerTracingUtils.TracingEntry.CTX_TRANSACTION_ID.getKey());
         assertEquals("ctx.wallet.id", JWTIssuerTracingUtils.TracingEntry.CTX_WALLET_ID.getKey());
-        assertEquals("ctx.rpt.ids", JWTIssuerTracingUtils.TracingEntry.CTX_RPT_IDS.getKey());
-        assertEquals("ctx.payment.tokens", JWTIssuerTracingUtils.TracingEntry.CTX_PAYMENT_TOKENS.getKey());
         assertEquals("{errorType-not-found}", JWTIssuerTracingUtils.TracingEntry.ERROR_TYPE.getDefaultValue());
         assertEquals("{errorMessage-not-found}", JWTIssuerTracingUtils.TracingEntry.ERROR_MESSAGE.getDefaultValue());
     }

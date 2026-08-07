@@ -6,10 +6,13 @@ import it.pagopa.touchpoint.jwtissuerservice.models.PrivateKeyWithKid
 import java.time.Duration
 import java.time.Instant
 import java.util.Date
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
 class JwtTokenUtils() {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     private val publicClaims =
         setOf(
@@ -43,6 +46,9 @@ class JwtTokenUtils() {
                 .setAudience(audience) // aud
                 .setIssuer(jwtIssuer) // iss
                 .signWith(privateKey.privateKey)
-        return jwtBuilder.compact()
+
+        val jwtToken = jwtBuilder.compact()
+        logger.info("Token generated successfully")
+        return jwtToken
     }
 }

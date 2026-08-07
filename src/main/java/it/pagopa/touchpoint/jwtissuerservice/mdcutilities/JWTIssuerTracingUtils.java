@@ -24,10 +24,8 @@ public class JWTIssuerTracingUtils {
      */
     public enum TracingEntry {
         CTX_TRANSACTION_ID("ctx.transaction.id", "{transactionId-not-found}", true),
-        CTX_ORDER_ID("ctx.order.id", "{orderId-not-found}", true),
+        CTX_AUTHORIZATION_REQUEST_ID("ctx.authorization.reqeust.id", "{authorizationRequestId-not-found}", true),
         CTX_WALLET_ID("ctx.wallet.id", "{walletId-not-found}", true),
-        CTX_RPT_IDS("ctx.rpt.ids", "{rptIds-not-found}", true),
-        CTX_PAYMENT_TOKENS("ctx.payment.tokens", "{paymentTokens-not-found}", true),
         DEPENDENCY("dependency", "{dependency-not-found}", false),
         ERROR_TYPE("error.type", "{errorType-not-found}", false),
         ERROR_MESSAGE("error.message", "{errorMessage-not-found}", false);
@@ -94,8 +92,6 @@ public class JWTIssuerTracingUtils {
     public static Context enrichContextForJwtIssuer(
                                                     String transactionId,
                                                     String orderId,
-                                                    String rptIds,
-                                                    String paymentTokens,
                                                     String walletId,
                                                     Context reactorContext
     ) {
@@ -109,7 +105,7 @@ public class JWTIssuerTracingUtils {
         }
         if (orderId != null) {
             tracingEntries.put(
-                    TracingEntry.CTX_ORDER_ID,
+                    TracingEntry.CTX_AUTHORIZATION_REQUEST_ID,
                     orderId
             );
         }
@@ -119,21 +115,47 @@ public class JWTIssuerTracingUtils {
                     walletId
             );
         }
-        if (rptIds != null) {
-            tracingEntries.put(
-                    TracingEntry.CTX_RPT_IDS,
-                    rptIds
-            );
-        }
-
-        if (paymentTokens != null) {
-            tracingEntries.put(
-                    TracingEntry.CTX_PAYMENT_TOKENS,
-                    paymentTokens
-            );
-        }
 
         return enrichContextForJwtIssuer(tracingEntries, reactorContext);
+    }
+
+    public static void withContextMdc(
+                                      Map<String, String> values,
+                                      Runnable block
+    ) {
+
+        Map<String, Object> mdcMap = new HashMap<>();
+
+        if (values.containsKey("transactionId")) {
+            String transactionId = values.get("transactionId");
+            mdcMap.put(
+                    TracingEntry.CTX_TRANSACTION_ID.getKey(),
+                    transactionId != null
+                            ? transactionId
+                            : TracingEntry.CTX_TRANSACTION_ID.getDefaultValue()
+            );
+        }
+
+        if (values.containsKey("orderId")) {
+            String orderId = values.get("orderId");
+            mdcMap.put(
+                    TracingEntry.CTX_AUTHORIZATION_REQUEST_ID.getKey(),
+                    orderId != null
+                            ? orderId
+                            : TracingEntry.CTX_AUTHORIZATION_REQUEST_ID.getDefaultValue()
+            );
+        }
+
+        if (values.containsKey("walletId")) {
+            String walletId = values.get("walletId");
+            mdcMap.put(
+                    TracingEntry.CTX_WALLET_ID.getKey(),
+                    walletId != null
+                            ? walletId
+                            : TracingEntry.CTX_WALLET_ID.getDefaultValue()
+            );
+        }
+        insertIntoMdcAndCleanup(mdcMap, block);
     }
 
     /**

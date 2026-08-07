@@ -38,10 +38,13 @@ class TokensService(
                     )
                 )
             }
-            .doOnNext {
-                JWTIssuerTracingUtils.withContextDetailsMdc(createTokenRequest.privateClaims) {
-                    logger.info("Token generated successfully")
-                }
+            .contextWrite { context ->
+                JWTIssuerTracingUtils.enrichContextForJwtIssuer(
+                    createTokenRequest.privateClaims["transactionId"],
+                    createTokenRequest.privateClaims["orderId"],
+                    createTokenRequest.privateClaims["walletId"],
+                    context,
+                )
             }
             .awaitSingle()
 
