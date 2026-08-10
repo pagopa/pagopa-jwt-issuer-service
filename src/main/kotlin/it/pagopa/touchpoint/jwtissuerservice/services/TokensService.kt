@@ -4,6 +4,7 @@ import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.CreateTokenReque
 import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.CreateTokenResponseDto
 import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.JWKResponseDto
 import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.JWKSResponseDto
+import it.pagopa.touchpoint.jwtissuerservice.mdcutilities.JWTIssuerTracingUtils
 import it.pagopa.touchpoint.jwtissuerservice.utils.JwtTokenUtils
 import java.math.BigInteger
 import java.security.interfaces.ECPublicKey
@@ -38,8 +39,19 @@ class TokensService(
                     )
                 )
             }
-            .doOnError { logger.error("Token generation error") }
-            .doOnNext { logger.info("Token generated successfully") }
+            .doOnNext {
+                JWTIssuerTracingUtils.withContextDetailsMdc(
+                    mapOf(JWTIssuerTracingUtils.TracingEntry.EVENT_OUTCOME.key to "success")
+                ) {
+                    logger.info("Token generated successfully")
+                }
+            }
+            .onErrorResume { exception ->
+                JWTIssuerTracingUtils.withErrorMdc(exception) {
+                    logger.error("Token generation error", exception)
+                }
+                Mono.empty()
+            }
 
     suspend fun getJwksKeys(): JWKSResponseDto =
         reactiveAzureKVSecurityKeysService

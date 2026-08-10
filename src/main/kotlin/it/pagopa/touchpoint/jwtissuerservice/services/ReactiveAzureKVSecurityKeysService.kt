@@ -60,7 +60,8 @@ class ReactiveAzureKVSecurityKeysService(
                     .onErrorResume { exception ->
                         JWTIssuerTracingUtils.withErrorMdc(exception) {
                             logger.error(
-                                "Transaction get authorization data or PATCH auth request error"
+                                "Transaction get authorization data or PATCH auth request error",
+                                exception,
                             )
                         }
                         Mono.empty()
