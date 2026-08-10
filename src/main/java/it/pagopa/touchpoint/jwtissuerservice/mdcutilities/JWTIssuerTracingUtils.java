@@ -24,7 +24,7 @@ public class JWTIssuerTracingUtils {
      */
     public enum TracingEntry {
         CTX_TRANSACTION_ID("ctx.transaction.id", "{transactionId-not-found}", true),
-        CTX_AUTHORIZATION_REQUEST_ID("ctx.authorization.reqeust.id", "{authorizationRequestId-not-found}", true),
+        CTX_AUTHORIZATION_REQUEST_ID("ctx.authorization.request.id", "{authorizationRequestId-not-found}", true),
         CTX_WALLET_ID("ctx.wallet.id", "{walletId-not-found}", true),
         DEPENDENCY("dependency", "{dependency-not-found}", false),
         ERROR_TYPE("error.type", "{errorType-not-found}", false),
@@ -117,45 +117,6 @@ public class JWTIssuerTracingUtils {
         }
 
         return enrichContextForJwtIssuer(tracingEntries, reactorContext);
-    }
-
-    public static void withContextMdc(
-                                      Map<String, String> values,
-                                      Runnable block
-    ) {
-
-        Map<String, Object> mdcMap = new HashMap<>();
-
-        if (values.containsKey("transactionId")) {
-            String transactionId = values.get("transactionId");
-            mdcMap.put(
-                    TracingEntry.CTX_TRANSACTION_ID.getKey(),
-                    transactionId != null
-                            ? transactionId
-                            : TracingEntry.CTX_TRANSACTION_ID.getDefaultValue()
-            );
-        }
-
-        if (values.containsKey("orderId")) {
-            String orderId = values.get("orderId");
-            mdcMap.put(
-                    TracingEntry.CTX_AUTHORIZATION_REQUEST_ID.getKey(),
-                    orderId != null
-                            ? orderId
-                            : TracingEntry.CTX_AUTHORIZATION_REQUEST_ID.getDefaultValue()
-            );
-        }
-
-        if (values.containsKey("walletId")) {
-            String walletId = values.get("walletId");
-            mdcMap.put(
-                    TracingEntry.CTX_WALLET_ID.getKey(),
-                    walletId != null
-                            ? walletId
-                            : TracingEntry.CTX_WALLET_ID.getDefaultValue()
-            );
-        }
-        insertIntoMdcAndCleanup(mdcMap, block);
     }
 
     /**
