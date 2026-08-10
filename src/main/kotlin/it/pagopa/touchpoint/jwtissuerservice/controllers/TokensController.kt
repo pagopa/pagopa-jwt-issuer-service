@@ -19,6 +19,7 @@ class TokensController(private val tokensService: TokensService) : TokensApi {
             .generateToken(createTokenRequestDto)
             .contextWrite { context ->
                 JWTIssuerTracingUtils.enrichContextForJwtIssuer(
+                    "POST /tokens",
                     createTokenRequestDto.privateClaims["transactionId"],
                     createTokenRequestDto.privateClaims["orderId"],
                     createTokenRequestDto.privateClaims["walletId"],

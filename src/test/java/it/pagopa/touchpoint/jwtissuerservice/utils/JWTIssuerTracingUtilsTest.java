@@ -30,7 +30,7 @@ class JWTIssuerTracingUtilsTest {
 
         // test
         Context enrichedContext = JWTIssuerTracingUtils
-                .enrichContextForJwtIssuer(null, null, null, reactorContext);
+                .enrichContextForJwtIssuer(null, null, null, null, reactorContext);
 
         // assertions
         assertSame(reactorContext, enrichedContext);

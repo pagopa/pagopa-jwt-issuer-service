@@ -23,10 +23,18 @@ public class JWTIssuerTracingUtils {
      * written locally in MDC (for example by {@link #withErrorMdc}).
      */
     public enum TracingEntry {
+        /** Reactor context key for action associated with the event. */
+        EVENT_ACTION("event.action", "{eventAction-not-found}", true),
+        /** Reactor context key for transaction identifier. */
         CTX_TRANSACTION_ID("ctx.transaction.id", "{transactionId-not-found}", true),
+        /** Reactor context key for authorization request identifier/ orderId. */
         CTX_AUTHORIZATION_REQUEST_ID("ctx.authorization.request.id", "{authorizationRequestId-not-found}", true),
+        /** Reactor context key for wallet identifier. */
         CTX_WALLET_ID("ctx.wallet.id", "{walletId-not-found}", true),
+        /** MDC key for dependency name involved in the operation. */
         DEPENDENCY("dependency", "{dependency-not-found}", false),
+        /** MDC key for event outcome. */
+        EVENT_OUTCOME("event.outcome", "{eventOutcome-not-found}", true),
         ERROR_TYPE("error.type", "{errorType-not-found}", false),
         ERROR_MESSAGE("error.message", "{errorMessage-not-found}", false);
 
@@ -90,6 +98,7 @@ public class JWTIssuerTracingUtils {
 
     /** Enrich Reactor Context with JwtIssuer metadata used by MDC/logging hooks. */
     public static Context enrichContextForJwtIssuer(
+                                                    String eventAction,
                                                     String transactionId,
                                                     String orderId,
                                                     String walletId,
@@ -97,6 +106,12 @@ public class JWTIssuerTracingUtils {
     ) {
 
         EnumMap<TracingEntry, String> tracingEntries = new EnumMap<>(TracingEntry.class);
+        if (eventAction != null) {
+            tracingEntries.put(
+                    TracingEntry.EVENT_ACTION,
+                    eventAction
+            );
+        }
         if (transactionId != null) {
             tracingEntries.put(
                     TracingEntry.CTX_TRANSACTION_ID,
