@@ -96,7 +96,7 @@ public class JWTIssuerTracingUtils {
                                                     Context reactorContext
     ) {
 
-        Map<TracingEntry, String> tracingEntries = new HashMap<>();
+        EnumMap<TracingEntry, String> tracingEntries = new EnumMap<>(TracingEntry.class);
         if (transactionId != null) {
             tracingEntries.put(
                     TracingEntry.CTX_TRANSACTION_ID,

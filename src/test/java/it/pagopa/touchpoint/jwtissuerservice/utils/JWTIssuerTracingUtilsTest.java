@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class JWTIssuerTracingUtilsTest {
+class JWTIssuerTracingUtilsTest {
 
     @AfterEach
     void clearMdc() {
