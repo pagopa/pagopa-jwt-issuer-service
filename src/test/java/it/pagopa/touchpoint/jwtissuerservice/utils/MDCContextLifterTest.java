@@ -10,15 +10,13 @@ import org.slf4j.MDC;
 import reactor.core.CoreSubscriber;
 import reactor.util.context.Context;
 
-import java.util.HashSet;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class MDCContextLifterTest {
+class MDCContextLifterTest {
 
     private static final Subscription NO_OP_SUBSCRIPTION = new Subscription() {
 
@@ -49,11 +47,6 @@ public class MDCContextLifterTest {
 
         @Test
         void shouldCopyContextToMdcOnNext() {
-            HashSet<JWTIssuerTracingUtils.TracingEntry> entries = new HashSet<>();
-            entries.add(JWTIssuerTracingUtils.TracingEntry.CTX_TRANSACTION_ID);
-            entries.add(JWTIssuerTracingUtils.TracingEntry.CTX_AUTHORIZATION_REQUEST_ID);
-            entries.add(JWTIssuerTracingUtils.TracingEntry.CTX_WALLET_ID);
-
             RecordingSubscriber coreSubscriber = new RecordingSubscriber(
                     Context.of(
                             JWTIssuerTracingUtils.TracingEntry.CTX_TRANSACTION_ID.getKey(),
