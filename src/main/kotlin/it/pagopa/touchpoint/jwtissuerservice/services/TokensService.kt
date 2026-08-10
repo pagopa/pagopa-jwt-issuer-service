@@ -11,7 +11,6 @@ import java.security.interfaces.ECPublicKey
 import java.security.interfaces.RSAPublicKey
 import java.time.Duration
 import java.util.*
-import kotlinx.coroutines.reactive.awaitSingle
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -40,20 +39,19 @@ class TokensService(
                 )
             }
             .doOnNext {
-                JWTIssuerTracingUtils.withContextDetailsMdc(
-                    mapOf(JWTIssuerTracingUtils.TracingEntry.EVENT_OUTCOME.key to "success")
-                ) {
-                    logger.info("Token generated successfully")
-                }
+                // Remove event outcome value since it is stored in the context details
+                logger.info("Token generated successfully")
             }
-            .onErrorResume { exception ->
-                JWTIssuerTracingUtils.withErrorMdc(exception) {
+            .doOnError { exception ->
+                JWTIssuerTracingUtils.withErrorMdc(
+                    exception,
+                    mapOf(JWTIssuerTracingUtils.TracingEntry.EVENT_OUTCOME.key to "error"),
+                ) {
                     logger.error("Token generation error", exception)
                 }
-                Mono.empty()
             }
 
-    suspend fun getJwksKeys(): JWKSResponseDto =
+    fun getJwksKeys(): Mono<JWKSResponseDto> =
         reactiveAzureKVSecurityKeysService
             .getPublic()
             .map {
@@ -88,7 +86,14 @@ class TokensService(
             .doOnNext {
                 logger.info("Public keys list retrieved, number of keys: ${it.propertyKeys.size}")
             }
-            .awaitSingle()
+            .doOnError { exception ->
+                JWTIssuerTracingUtils.withErrorMdc(
+                    exception,
+                    mapOf(JWTIssuerTracingUtils.TracingEntry.EVENT_OUTCOME.key to "error"),
+                ) {
+                    logger.error("Public keys list retrieve error", exception)
+                }
+            }
 
     private fun base64UrlEncodeUnsigned(value: BigInteger): String {
         var bytes = value.toByteArray()

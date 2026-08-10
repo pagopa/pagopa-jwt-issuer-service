@@ -113,7 +113,7 @@ class TokensServiceTest {
             )
         given(kvService.getPublic()).willReturn(Flux.just(publicKeyWithKid, rsaPublicKeyWithKid))
         // test
-        val jwks = tokensService.getJwksKeys()
+        val jwks = tokensService.getJwksKeys().awaitSingle()
         assertEquals(expectedJwksResponse, jwks)
         verify(kvService, times(1)).getPublic()
     }
@@ -125,7 +125,7 @@ class TokensServiceTest {
         val mockPublicKeyWithKid = PublicKeyWithKid("mockKid", mockPublicKey)
         given(kvService.getPublic()).willReturn(Flux.just(mockPublicKeyWithKid))
         // test
-        assertThrows<IllegalArgumentException> { tokensService.getJwksKeys() }
+        assertThrows<IllegalArgumentException> { tokensService.getJwksKeys().awaitSingle() }
 
         verify(kvService, times(1)).getPublic()
     }

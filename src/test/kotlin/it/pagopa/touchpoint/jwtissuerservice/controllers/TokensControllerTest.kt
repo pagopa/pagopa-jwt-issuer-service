@@ -165,7 +165,7 @@ class TokensControllerTest {
                     )
             )
 
-        given(tokensService.getJwksKeys()).willReturn(jwksResponse)
+        given(tokensService.getJwksKeys()).willReturn(Mono.just(jwksResponse))
         webClient
             .get()
             .uri("/tokens/keys")

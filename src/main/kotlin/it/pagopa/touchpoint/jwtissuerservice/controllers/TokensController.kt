@@ -30,5 +30,11 @@ class TokensController(private val tokensService: TokensService) : TokensApi {
             .awaitSingle()
 
     override suspend fun getTokenPublicKeys(): ResponseEntity<JWKSResponseDto> =
-        ResponseEntity.ok(tokensService.getJwksKeys())
+        tokensService
+            .getJwksKeys()
+            .contextWrite { context ->
+                JWTIssuerTracingUtils.enrichContextForJwtIssuer("GET /tokens/keys", context)
+            }
+            .map { v -> ResponseEntity.ok(v) }
+            .awaitSingle()
 }

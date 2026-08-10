@@ -34,7 +34,7 @@ public class JWTIssuerTracingUtils {
         /** MDC key for dependency name involved in the operation. */
         DEPENDENCY("dependency", "{dependency-not-found}", false),
         /** MDC key for event outcome. */
-        EVENT_OUTCOME("event.outcome", "{eventOutcome-not-found}", true),
+        EVENT_OUTCOME("event.outcome", "{eventOutcome-not-found}", false),
         ERROR_TYPE("error.type", "{errorType-not-found}", false),
         ERROR_MESSAGE("error.message", "{errorMessage-not-found}", false);
 
@@ -94,6 +94,22 @@ public class JWTIssuerTracingUtils {
             }
         }
         return enrichedContext;
+    }
+
+    /** Enrich Reactor Context with JwtIssuer metadata used by MDC/logging hooks. */
+    public static Context enrichContextForJwtIssuer(
+                                                    String eventAction,
+                                                    Context reactorContext
+    ) {
+
+        return enrichContextForJwtIssuer(
+                eventAction,
+                null,
+                null,
+                null,
+                reactorContext
+        );
+
     }
 
     /** Enrich Reactor Context with JwtIssuer metadata used by MDC/logging hooks. */
