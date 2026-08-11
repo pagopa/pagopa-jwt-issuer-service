@@ -40,16 +40,11 @@ class ReactiveAzureKVSecurityKeysService(
         return certClient
             .listPropertiesOfCertificateVersions(azureSecretConfig.name)
             .doOnNext {
-                logger.debug(
-                    "CertificateProperties - name: {}, version: {}, enabled: {}, expiresOn: {}, notBefore: {}, createdOn: {}, updatedOn: {}",
-                    it.name,
-                    it.version,
-                    it.isEnabled,
-                    it.expiresOn,
-                    it.notBefore,
-                    it.createdOn,
-                    it.updatedOn,
-                )
+                LogTracingUtils.loggerTracingUtils()
+                    .logDebug(
+                        logger,
+                        "CertificateProperties - name: ${it.name}, version: ${it.version}, enabled: ${it.isEnabled}, expiresOn: ${it.expiresOn}, notBefore: ${it.notBefore}, createdOn: ${it.createdOn}, updatedOn: ${it.updatedOn}",
+                    )
             }
             .filter {
                 it.isEnabled && (it.expiresOn == null || it.expiresOn.isAfter(OffsetDateTime.now()))
