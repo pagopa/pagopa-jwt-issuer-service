@@ -90,6 +90,9 @@ dependencies {
   implementation("io.jsonwebtoken:jjwt-impl:${Deps.jsonWebTokenVersion}")
   implementation("io.jsonwebtoken:jjwt-jackson:${Deps.jsonWebTokenVersion}")
 
+  // micrometer
+  implementation("io.micrometer:context-propagation")
+
   testImplementation("org.springframework.boot:spring-boot-starter-test")
   testImplementation("io.projectreactor:reactor-test")
   testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")

@@ -4,7 +4,8 @@ import it.pagopa.generated.touchpoint.jwtissuerservice.v1.api.TokensApi
 import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.CreateTokenRequestDto
 import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.CreateTokenResponseDto
 import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.JWKSResponseDto
-import it.pagopa.touchpoint.jwtissuerservice.mdcutilities.JWTIssuerTracingUtils
+import it.pagopa.touchpoint.jwtissuerservice.mdcutilities.LogTracingUtils
+import it.pagopa.touchpoint.jwtissuerservice.mdcutilities.LogTracingUtils.AttributeKeys
 import it.pagopa.touchpoint.jwtissuerservice.services.TokensService
 import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.http.ResponseEntity
@@ -18,11 +19,15 @@ class TokensController(private val tokensService: TokensService) : TokensApi {
         tokensService
             .generateToken(createTokenRequestDto)
             .contextWrite { context ->
-                JWTIssuerTracingUtils.enrichContextForJwtIssuer(
-                    "POST /tokens",
-                    createTokenRequestDto.privateClaims["transactionId"],
-                    createTokenRequestDto.privateClaims["orderId"],
-                    createTokenRequestDto.privateClaims["walletId"],
+                LogTracingUtils.enrichContextForEvent(
+                    mapOf(
+                        AttributeKeys.CTX_TRANSACTION_ID to
+                            createTokenRequestDto.privateClaims["transactionId"],
+                        AttributeKeys.CTX_AUTHORIZATION_REQUEST_ID to
+                            createTokenRequestDto.privateClaims["orderId"],
+                        AttributeKeys.CTX_WALLET_ID to
+                            createTokenRequestDto.privateClaims["walletId"],
+                    ),
                     context,
                 )
             }
@@ -30,11 +35,5 @@ class TokensController(private val tokensService: TokensService) : TokensApi {
             .awaitSingle()
 
     override suspend fun getTokenPublicKeys(): ResponseEntity<JWKSResponseDto> =
-        tokensService
-            .getJwksKeys()
-            .contextWrite { context ->
-                JWTIssuerTracingUtils.enrichContextForJwtIssuer("GET /tokens/keys", context)
-            }
-            .map { v -> ResponseEntity.ok(v) }
-            .awaitSingle()
+        tokensService.getJwksKeys().map { v -> ResponseEntity.ok(v) }.awaitSingle()
 }

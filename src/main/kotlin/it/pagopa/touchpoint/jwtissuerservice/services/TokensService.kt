@@ -4,7 +4,7 @@ import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.CreateTokenReque
 import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.CreateTokenResponseDto
 import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.JWKResponseDto
 import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.JWKSResponseDto
-import it.pagopa.touchpoint.jwtissuerservice.mdcutilities.JWTIssuerTracingUtils
+import it.pagopa.touchpoint.jwtissuerservice.mdcutilities.LogTracingUtils
 import it.pagopa.touchpoint.jwtissuerservice.utils.JwtTokenUtils
 import java.math.BigInteger
 import java.security.interfaces.ECPublicKey
@@ -39,16 +39,14 @@ class TokensService(
                 )
             }
             .doOnNext {
-                // Remove event outcome value since it is stored in the context details
-                logger.info("Token generated successfully")
+                LogTracingUtils.loggerTracingUtils()
+                    .success()
+                    .logInfo(logger, "Token generated successfully")
             }
             .doOnError { exception ->
-                JWTIssuerTracingUtils.withErrorMdc(
-                    exception,
-                    mapOf(JWTIssuerTracingUtils.TracingEntry.EVENT_OUTCOME.key to "error"),
-                ) {
-                    logger.error("Token generation error", exception)
-                }
+                LogTracingUtils.loggerTracingUtils()
+                    .failure()
+                    .logError(logger, exception, "Token generation error")
             }
 
     fun getJwksKeys(): Mono<JWKSResponseDto> =
@@ -84,15 +82,17 @@ class TokensService(
             .collectList()
             .map { JWKSResponseDto(propertyKeys = it) }
             .doOnNext {
-                logger.info("Public keys list retrieved, number of keys: ${it.propertyKeys.size}")
+                LogTracingUtils.loggerTracingUtils()
+                    .success()
+                    .logInfo(
+                        logger,
+                        "Public keys list retrieved, number of keys: ${it.propertyKeys.size}",
+                    )
             }
             .doOnError { exception ->
-                JWTIssuerTracingUtils.withErrorMdc(
-                    exception,
-                    mapOf(JWTIssuerTracingUtils.TracingEntry.EVENT_OUTCOME.key to "error"),
-                ) {
-                    logger.error("Public keys list retrieve error", exception)
-                }
+                LogTracingUtils.loggerTracingUtils()
+                    .failure()
+                    .logError(logger, exception, "Public keys list retrieve error")
             }
 
     private fun base64UrlEncodeUnsigned(value: BigInteger): String {

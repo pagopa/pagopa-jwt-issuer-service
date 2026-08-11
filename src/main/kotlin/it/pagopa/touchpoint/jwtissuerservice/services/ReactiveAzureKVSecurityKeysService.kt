@@ -5,7 +5,7 @@ import com.azure.security.keyvault.certificates.models.KeyVaultCertificate
 import com.azure.security.keyvault.secrets.SecretAsyncClient
 import com.azure.security.keyvault.secrets.models.KeyVaultSecret
 import it.pagopa.touchpoint.jwtissuerservice.config.properties.AzureSecretConfigProperties
-import it.pagopa.touchpoint.jwtissuerservice.mdcutilities.JWTIssuerTracingUtils
+import it.pagopa.touchpoint.jwtissuerservice.mdcutilities.LogTracingUtils
 import it.pagopa.touchpoint.jwtissuerservice.models.PrivateKeyWithKid
 import it.pagopa.touchpoint.jwtissuerservice.models.PublicKeyWithKid
 import java.io.ByteArrayInputStream
@@ -58,12 +58,13 @@ class ReactiveAzureKVSecurityKeysService(
                 certClient
                     .getCertificateVersion(azureSecretConfig.name, it.version)
                     .onErrorResume { exception ->
-                        JWTIssuerTracingUtils.withErrorMdc(exception) {
-                            logger.error(
-                                "Transaction get authorization data or PATCH auth request error",
+                        LogTracingUtils.loggerTracingUtils()
+                            .failure()
+                            .logError(
+                                logger,
                                 exception,
+                                "Transaction get authorization data or PATCH auth request error",
                             )
-                        }
                         Mono.empty()
                     }
             }
