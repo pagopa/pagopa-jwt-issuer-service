@@ -14,8 +14,6 @@ import reactor.util.context.Context
 class MDCFilter : WebFilter {
 
     companion object {
-        const val HEADER_TRANSACTION_ID = "X-Transaction-Id"
-        const val HEADER_WALLET_ID = "X-Wallet-Id"
         val contextBound =
             setOf(
                 LogTracingUtils.AttributeKeys.CTX_TRANSACTION_ID.key,
@@ -41,28 +39,10 @@ class MDCFilter : WebFilter {
     }
 
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
-        val headers = exchange.request.headers
-
         val method = exchange.request.method
         val path = exchange.request.path
 
-        val transactionId =
-            headers.getFirst(HEADER_TRANSACTION_ID)
-                ?: LogTracingUtils.AttributeKeys.CTX_TRANSACTION_ID.defaultValue
-
-        val walletId =
-            headers.getFirst(HEADER_WALLET_ID)
-                ?: LogTracingUtils.AttributeKeys.CTX_TRANSACTION_ID.defaultValue
-
-        val mdcContext =
-            Context.of(
-                LogTracingUtils.AttributeKeys.EVENT_ACTION.key,
-                "$method $path",
-                LogTracingUtils.AttributeKeys.CTX_TRANSACTION_ID.key,
-                transactionId,
-                LogTracingUtils.AttributeKeys.CTX_WALLET_ID.key,
-                walletId,
-            )
+        val mdcContext = Context.of(LogTracingUtils.AttributeKeys.EVENT_ACTION.key, "$method $path")
 
         return chain.filter(exchange).contextWrite(mdcContext)
     }
