@@ -20,14 +20,17 @@ class TokensController(private val tokensService: TokensService) : TokensApi {
             .generateToken(createTokenRequestDto)
             .contextWrite { context ->
                 LogTracingUtils.enrichContextForEvent(
-                    mapOf(
-                        AttributeKeys.CTX_TRANSACTION_ID to
-                            createTokenRequestDto.privateClaims["transactionId"],
-                        AttributeKeys.CTX_AUTHORIZATION_REQUEST_ID to
-                            createTokenRequestDto.privateClaims["orderId"],
-                        AttributeKeys.CTX_WALLET_ID to
-                            createTokenRequestDto.privateClaims["walletId"],
-                    ),
+                    buildMap {
+                        createTokenRequestDto.privateClaims["transactionId"]?.let {
+                            put(AttributeKeys.CTX_TRANSACTION_ID, it)
+                        }
+                        createTokenRequestDto.privateClaims["orderId"]?.let {
+                            put(AttributeKeys.CTX_AUTHORIZATION_REQUEST_ID, it)
+                        }
+                        createTokenRequestDto.privateClaims["walletId"]?.let {
+                            put(AttributeKeys.CTX_WALLET_ID, it)
+                        }
+                    },
                     context,
                 )
             }
