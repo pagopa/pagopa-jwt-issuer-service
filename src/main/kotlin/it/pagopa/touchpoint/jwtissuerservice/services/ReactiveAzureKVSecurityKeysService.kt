@@ -41,9 +41,12 @@ class ReactiveAzureKVSecurityKeysService(
             .listPropertiesOfCertificateVersions(azureSecretConfig.name)
             .doOnNext {
                 LogTracingUtils.loggerTracingUtils()
-                    .logDebug(
+                    .dependency("Azure Key Vault")
+                    .details(mapOf("name" to it.name, "version" to it.version, "enabled" to it.isEnabled?.toString(), "expiresOn" to it.expiresOn?.toString(), "notBefore" to it.notBefore?.toString(), "createdOn" to it.createdOn?.toString(), "updatedOn" to it.updatedOn?.toString()))
+                    .success()
+                    .logInfo(
                         logger,
-                        "CertificateProperties - name: ${it.name}, version: ${it.version}, enabled: ${it.isEnabled}, expiresOn: ${it.expiresOn}, notBefore: ${it.notBefore}, createdOn: ${it.createdOn}, updatedOn: ${it.updatedOn}",
+                        "Retrieved Certificate Properties",
                     )
             }
             .filter {
@@ -52,13 +55,23 @@ class ReactiveAzureKVSecurityKeysService(
             .flatMap {
                 certClient
                     .getCertificateVersion(azureSecretConfig.name, it.version)
+                    .doOnNext { cert ->
+                        LogTracingUtils.loggerTracingUtils()
+                        .dependency("Azure Key Vault")
+                        .details(mapOf("name" to cert.name, "version" to cert.properties.version))
+                        .success()
+                        .logInfo(
+                            logger,
+                            "Retrieved Certificate Version",
+                        )
+                    } }
                     .onErrorResume { exception ->
                         LogTracingUtils.loggerTracingUtils()
                             .failure()
                             .logError(
                                 logger,
                                 exception,
-                                "Transaction get authorization data or PATCH auth request error",
+                                "Failed to retrieve certificate version",
                             )
                         Mono.empty()
                     }
