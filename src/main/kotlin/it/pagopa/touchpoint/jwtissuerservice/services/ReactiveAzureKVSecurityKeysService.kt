@@ -33,8 +33,8 @@ class ReactiveAzureKVSecurityKeysService(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     fun getSecret(): Mono<KeyVaultSecret> {
-        return secretClient.getSecret(azureSecretConfig.name)
-            .doOnNext { secret -> LogTracingUtils.loggerTracingUtils()
+        return secretClient.getSecret(azureSecretConfig.name).doOnNext { secret ->
+            LogTracingUtils.loggerTracingUtils()
                 .dependency("azure-key-vault")
                 .details(
                     mapOf(
@@ -42,12 +42,12 @@ class ReactiveAzureKVSecurityKeysService(
                         "version" to secret.properties?.version,
                         "enabled" to secret.properties?.isEnabled?.toString(),
                         "expires_on" to secret.properties?.expiresOn?.toString(),
-                        "not_before" to secret.properties?.notBefore?.toString()
+                        "not_before" to secret.properties?.notBefore?.toString(),
                     )
                 )
                 .success()
                 .logInfo(logger, "Retrieved Secret")
-            }
+        }
     }
 
     fun getCerts(): Flux<KeyVaultCertificate> {
@@ -62,7 +62,7 @@ class ReactiveAzureKVSecurityKeysService(
                             "version" to it.version,
                             "enabled" to it.isEnabled?.toString(),
                             "expires_on" to it.expiresOn?.toString(),
-                            "not_before" to it.notBefore?.toString()
+                            "not_before" to it.notBefore?.toString(),
                         )
                     )
                     .success()
