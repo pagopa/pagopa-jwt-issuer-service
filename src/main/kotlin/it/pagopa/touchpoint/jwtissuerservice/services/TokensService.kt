@@ -20,7 +20,7 @@ import reactor.core.publisher.Mono
 class TokensService(
     private val jwtTokenUtils: JwtTokenUtils,
     private val reactiveAzureKVSecurityKeysService: IReactiveSecurityKeysService,
-    @Value("\${jwt.issuer}") private val jwtIssuer: String,
+    @param:Value("\${jwt.issuer}") private val jwtIssuer: String,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -84,10 +84,8 @@ class TokensService(
             .doOnNext {
                 LogTracingUtils.loggerTracingUtils()
                     .success()
-                    .logInfo(
-                        logger,
-                        "Public keys list retrieved, number of keys: ${it.propertyKeys.size}",
-                    )
+                    .details(mapOf("number_of_keys" to it.propertyKeys.size.toString()))
+                    .logInfo(logger, "Public keys list retrieved")
             }
             .doOnError { exception ->
                 LogTracingUtils.loggerTracingUtils()

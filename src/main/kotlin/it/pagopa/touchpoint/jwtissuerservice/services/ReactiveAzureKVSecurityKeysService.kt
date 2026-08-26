@@ -47,10 +47,10 @@ class ReactiveAzureKVSecurityKeysService(
                             "name" to it.name,
                             "version" to it.version,
                             "enabled" to it.isEnabled?.toString(),
-                            "expiresOn" to it.expiresOn?.toString(),
-                            "notBefore" to it.notBefore?.toString(),
-                            "createdOn" to it.createdOn?.toString(),
-                            "updatedOn" to it.updatedOn?.toString(),
+                            "expires_on" to it.expiresOn?.toString(),
+                            "not_before" to it.notBefore?.toString(),
+                            "created_on" to it.createdOn?.toString(),
+                            "updated_on" to it.updatedOn?.toString(),
                         )
                     )
                     .success()
