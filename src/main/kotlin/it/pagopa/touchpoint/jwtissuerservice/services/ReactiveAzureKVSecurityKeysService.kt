@@ -35,7 +35,7 @@ class ReactiveAzureKVSecurityKeysService(
     fun getSecret(): Mono<KeyVaultSecret> {
         return secretClient.getSecret(azureSecretConfig.name).doOnNext { secret ->
             LogTracingUtils.loggerTracingUtils()
-                .dependency("azure-key-vault")
+                .dependency(LogTracingUtils.AZURE_KEY_VAULT_DEPENDENCY)
                 .details(
                     mapOf(
                         "name" to secret.name,
@@ -55,7 +55,7 @@ class ReactiveAzureKVSecurityKeysService(
             .listPropertiesOfCertificateVersions(azureSecretConfig.name)
             .doOnNext {
                 LogTracingUtils.loggerTracingUtils()
-                    .dependency("azure-key-vault")
+                    .dependency(LogTracingUtils.AZURE_KEY_VAULT_DEPENDENCY)
                     .details(
                         mapOf(
                             "name" to it.name,
@@ -76,7 +76,7 @@ class ReactiveAzureKVSecurityKeysService(
                     .getCertificateVersion(azureSecretConfig.name, it.version)
                     .doOnNext { cert ->
                         LogTracingUtils.loggerTracingUtils()
-                            .dependency("azure-key-vault")
+                            .dependency(LogTracingUtils.AZURE_KEY_VAULT_DEPENDENCY)
                             .details(
                                 mapOf("name" to cert.name, "version" to cert.properties?.version)
                             )

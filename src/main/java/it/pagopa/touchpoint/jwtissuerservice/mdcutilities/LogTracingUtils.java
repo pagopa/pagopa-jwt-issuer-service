@@ -38,6 +38,7 @@ public class LogTracingUtils {
 
     private static final String SUCCESS = "success";
     private static final String FAILURE = "failure";
+    public static final String AZURE_KEY_VAULT_DEPENDENCY = "azure-key-vault";
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
             .registerModule(new JavaTimeModule())
