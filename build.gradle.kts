@@ -76,7 +76,6 @@ dependencies {
   implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
   implementation("io.arrow-kt:arrow-core:2.0.1")
   implementation("io.swagger.core.v3:swagger-annotations:2.2.28")
-  implementation(kotlin("stdlib-jdk8"))
 
   // otel api
   implementation("io.opentelemetry.instrumentation:opentelemetry-reactor-3.1")
