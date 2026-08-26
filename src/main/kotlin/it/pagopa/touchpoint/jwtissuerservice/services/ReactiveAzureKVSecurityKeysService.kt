@@ -42,12 +42,19 @@ class ReactiveAzureKVSecurityKeysService(
             .doOnNext {
                 LogTracingUtils.loggerTracingUtils()
                     .dependency("Azure Key Vault")
-                    .details(mapOf("name" to it.name, "version" to it.version, "enabled" to it.isEnabled?.toString(), "expiresOn" to it.expiresOn?.toString(), "notBefore" to it.notBefore?.toString(), "createdOn" to it.createdOn?.toString(), "updatedOn" to it.updatedOn?.toString()))
-                    .success()
-                    .logInfo(
-                        logger,
-                        "Retrieved Certificate Properties",
+                    .details(
+                        mapOf(
+                            "name" to it.name,
+                            "version" to it.version,
+                            "enabled" to it.isEnabled?.toString(),
+                            "expiresOn" to it.expiresOn?.toString(),
+                            "notBefore" to it.notBefore?.toString(),
+                            "createdOn" to it.createdOn?.toString(),
+                            "updatedOn" to it.updatedOn?.toString(),
+                        )
                     )
+                    .success()
+                    .logInfo(logger, "Retrieved Certificate Properties")
             }
             .filter {
                 it.isEnabled && (it.expiresOn == null || it.expiresOn.isAfter(OffsetDateTime.now()))
@@ -57,22 +64,17 @@ class ReactiveAzureKVSecurityKeysService(
                     .getCertificateVersion(azureSecretConfig.name, it.version)
                     .doOnNext { cert ->
                         LogTracingUtils.loggerTracingUtils()
-                        .dependency("Azure Key Vault")
-                        .details(mapOf("name" to cert.name, "version" to cert.properties.version))
-                        .success()
-                        .logInfo(
-                            logger,
-                            "Retrieved Certificate Version",
-                        )
-                    } }
+                            .dependency("Azure Key Vault")
+                            .details(
+                                mapOf("name" to cert.name, "version" to cert.properties?.version)
+                            )
+                            .success()
+                            .logInfo(logger, "Retrieved Certificate Version")
+                    }
                     .onErrorResume { exception ->
                         LogTracingUtils.loggerTracingUtils()
                             .failure()
-                            .logError(
-                                logger,
-                                exception,
-                                "Failed to retrieve certificate version",
-                            )
+                            .logError(logger, exception, "Failed to retrieve certificate version")
                         Mono.empty()
                     }
             }
