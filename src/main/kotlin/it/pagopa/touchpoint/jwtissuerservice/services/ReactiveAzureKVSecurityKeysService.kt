@@ -64,7 +64,7 @@ class ReactiveAzureKVSecurityKeysService(
                     .getCertificateVersion(azureSecretConfig.name, it.version)
                     .doOnNext { cert ->
                         LogTracingUtils.loggerTracingUtils()
-                            .dependency("Azure Key Vault")
+                            .dependency("azure-key-vault")
                             .details(
                                 mapOf("name" to cert.name, "version" to cert.properties?.version)
                             )
