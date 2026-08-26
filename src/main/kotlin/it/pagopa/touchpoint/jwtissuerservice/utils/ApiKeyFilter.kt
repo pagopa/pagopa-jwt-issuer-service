@@ -60,8 +60,10 @@ class ApiKeyFilter(
                 secondaryApiKey -> "secondary"
                 else -> "unknown"
             }
-        LogTracingUtils.loggerTracingUtils()
-            .attributes(mapOf(LogTracingUtils.AttributeKeys.EVENT_ACTION to "$method $path"))
-            .logDebug(logger, "API key type used: $apiKeyType")
+        if (logger.isDebugEnabled) {
+            LogTracingUtils.loggerTracingUtils()
+                .attributes(mapOf(LogTracingUtils.AttributeKeys.EVENT_ACTION to "$method $path"))
+                .logDebug(logger, "API key type used: $apiKeyType")
+        }
     }
 }
