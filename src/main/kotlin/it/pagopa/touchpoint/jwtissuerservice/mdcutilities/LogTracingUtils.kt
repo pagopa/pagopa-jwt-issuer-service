@@ -147,7 +147,7 @@ class LogTracingUtils private constructor() {
 
         @JvmStatic
         fun enrichContextForEvent(
-            tracingEntries: Map<AttributeKeys, String>?,
+            tracingEntries: Map<AttributeKeys, String?>?,
             reactorContext: Context,
         ): Context {
             if (tracingEntries == null) return reactorContext
