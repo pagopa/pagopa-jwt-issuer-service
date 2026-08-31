@@ -44,7 +44,7 @@ class ApiKeyFilter(
                 exchange.response.statusCode = HttpStatus.UNAUTHORIZED
                 return exchange.response.setComplete()
             }
-            logWhichApiKey(apiKey, method, path)
+            if (logger.isDebugEnabled) logWhichApiKey(apiKey, method, path)
         }
         return chain.filter(exchange)
     }
@@ -60,10 +60,8 @@ class ApiKeyFilter(
                 secondaryApiKey -> "secondary"
                 else -> "unknown"
             }
-        if (logger.isDebugEnabled) {
-            LogTracingUtils.loggerTracingUtils()
-                .attributes(mapOf(LogTracingUtils.AttributeKeys.EVENT_ACTION to "$method $path"))
-                .logDebug(logger, "API key type used: $apiKeyType")
-        }
+        LogTracingUtils.loggerTracingUtils()
+            .attributes(mapOf(LogTracingUtils.AttributeKeys.EVENT_ACTION to "$method $path"))
+            .logDebug(logger, "API key type used: $apiKeyType")
     }
 }
