@@ -101,7 +101,6 @@ dependencies {
   testImplementation("org.bouncycastle:bcpkix-jdk18on:${Deps.bouncyCastleVersion}")
   testImplementation("org.bouncycastle:bcprov-jdk18on:${Deps.bouncyCastleVersion}")
   testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-  implementation(kotlin("stdlib-jdk8"))
 }
 
 // openapi code generation
