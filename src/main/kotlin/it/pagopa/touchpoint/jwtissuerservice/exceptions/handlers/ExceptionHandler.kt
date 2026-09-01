@@ -3,6 +3,7 @@ package it.pagopa.touchpoint.jwtissuerservice.exceptions.handlers
 import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.ProblemJsonDto
 import it.pagopa.touchpoint.jwtissuerservice.exceptions.ApiError
 import it.pagopa.touchpoint.jwtissuerservice.exceptions.RestApiException
+import it.pagopa.touchpoint.jwtissuerservice.mdcutilities.LogTracingUtils
 import jakarta.validation.ValidationException
 import kotlin.jvm.javaClass
 import org.slf4j.LoggerFactory
@@ -22,7 +23,9 @@ class ExceptionHandler {
 
     @ExceptionHandler(RestApiException::class)
     fun handleException(e: RestApiException): ResponseEntity<ProblemJsonDto> {
-        logger.error("Exception processing request", e)
+        LogTracingUtils.loggerTracingUtils()
+            .failure()
+            .logError(logger, e, "Rest Exception processing request")
         return ResponseEntity.status(e.httpStatus)
             .body(
                 ProblemJsonDto(
@@ -40,7 +43,9 @@ class ExceptionHandler {
 
     @ExceptionHandler(Exception::class)
     fun handleGenericException(e: Exception): ResponseEntity<ProblemJsonDto> {
-        logger.error("Exception processing the request", e)
+        LogTracingUtils.loggerTracingUtils()
+            .failure()
+            .logErrorWithStackTrace(logger, e, "Exception processing request")
         return ResponseEntity.internalServerError()
             .body(
                 ProblemJsonDto(
@@ -61,7 +66,9 @@ class ExceptionHandler {
         WebExchangeBindException::class,
     )
     fun handleRequestValidationException(e: Exception): ResponseEntity<ProblemJsonDto> {
-        logger.error("Input request is not valid", e)
+        LogTracingUtils.loggerTracingUtils()
+            .failure()
+            .logError(logger, e, "Input request is not valid")
         return ResponseEntity.badRequest()
             .body(
                 ProblemJsonDto(

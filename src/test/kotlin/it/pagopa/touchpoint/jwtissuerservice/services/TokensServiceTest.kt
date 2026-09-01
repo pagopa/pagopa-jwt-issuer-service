@@ -14,6 +14,7 @@ import java.security.interfaces.ECPublicKey
 import java.security.interfaces.RSAPublicKey
 import java.time.Duration
 import java.util.Base64
+import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -65,7 +66,7 @@ class TokensServiceTest {
             )
             .willReturn(token)
         // test
-        val generateTokenResponse = tokensService.generateToken(createTokenRequestDto)
+        val generateTokenResponse = tokensService.generateToken(createTokenRequestDto).awaitSingle()
         assertEquals(token, generateTokenResponse.token)
         verify(jwtTokenUtils, times(1))
             .generateJwtToken(
@@ -112,7 +113,7 @@ class TokensServiceTest {
             )
         given(kvService.getPublic()).willReturn(Flux.just(publicKeyWithKid, rsaPublicKeyWithKid))
         // test
-        val jwks = tokensService.getJwksKeys()
+        val jwks = tokensService.getJwksKeys().awaitSingle()
         assertEquals(expectedJwksResponse, jwks)
         verify(kvService, times(1)).getPublic()
     }
@@ -124,7 +125,7 @@ class TokensServiceTest {
         val mockPublicKeyWithKid = PublicKeyWithKid("mockKid", mockPublicKey)
         given(kvService.getPublic()).willReturn(Flux.just(mockPublicKeyWithKid))
         // test
-        assertThrows<IllegalArgumentException> { tokensService.getJwksKeys() }
+        assertThrows<IllegalArgumentException> { tokensService.getJwksKeys().awaitSingle() }
 
         verify(kvService, times(1)).getPublic()
     }
