@@ -16,7 +16,7 @@ plugins {
 
 group = "it.pagopa.touchpoint.jwtissuerservice"
 
-version = "0.7.1"
+version = "0.8.0"
 
 description = "pagopa-jwt-issuer-service"
 
@@ -88,6 +88,9 @@ dependencies {
   implementation("io.jsonwebtoken:jjwt-api:${Deps.jsonWebTokenVersion}")
   implementation("io.jsonwebtoken:jjwt-impl:${Deps.jsonWebTokenVersion}")
   implementation("io.jsonwebtoken:jjwt-jackson:${Deps.jsonWebTokenVersion}")
+
+  // micrometer
+  implementation("io.micrometer:context-propagation")
 
   testImplementation("org.springframework.boot:spring-boot-starter-test")
   testImplementation("io.projectreactor:reactor-test")

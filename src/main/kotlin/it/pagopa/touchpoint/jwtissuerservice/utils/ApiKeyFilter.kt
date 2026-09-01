@@ -1,5 +1,6 @@
 package it.pagopa.touchpoint.jwtissuerservice.utils
 
+import it.pagopa.touchpoint.jwtissuerservice.mdcutilities.LogTracingUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -30,14 +31,20 @@ class ApiKeyFilter(
     @SuppressWarnings("kotlin:S6508")
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
         val path = exchange.request.path.toString()
+        val method = exchange.request.method.toString()
         if (securedPaths.any { path == it }) {
             val apiKey = exchange.request.headers.getFirst("x-api-key")
             if (!isValidApiKey(apiKey)) {
-                logger.error("Unauthorized request for path $path - Missing or invalid API key")
+                LogTracingUtils.loggerTracingUtils()
+                    .failure()
+                    .attributes(
+                        mapOf(LogTracingUtils.AttributeKeys.EVENT_ACTION to "$method $path")
+                    )
+                    .logWarn(logger, "Unauthorized request - Missing or invalid API key")
                 exchange.response.statusCode = HttpStatus.UNAUTHORIZED
                 return exchange.response.setComplete()
             }
-            logWhichApiKey(apiKey, path)
+            if (logger.isDebugEnabled) logWhichApiKey(apiKey, method, path)
         }
         return chain.filter(exchange)
     }
@@ -46,13 +53,15 @@ class ApiKeyFilter(
         return !apiKey.isNullOrBlank() && validApiKeys.contains(apiKey)
     }
 
-    private fun logWhichApiKey(apiKey: String?, path: String) {
+    private fun logWhichApiKey(apiKey: String?, method: String, path: String) {
         val apiKeyType =
             when (apiKey) {
                 primaryApiKey -> "primary"
                 secondaryApiKey -> "secondary"
                 else -> "unknown"
             }
-        logger.debug("API key type used for path $path: $apiKeyType")
+        LogTracingUtils.loggerTracingUtils()
+            .attributes(mapOf(LogTracingUtils.AttributeKeys.EVENT_ACTION to "$method $path"))
+            .logDebug(logger, "API key type used: $apiKeyType")
     }
 }

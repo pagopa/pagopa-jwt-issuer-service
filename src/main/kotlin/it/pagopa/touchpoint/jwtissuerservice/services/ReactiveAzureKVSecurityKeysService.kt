@@ -5,6 +5,7 @@ import com.azure.security.keyvault.certificates.models.KeyVaultCertificate
 import com.azure.security.keyvault.secrets.SecretAsyncClient
 import com.azure.security.keyvault.secrets.models.KeyVaultSecret
 import it.pagopa.touchpoint.jwtissuerservice.config.properties.AzureSecretConfigProperties
+import it.pagopa.touchpoint.jwtissuerservice.mdcutilities.LogTracingUtils
 import it.pagopa.touchpoint.jwtissuerservice.models.PrivateKeyWithKid
 import it.pagopa.touchpoint.jwtissuerservice.models.PublicKeyWithKid
 import java.io.ByteArrayInputStream
@@ -32,23 +33,40 @@ class ReactiveAzureKVSecurityKeysService(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     fun getSecret(): Mono<KeyVaultSecret> {
-        return secretClient.getSecret(azureSecretConfig.name)
+        return secretClient.getSecret(azureSecretConfig.name).doOnNext { secret ->
+            LogTracingUtils.loggerTracingUtils()
+                .dependency(LogTracingUtils.AZURE_KEY_VAULT_DEPENDENCY)
+                .details(
+                    mapOf(
+                        "name" to secret.name,
+                        "version" to secret.properties?.version,
+                        "enabled" to secret.properties?.isEnabled?.toString(),
+                        "expires_on" to secret.properties?.expiresOn?.toString(),
+                        "not_before" to secret.properties?.notBefore?.toString(),
+                    )
+                )
+                .success()
+                .logInfo(logger, "Retrieved Secret")
+        }
     }
 
     fun getCerts(): Flux<KeyVaultCertificate> {
         return certClient
             .listPropertiesOfCertificateVersions(azureSecretConfig.name)
             .doOnNext {
-                logger.debug(
-                    "CertificateProperties - name: {}, version: {}, enabled: {}, expiresOn: {}, notBefore: {}, createdOn: {}, updatedOn: {}",
-                    it.name,
-                    it.version,
-                    it.isEnabled,
-                    it.expiresOn,
-                    it.notBefore,
-                    it.createdOn,
-                    it.updatedOn,
-                )
+                LogTracingUtils.loggerTracingUtils()
+                    .dependency(LogTracingUtils.AZURE_KEY_VAULT_DEPENDENCY)
+                    .details(
+                        mapOf(
+                            "name" to it.name,
+                            "version" to it.version,
+                            "enabled" to it.isEnabled?.toString(),
+                            "expires_on" to it.expiresOn?.toString(),
+                            "not_before" to it.notBefore?.toString(),
+                        )
+                    )
+                    .success()
+                    .logInfo(logger, "Retrieved Certificate Properties")
             }
             .filter {
                 it.isEnabled && (it.expiresOn == null || it.expiresOn.isAfter(OffsetDateTime.now()))
@@ -56,8 +74,19 @@ class ReactiveAzureKVSecurityKeysService(
             .flatMap {
                 certClient
                     .getCertificateVersion(azureSecretConfig.name, it.version)
+                    .doOnNext { cert ->
+                        LogTracingUtils.loggerTracingUtils()
+                            .dependency(LogTracingUtils.AZURE_KEY_VAULT_DEPENDENCY)
+                            .details(
+                                mapOf("name" to cert.name, "version" to cert.properties?.version)
+                            )
+                            .success()
+                            .logInfo(logger, "Retrieved Certificate Version")
+                    }
                     .onErrorResume { exception ->
-                        logger.error("Failed to retrieve certificate version", exception)
+                        LogTracingUtils.loggerTracingUtils()
+                            .failure()
+                            .logError(logger, exception, "Failed to retrieve certificate version")
                         Mono.empty()
                     }
             }

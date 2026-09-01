@@ -4,26 +4,27 @@ import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.CreateTokenReque
 import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.CreateTokenResponseDto
 import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.JWKResponseDto
 import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.JWKSResponseDto
+import it.pagopa.touchpoint.jwtissuerservice.mdcutilities.LogTracingUtils
 import it.pagopa.touchpoint.jwtissuerservice.utils.JwtTokenUtils
 import java.math.BigInteger
 import java.security.interfaces.ECPublicKey
 import java.security.interfaces.RSAPublicKey
 import java.time.Duration
 import java.util.*
-import kotlinx.coroutines.reactive.awaitSingle
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
+import reactor.core.publisher.Mono
 
 @Service
 class TokensService(
     private val jwtTokenUtils: JwtTokenUtils,
     private val reactiveAzureKVSecurityKeysService: IReactiveSecurityKeysService,
-    @Value("\${jwt.issuer}") private val jwtIssuer: String,
+    @param:Value("\${jwt.issuer}") private val jwtIssuer: String,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    suspend fun generateToken(createTokenRequest: CreateTokenRequestDto): CreateTokenResponseDto =
+    fun generateToken(createTokenRequest: CreateTokenRequestDto): Mono<CreateTokenResponseDto> =
         reactiveAzureKVSecurityKeysService
             .getPrivate()
             .map {
@@ -37,10 +38,18 @@ class TokensService(
                     )
                 )
             }
-            .doOnNext { logger.info("Token generated successfully") }
-            .awaitSingle()
+            .doOnNext {
+                LogTracingUtils.loggerTracingUtils()
+                    .success()
+                    .logInfo(logger, "Token generated successfully")
+            }
+            .doOnError { exception ->
+                LogTracingUtils.loggerTracingUtils()
+                    .failure()
+                    .logError(logger, exception, "Token generation error")
+            }
 
-    suspend fun getJwksKeys(): JWKSResponseDto =
+    fun getJwksKeys(): Mono<JWKSResponseDto> =
         reactiveAzureKVSecurityKeysService
             .getPublic()
             .map {
@@ -73,9 +82,16 @@ class TokensService(
             .collectList()
             .map { JWKSResponseDto(propertyKeys = it) }
             .doOnNext {
-                logger.info("Public keys list retrieved, number of keys: ${it.propertyKeys.size}")
+                LogTracingUtils.loggerTracingUtils()
+                    .success()
+                    .details(mapOf("number_of_keys" to it.propertyKeys.size.toString()))
+                    .logInfo(logger, "Public keys list retrieved")
             }
-            .awaitSingle()
+            .doOnError { exception ->
+                LogTracingUtils.loggerTracingUtils()
+                    .failure()
+                    .logError(logger, exception, "Public keys list retrieve error")
+            }
 
     private fun base64UrlEncodeUnsigned(value: BigInteger): String {
         var bytes = value.toByteArray()

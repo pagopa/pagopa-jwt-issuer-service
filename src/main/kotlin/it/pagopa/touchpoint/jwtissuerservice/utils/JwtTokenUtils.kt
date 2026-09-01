@@ -43,6 +43,7 @@ class JwtTokenUtils() {
                 .setAudience(audience) // aud
                 .setIssuer(jwtIssuer) // iss
                 .signWith(privateKey.privateKey)
+
         return jwtBuilder.compact()
     }
 }
