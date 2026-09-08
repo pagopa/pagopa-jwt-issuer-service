@@ -33,20 +33,20 @@ class LogTracingUtils private constructor() {
     private val mdcKeys = mutableListOf<String>()
 
     enum class AttributeKeys(val key: String, val defaultValue: String) {
-        EVENT_ACTION("event.action", "{eventAction-not-found}"),
-        CTX_TRANSACTION_ID("ctx.transaction.id", "{transactionId-not-found}"),
+        EVENT_ACTION("event_action", "{eventAction-not-found}"),
+        CTX_TRANSACTION_ID("ctx_transaction_id", "{transactionId-not-found}"),
         CTX_AUTHORIZATION_REQUEST_ID(
-            "ctx.authorization.request.id",
+            "ctx_authorization_request_id",
             "{authorizationRequestId-not-found}",
         ),
-        CTX_WALLET_ID("ctx.wallet.id", "{walletId-not-found}"),
-        CTX_EVENT_CODE("ctx.event.code", "{eventCode-not-found}"),
-        CTX_EVENT_ID("ctx.event.id", "{eventId-not-found}"),
+        CTX_WALLET_ID("ctx_wallet_id", "{walletId-not-found}"),
+        CTX_EVENT_CODE("ctx_event_code", "{eventCode-not-found}"),
+        CTX_EVENT_ID("ctx_event_id", "{eventId-not-found}"),
     }
 
     private enum class AttributeKeysPrivate(val key: String, val defaultValue: String) {
-        CTX_DETAILS("ctx.details", "{details-not-found}"),
-        EVENT_OUTCOME("event.outcome", "{eventOutcome-not-found}"),
+        CTX_DETAILS("ctx_details", "{details-not-found}"),
+        EVENT_OUTCOME("event_outcome", "{eventOutcome-not-found}"),
         DEPENDENCY("dependency", "{dependency-not-found}"),
         ERROR_TYPE("error.type", "{errorType-not-found}"),
         ERROR_MESSAGE("error.message", "{errorMessage-not-found}"),
