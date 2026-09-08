@@ -45,9 +45,9 @@ class LogTracingUtilsTest {
             )
 
         doAnswer {
-                assertEquals("test-action", MDC.get("event.action"))
-                assertEquals("12345", MDC.get("ctx.transaction.id"))
-                assertEquals("success", MDC.get("event.outcome"))
+                assertEquals("test-action", MDC.get("event_action"))
+                assertEquals("12345", MDC.get("ctx_transaction_id"))
+                assertEquals("success", MDC.get("event_outcome"))
                 null
             }
             .`when`(mockLogger)
@@ -61,9 +61,9 @@ class LogTracingUtilsTest {
 
         // Assert
         verify(mockLogger).info("Test info message")
-        assertNull(MDC.get("event.action"), "MDC should be cleaned up after logging")
-        assertNull(MDC.get("correlation.id"))
-        assertNull(MDC.get("event.outcome"))
+        assertNull(MDC.get("event_action"), "MDC should be cleaned up after logging")
+        assertNull(MDC.get("correlation_id"))
+        assertNull(MDC.get("event_outcome"))
     }
 
     @Test
@@ -72,7 +72,7 @@ class LogTracingUtilsTest {
         val testException = RuntimeException("Something went wrong")
 
         doAnswer {
-                assertEquals("failure", MDC.get("event.outcome"))
+                assertEquals("failure", MDC.get("event_outcome"))
                 assertEquals(RuntimeException::class.java.name, MDC.get("error.type"))
                 assertEquals("Something went wrong", MDC.get("error.message"))
                 assertNotNull(MDC.get("error.stack_trace"))
@@ -99,7 +99,7 @@ class LogTracingUtilsTest {
         val details = mapOf("userId" to "u-123", "retryCount" to "3")
 
         doAnswer {
-                val mdcDetails = MDC.get("ctx.details")
+                val mdcDetails = MDC.get("ctx_details")
                 assertNotNull(mdcDetails)
                 assertTrue(mdcDetails.contains("\"userId\":\"u-123\""))
                 assertTrue(mdcDetails.contains("\"retryCount\":\"3\""))
@@ -117,7 +117,7 @@ class LogTracingUtilsTest {
 
         // Assert
         verify(mockLogger).debug("Test debug message")
-        assertNull(MDC.get("ctx.details"))
+        assertNull(MDC.get("ctx_details"))
     }
 
     @Test
@@ -179,7 +179,7 @@ class LogTracingUtilsTest {
             }
 
         doAnswer {
-                assertNull(MDC.get("ctx.transaction.id"))
+                assertNull(MDC.get("ctx_transaction_id"))
                 null
             }
             .`when`(mockLogger)
@@ -232,7 +232,7 @@ class LogTracingUtilsTest {
         val enrichedContext = enrichContextForEvent(tracingEntries, Context.empty())
 
         // Assert
-        assertEquals("event_action", enrichedContext.get<String>("event.action"))
-        assertEquals("{transactionId-not-found}", enrichedContext.get<String>("ctx.transaction.id"))
+        assertEquals("event_action", enrichedContext.get<String>("event_action"))
+        assertEquals("{transactionId-not-found}", enrichedContext.get<String>("ctx_transaction_id"))
     }
 }
