@@ -35,7 +35,7 @@ object Deps {
   const val openTelemetryInstrumentationVersion = "2.14.0-alpha"
   const val springBootVersion = "3.4.5"
   const val jsonWebTokenVersion = "0.11.5"
-  const val bouncyCastleVersion = "1.80"
+  const val bouncyCastleVersion = "1.84"
   const val azureIdentityVersion = "1.16.0"
   const val azureKeyVaultSecretsVersion = "4.9.4"
   const val azureKeyVaultCertificatesVersion = "4.7.4"
