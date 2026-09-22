@@ -54,7 +54,7 @@ class ReactiveAzureKVSecurityKeysService(
             }
             .filter { secret ->
                 secret.properties?.isEnabled == true &&
-                        secret.properties?.expiresOn?.isAfter(OffsetDateTime.now()) == true
+                    secret.properties?.expiresOn?.isAfter(OffsetDateTime.now()) == true
             }
             .switchIfEmpty(
                 Mono.error(
