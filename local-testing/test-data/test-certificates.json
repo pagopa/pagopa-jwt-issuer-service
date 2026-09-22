@@ -9,7 +9,7 @@
       "name": "testName",
       "enabled": true,
       "notBefore": "2024-01-01T00:00:00Z",
-      "expiresOn": "2036-01-01T00:00:00Z",
+      "exp": 2082729600,
       "createdOn": "2024-01-01T00:00:00Z",
       "updatedOn": "2024-01-01T00:00:00Z",
       "recoveryLevel": "Recoverable+Purgeable",
