@@ -5,6 +5,7 @@ import com.azure.security.keyvault.certificates.models.KeyVaultCertificate
 import com.azure.security.keyvault.secrets.SecretAsyncClient
 import com.azure.security.keyvault.secrets.models.KeyVaultSecret
 import it.pagopa.touchpoint.jwtissuerservice.config.properties.AzureSecretConfigProperties
+import it.pagopa.touchpoint.jwtissuerservice.exceptions.RestApiException
 import it.pagopa.touchpoint.jwtissuerservice.mdcutilities.LogTracingUtils
 import it.pagopa.touchpoint.jwtissuerservice.models.PrivateKeyWithKid
 import it.pagopa.touchpoint.jwtissuerservice.models.PublicKeyWithKid
@@ -18,6 +19,7 @@ import java.time.OffsetDateTime
 import java.util.*
 import org.slf4j.LoggerFactory
 import org.springframework.cache.annotation.Cacheable
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -33,21 +35,36 @@ class ReactiveAzureKVSecurityKeysService(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     fun getSecret(): Mono<KeyVaultSecret> {
-        return secretClient.getSecret(azureSecretConfig.name).doOnNext { secret ->
-            LogTracingUtils.loggerTracingUtils()
-                .dependency(LogTracingUtils.AZURE_KEY_VAULT_DEPENDENCY)
-                .details(
-                    mapOf(
-                        "name" to secret.name,
-                        "version" to secret.properties?.version,
-                        "enabled" to secret.properties?.isEnabled?.toString(),
-                        "expires_on" to secret.properties?.expiresOn?.toString(),
-                        "not_before" to secret.properties?.notBefore?.toString(),
+        return secretClient
+            .getSecret(azureSecretConfig.name)
+            .filter { secret ->
+                secret.properties?.isEnabled == true &&
+                    secret.properties?.expiresOn?.isAfter(OffsetDateTime.now()) == true
+            }
+            .doOnNext { secret ->
+                LogTracingUtils.loggerTracingUtils()
+                    .dependency(LogTracingUtils.AZURE_KEY_VAULT_DEPENDENCY)
+                    .details(
+                        mapOf(
+                            "name" to secret.name,
+                            "version" to secret.properties?.version,
+                            "enabled" to secret.properties?.isEnabled?.toString(),
+                            "expires_on" to secret.properties?.expiresOn?.toString(),
+                            "not_before" to secret.properties?.notBefore?.toString(),
+                        )
+                    )
+                    .success()
+                    .logInfo(logger, "Retrieved Secret")
+            }
+            .switchIfEmpty(
+                Mono.error(
+                    RestApiException(
+                        HttpStatus.INTERNAL_SERVER_ERROR,
+                        "Unable to retrieve secret",
+                        "KeyVault secret not found, not valid or expired",
                     )
                 )
-                .success()
-                .logInfo(logger, "Retrieved Secret")
-        }
+            )
     }
 
     fun getCerts(): Flux<KeyVaultCertificate> {
