@@ -39,5 +39,11 @@
     "name": "com.azure.security.keyvault.certificates.implementation.models.CertificateAttributes",
     "allDeclaredFields": true,
     "allPublicMethods": true
+  },
+  {
+    "name": "com.azure.security.keyvault.secrets.models.SecretProperties",
+    "allDeclaredMethods": true,
+    "allDeclaredConstructors": true,
+    "allDeclaredFields": true
   }
 ]
