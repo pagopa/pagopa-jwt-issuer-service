@@ -37,10 +37,6 @@ class ReactiveAzureKVSecurityKeysService(
     fun getSecret(): Mono<KeyVaultSecret> {
         return secretClient
             .getSecret(azureSecretConfig.name)
-            .filter { secret ->
-                secret.properties?.isEnabled == true &&
-                    secret.properties?.expiresOn?.isAfter(OffsetDateTime.now()) == true
-            }
             .doOnNext { secret ->
                 LogTracingUtils.loggerTracingUtils()
                     .dependency(LogTracingUtils.AZURE_KEY_VAULT_DEPENDENCY)
@@ -55,6 +51,10 @@ class ReactiveAzureKVSecurityKeysService(
                     )
                     .success()
                     .logInfo(logger, "Retrieved Secret")
+            }
+            .filter { secret ->
+                secret.properties?.isEnabled == true &&
+                        secret.properties?.expiresOn?.isAfter(OffsetDateTime.now()) == true
             }
             .switchIfEmpty(
                 Mono.error(
