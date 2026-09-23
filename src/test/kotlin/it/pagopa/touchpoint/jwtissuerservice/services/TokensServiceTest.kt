@@ -3,6 +3,7 @@ package it.pagopa.touchpoint.jwtissuerservice.services
 import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.CreateTokenRequestDto
 import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.JWKResponseDto
 import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.JWKSResponseDto
+import it.pagopa.touchpoint.jwtissuerservice.exceptions.RestApiException
 import it.pagopa.touchpoint.jwtissuerservice.models.PrivateKeyWithKid
 import it.pagopa.touchpoint.jwtissuerservice.models.PublicKeyWithKid
 import it.pagopa.touchpoint.jwtissuerservice.utils.JwtTokenUtils
@@ -127,6 +128,16 @@ class TokensServiceTest {
         // test
         assertThrows<IllegalArgumentException> { tokensService.getJwksKeys().awaitSingle() }
 
+        verify(kvService, times(1)).getPublic()
+    }
+
+    @Test
+    fun `Should throw exception on empty public key list`() = runTest {
+        // pre-conditions
+        given(kvService.getPublic()).willReturn(Flux.empty())
+        // test
+        assertThrows<RestApiException> { tokensService.getJwksKeys().awaitSingle() }
+        
         verify(kvService, times(1)).getPublic()
     }
 
