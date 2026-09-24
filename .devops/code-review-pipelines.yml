@@ -83,6 +83,7 @@ stages:
                 TEST_FILE_PREFIX: "local"
                 USE_NEWMAN_DOCKER_IMAGE: false
                 SERVICE_API_KEY: "PRIMARY-KEY"
+                COMMAND_STEP_NAME: "newman_run_command_local"
 
             - script: |
                 sed -i 's/^SECRET_KEY_NAME=.*/SECRET_KEY_NAME=testNameExpired/' .env
@@ -97,9 +98,10 @@ stages:
               parameters:
                 API_TEST_FILE: "api-tests/jwt-token-issuer-service-expired.postman-collection.json"
                 ENV_FILE: "api-tests/localhost.env.json"
-                TEST_FILE_PREFIX: "local-after-restart"
+                TEST_FILE_PREFIX: "local-expired"
                 USE_NEWMAN_DOCKER_IMAGE: false
                 SERVICE_API_KEY: "PRIMARY-KEY"
+                COMMAND_STEP_NAME: "newman_run_command_local_expired"
 
             - script: |
                 echo "Printing logs for all running containers:"
