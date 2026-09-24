@@ -58,8 +58,8 @@ class TokensService(
                 Mono.error(
                     RestApiException(
                         HttpStatus.NOT_FOUND,
-                        "Unable to retrieve certificate",
-                        "KeyVault certificate not found, not valid or expired",
+                        "Unable to retrieve certificates",
+                        "No valid KeyVault certificate found ",
                     )
                 )
             )
