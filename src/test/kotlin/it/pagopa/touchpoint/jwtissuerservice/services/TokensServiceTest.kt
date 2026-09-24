@@ -25,6 +25,7 @@ import org.mockito.kotlin.given
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.springframework.http.HttpStatus
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
@@ -136,8 +137,10 @@ class TokensServiceTest {
         // pre-conditions
         given(kvService.getPublic()).willReturn(Flux.empty())
         // test
-        assertThrows<RestApiException> { tokensService.getJwksKeys().awaitSingle() }
-        
+        val exception = assertThrows<RestApiException> { tokensService.getJwksKeys().awaitSingle() }
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.httpStatus)
+
         verify(kvService, times(1)).getPublic()
     }
 
