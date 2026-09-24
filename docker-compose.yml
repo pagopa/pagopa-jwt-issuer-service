@@ -21,11 +21,10 @@ services:
       context: .
     env_file:
       - ./.env
+    environment:
+      - JAVA_TOOL_OPTIONS=-Djavax.net.ssl.trustStore=/test-certs/truststore.jks -Djavax.net.ssl.trustStorePassword=changeit
     volumes:
       - ./local-testing/test-certs/truststore.jks:/test-certs/truststore.jks:ro
-    command:
-      - "-Djavax.net.ssl.trustStore=/test-certs/truststore.jks"
-      - "-Djavax.net.ssl.trustStorePassword=changeit"
     ports:
       - "8080:8080"
     depends_on:
