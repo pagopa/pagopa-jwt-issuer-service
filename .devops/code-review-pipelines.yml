@@ -96,12 +96,30 @@ stages:
 
             - template: azure-templates/api-tests.yml
               parameters:
-                API_TEST_FILE: "api-tests/jwt-token-issuer-service-expired.postman-collection.json"
+                API_TEST_FILE: "api-tests/jwt-token-issuer-service-expired-disabled.postman-collection.json"
                 ENV_FILE: "api-tests/localhost.env.json"
                 TEST_FILE_PREFIX: "local-expired"
                 USE_NEWMAN_DOCKER_IMAGE: false
                 SERVICE_API_KEY: "PRIMARY-KEY"
                 COMMAND_STEP_NAME: "newman_run_command_local_expired"
+
+            - script: |
+                sed -i 's/^SECRET_KEY_NAME=.*/SECRET_KEY_NAME=testNameDisabled/' .env
+                docker compose up -d --force-recreate --no-deps pagopa-jwt-issuer-service
+              displayName: 'Change SECRET_KEY_NAME and recreate service'
+
+            - script: |
+                timeout 180 bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:8080/actuator/health/liveness)" != "200" ]]; do sleep 5; done' || exit 1
+              displayName: 'Health check after restart'
+
+            - template: azure-templates/api-tests.yml
+              parameters:
+                API_TEST_FILE: "api-tests/jwt-token-issuer-service-expired-disabled.postman-collection.json"
+                ENV_FILE: "api-tests/localhost.env.json"
+                TEST_FILE_PREFIX: "local-disabled"
+                USE_NEWMAN_DOCKER_IMAGE: false
+                SERVICE_API_KEY: "PRIMARY-KEY"
+                COMMAND_STEP_NAME: "newman_run_command_local_disabled"
 
             - script: |
                 echo "Printing logs for all running containers:"
