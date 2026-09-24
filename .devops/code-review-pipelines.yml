@@ -85,6 +85,23 @@ stages:
                 SERVICE_API_KEY: "PRIMARY-KEY"
 
             - script: |
+                sed -i 's/^SECRET_KEY_NAME=.*/SECRET_KEY_NAME=testNameExpired/' .env
+                docker compose up -d --force-recreate --no-deps pagopa-jwt-issuer-service
+              displayName: 'Change SECRET_KEY_NAME and recreate service'
+
+            - script: |
+                timeout 180 bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:8080/actuator/health/liveness)" != "200" ]]; do sleep 5; done' || exit 1
+              displayName: 'Health check after restart'
+
+            - template: azure-templates/api-tests.yml
+              parameters:
+                API_TEST_FILE: "api-tests/jwt-token-issuer-service-expired.postman-collection.json"
+                ENV_FILE: "api-tests/localhost.env.json"
+                TEST_FILE_PREFIX: "local-after-restart"
+                USE_NEWMAN_DOCKER_IMAGE: false
+                SERVICE_API_KEY: "PRIMARY-KEY"
+
+            - script: |
                 echo "Printing logs for all running containers:"
                 for container in $(docker ps -q); do
                   name=$(docker inspect --format='{{.Name}}' $container | sed 's/^\/\(.*\)/\1/')
