@@ -66,12 +66,32 @@ parameters:
   - name: SERVICE_API_KEY_UAT
     displayName: "Jwt issuer API key used for uat environment"
     type: string
+  # Required for TAS tests
+  - name: tas-ref
+    displayName: "TAS repo branch/tag"
+    type: string
+    default: main
 
 # --- START Deploy DEV --- #
 stages:
+  - stage: 'test_fake_build_and_deploy'
+    displayName: 'Fake build and deploy for DEV deployment'
+    condition: and(succeeded(), eq(${{parameters.DEV_DEPLOY}}, true))
+    jobs:
+      - job: test_fake_build_and_deploy
+        displayName: 'Fake build and deploy for DEV deployment'
+        steps:
+          - task: Bash@3
+            displayName: "Fake build and deploy for DEV deployment"
+            inputs:
+              targetType: "inline"
+              script: |
+                echo "Fake stage of build and deploy in DEV"
+
   - stage: "Build_for_DEV"
     displayName: "Build for DEV"
-    condition: and(succeeded(), not(${{ parameters.SKIP_BUILD }}), eq(${{parameters.DEV_DEPLOY}}, true))
+    condition: false # TO-REMOVE AFTER TESTING
+    #condition: and(succeeded(), not(${{ parameters.SKIP_BUILD }}), eq(${{parameters.DEV_DEPLOY}}, true))
     jobs:
       - job: Build_docker
         displayName: Build docker with Build.SourceVersion as TAG
@@ -134,6 +154,22 @@ stages:
               TEST_FILE_PREFIX: "dev"
               USE_NEWMAN_DOCKER_IMAGE: true
               SERVICE_API_KEY: ${{ parameters.SERVICE_API_KEY_DEV }}
+
+  # TAS tests to launch only when a TAS ref is provided by the entry pipeline.
+  - ${{ if ne(parameters.tas-ref, '') }}:
+    - stage: TAS_tests_DEV
+      displayName: 'Running TAS tests on DEV environment'
+      dependsOn: test_fake_build_and_deploy #TO-CHANGE with Deploy_for_DEV
+      condition: succeeded('test_fake_build_and_deploy')  #TO-CHANGE with Deploy_for_DEV
+      pool:
+        vmImage: 'ubuntu-latest'
+      jobs:
+        - job: Run_TAS_tests
+          steps:
+            - template: ./ecommerce-tas-tests.yml
+              parameters:
+                ENVIRONMENT: dev
+                ref: ${{ parameters.tas-ref }}
   # --- END Deploy DEV --- #
 
   # --- START Deploy UAT --- #
@@ -368,6 +404,22 @@ stages:
               TEST_FILE_PREFIX: "uat-green"
               USE_NEWMAN_DOCKER_IMAGE: true
               SERVICE_API_KEY: ${{ parameters.SERVICE_API_KEY_UAT }}
+
+  # TAS tests to launch only when a TAS ref is provided by the entry pipeline.
+  - ${{ if ne(parameters.tas-ref, '') }}:
+    - stage: TAS_tests_UAT
+      displayName: 'Running TAS tests on UAT environment'
+      dependsOn: Deploy_UAT_Green
+      condition: succeeded('Deploy_UAT_Green')
+      pool:
+        vmImage: 'ubuntu-latest'
+      jobs:
+        - job: Run_TAS_tests
+          steps:
+            - template: ./ecommerce-tas-tests.yml
+              parameters:
+                ENVIRONMENT: uat
+                ref: ${{ parameters.tas-ref }}
 
   # --- END Deploy UAT --- #
 

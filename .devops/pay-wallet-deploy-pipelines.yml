@@ -68,6 +68,7 @@ stages:
       FORCE_REPLACE_DOCKER_IMAGE: ${{ parameters.FORCE_REPLACE_DOCKER_IMAGE }}
       NATIVE_COMPILATION: ${{ parameters.NATIVE_COMPILATION }}
       DOMAIN: pay-wallet
+      tas-ref: ''
       DOCKER_FILE_NAME: ${{ variables.dockerFileName }}
       DOCKER_FILE_VERSION_SUFFIX: ${{ variables.dockerFileVersionSuffix }}
       SERVICE_API_KEY_DEV: $(SERVICE_API_KEY_DEV)
