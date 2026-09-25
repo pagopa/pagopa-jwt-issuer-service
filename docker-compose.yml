@@ -21,6 +21,8 @@ services:
       context: .
     env_file:
       - ./.env
+    environment:
+      - JAVA_TOOL_OPTIONS=-Djavax.net.ssl.trustStore=/test-certs/truststore.jks -Djavax.net.ssl.trustStorePassword=changeit
     volumes:
       - ./local-testing/test-certs/truststore.jks:/test-certs/truststore.jks:ro
     command:
