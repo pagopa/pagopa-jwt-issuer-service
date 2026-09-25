@@ -3,6 +3,7 @@ package it.pagopa.touchpoint.jwtissuerservice.services
 import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.CreateTokenRequestDto
 import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.JWKResponseDto
 import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.JWKSResponseDto
+import it.pagopa.touchpoint.jwtissuerservice.exceptions.RestApiException
 import it.pagopa.touchpoint.jwtissuerservice.models.PrivateKeyWithKid
 import it.pagopa.touchpoint.jwtissuerservice.models.PublicKeyWithKid
 import it.pagopa.touchpoint.jwtissuerservice.utils.JwtTokenUtils
@@ -24,6 +25,7 @@ import org.mockito.kotlin.given
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.springframework.http.HttpStatus
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
@@ -126,6 +128,18 @@ class TokensServiceTest {
         given(kvService.getPublic()).willReturn(Flux.just(mockPublicKeyWithKid))
         // test
         assertThrows<IllegalArgumentException> { tokensService.getJwksKeys().awaitSingle() }
+
+        verify(kvService, times(1)).getPublic()
+    }
+
+    @Test
+    fun `Should throw exception on empty public key list`() = runTest {
+        // pre-conditions
+        given(kvService.getPublic()).willReturn(Flux.empty())
+        // test
+        val exception = assertThrows<RestApiException> { tokensService.getJwksKeys().awaitSingle() }
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.httpStatus)
 
         verify(kvService, times(1)).getPublic()
     }
