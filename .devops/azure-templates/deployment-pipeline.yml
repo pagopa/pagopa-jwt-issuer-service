@@ -134,6 +134,7 @@ stages:
               TEST_FILE_PREFIX: "dev"
               USE_NEWMAN_DOCKER_IMAGE: true
               SERVICE_API_KEY: ${{ parameters.SERVICE_API_KEY_DEV }}
+              COMMAND_STEP_NAME: "newman_run_command_dev"
   # --- END Deploy DEV --- #
 
   # --- START Deploy UAT --- #
@@ -263,6 +264,7 @@ stages:
               TEST_FILE_PREFIX: "uat-blue"
               USE_NEWMAN_DOCKER_IMAGE: true
               SERVICE_API_KEY: ${{ parameters.SERVICE_API_KEY_UAT }}
+              COMMAND_STEP_NAME: "newman_run_command_uat_blue"
           # uninstall helm release used for blue instance
           - task: HelmDeploy@0
             displayName: Un-install UAT blue version
@@ -368,6 +370,7 @@ stages:
               TEST_FILE_PREFIX: "uat-green"
               USE_NEWMAN_DOCKER_IMAGE: true
               SERVICE_API_KEY: ${{ parameters.SERVICE_API_KEY_UAT }}
+              COMMAND_STEP_NAME: "newman_run_command_uat"
 
   # --- END Deploy UAT --- #
 
