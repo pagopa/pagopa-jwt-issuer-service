@@ -16,7 +16,7 @@ plugins {
 
 group = "it.pagopa.touchpoint.jwtissuerservice"
 
-version = "0.8.2"
+version = "0.8.3"
 
 description = "pagopa-jwt-issuer-service"
 

@@ -17,7 +17,7 @@ microservice-chart:
     envSecret: {}
   image:
     repository: ""
-    tag: "0.8.2"
+    tag: "0.8.3"
     pullPolicy: Always
   livenessProbe:
     handlerType: httpGet

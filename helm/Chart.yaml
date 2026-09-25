@@ -1,7 +1,7 @@
 apiVersion: v2
 type: application
-version: 0.8.2
-appVersion: 0.8.2
+version: 0.8.3
+appVersion: 0.8.3
 name: pagopa-jwt-issuer-service
 description: Microservice that provides the creation of JWT tokens for pagopa touchpoint domains
 dependencies:
