@@ -3,6 +3,10 @@ parameters:
   - name: "ENVIRONMENT"
     type: string
 
+  - name: "dependsOnStages"
+    type: object
+    default: []
+
   - name: ref
     displayName: "TAS repo branch/tag"
     type: string
@@ -11,6 +15,7 @@ parameters:
 stages:
 
   - stage: TAS_tests_${{ parameters.ENVIRONMENT }}
+    dependsOn: ${{ parameters.dependsOnStages }}
     pool:
       vmImage: 'ubuntu-latest'
     jobs:

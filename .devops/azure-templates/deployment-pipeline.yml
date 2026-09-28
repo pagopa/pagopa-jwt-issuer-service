@@ -161,7 +161,8 @@ stages:
       parameters:
         ENVIRONMENT: dev
         ref: ${{ parameters.tas_ref }}
-        dependsOn: test_fake_build_and_deploy #TO-CHANGE with Deploy_for_DEV
+        dependsOnStages:
+          - test_fake_build_and_deploy #TO-CHANGE with Deploy_for_DEV
   # --- END Deploy DEV --- #
 
   # --- START Deploy UAT --- #
