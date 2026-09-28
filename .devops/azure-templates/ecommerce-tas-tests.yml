@@ -12,8 +12,6 @@ parameters:
     type: string
     default: main
 
-stages:
-
   - stage: TAS_tests_${{ parameters.ENVIRONMENT }}
     dependsOn: ${{ parameters.dependsOnStages }}
     pool:
