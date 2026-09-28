@@ -61,6 +61,13 @@ resources:
       name: pagopa/azure-pipeline-templates
       ref: refs/tags/v6.14.0
       endpoint: "io-azure-devops-github-ro"
+    # Required for TAS tests - must be in the top-level template to be available for the TAS test stage
+    - repository: tas
+      type: github
+      name: pagopa/azure-pipeline-templates
+      ref: refs/heads/PQ-456-add-qa-tas-template-dependsOn   # template repo branch (→ refs/tags/v1 once merged)
+      endpoint: 'io-azure-devops-github-ro'   # ← GitHub service connection name (Project settings → Service connections)
+
 pool:
   vmImage: ubuntu-latest
 
