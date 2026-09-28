@@ -1,7 +1,6 @@
 package it.pagopa.touchpoint.jwtissuerservice.controllers
 
 import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.CertificateDetailDto
-import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.CertificatesResponseDto
 import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.CreateTokenRequestDto
 import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.CreateTokenResponseDto
 import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.JWKResponseDto
@@ -185,32 +184,27 @@ class TokensControllerTest {
     }
 
     @Test
-    fun `Should return public certificates successfully`() = runTest {
+    fun `Should return public certificate successfully`() = runTest {
         // pre-conditions
-        val certificatesResponse =
-            CertificatesResponseDto(
-                certificates =
-                    listOf(
-                        CertificateDetailDto(
-                            id = URI("https://kv-name.vault.azure.net/secrets/certificate-name/id"),
-                            name = "certificate-name",
-                            notBefore = OffsetDateTime.now(ZoneOffset.UTC).minusDays(1),
-                            expirationDate = OffsetDateTime.now(ZoneOffset.UTC).plusDays(60),
-                            updated = OffsetDateTime.now(ZoneOffset.UTC),
-                        )
-                    )
+        val certificateDetail =
+            CertificateDetailDto(
+                id = URI("https://kv-name.vault.azure.net/secrets/certificate-name/id"),
+                name = "certificate-name",
+                notBefore = OffsetDateTime.now(ZoneOffset.UTC).minusDays(1),
+                expirationDate = OffsetDateTime.now(ZoneOffset.UTC).plusDays(60),
+                updated = OffsetDateTime.now(ZoneOffset.UTC),
             )
 
         given(certificatesService.getCertificateByNameAndValidity("certificate-name", 30))
-            .willReturn(Mono.just(certificatesResponse))
+            .willReturn(Mono.just(certificateDetail))
         webClient
             .get()
             .uri("/tokens/certificates/certificate-name?validForDays=30")
             .exchange()
             .expectStatus()
             .isOk
-            .expectBody(CertificatesResponseDto::class.java)
-            .consumeWith { assertEquals(certificatesResponse, it.responseBody) }
+            .expectBody(CertificateDetailDto::class.java)
+            .consumeWith { assertEquals(certificateDetail, it.responseBody) }
         verify(certificatesService, times(1))
             .getCertificateByNameAndValidity("certificate-name", 30)
     }

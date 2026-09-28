@@ -66,8 +66,8 @@ paths:
       tags:
         - jwtIssuer
       operationId: getTokenPublicCertificates
-      summary: Retrieve jwt public signature verifier certificates
-      description: Retrieve jwt public signature verifier certificates in x509 format
+      summary: Retrieve jwt public signature verifier certificate
+      description: Retrieve the most recent valid jwt public signature verifier certificate in x509 format
       parameters:
         - name: certificateName
           in: path
@@ -78,18 +78,18 @@ paths:
         - name: validForDays
           in: query
           required: true
-          description: Minimum number of remaining validity days for the certificates to be returned
+          description: Minimum number of remaining validity days for the certificate to be returned
           schema:
             type: integer
             minimum: 0
             example: 30
       responses:
         '200':
-          description: Certificates retrieved successfully
+          description: Certificate retrieved successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CertificatesResponse'
+                $ref: '#/components/schemas/CertificateDetail'
         '401':
           description: Unauthorized
           content:
@@ -442,15 +442,6 @@ components:
           description: |-
             An absolute URI that identifies the specific occurrence of the problem.
             It may or may not yield further information if dereferenced.
-    CertificatesResponse:
-      type: object
-      required:
-        - certificates
-      properties:
-        certificates:
-          type: array
-          items:
-            $ref: '#/components/schemas/CertificateDetail'
     CertificateDetail:
       type: object
       required:

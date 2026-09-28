@@ -1,7 +1,7 @@
 package it.pagopa.touchpoint.jwtissuerservice.controllers
 
 import it.pagopa.generated.touchpoint.jwtissuerservice.v1.api.TokensApi
-import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.CertificatesResponseDto
+import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.CertificateDetailDto
 import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.CreateTokenRequestDto
 import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.CreateTokenResponseDto
 import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.JWKSResponseDto
@@ -48,7 +48,7 @@ class TokensController(
     override suspend fun getTokenPublicCertificates(
         certificateName: String,
         validForDays: Int,
-    ): ResponseEntity<CertificatesResponseDto> {
+    ): ResponseEntity<CertificateDetailDto> {
         return certificatesService
             .getCertificateByNameAndValidity(certificateName, validForDays)
             .switchIfEmpty(

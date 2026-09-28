@@ -2,7 +2,6 @@ package it.pagopa.touchpoint.jwtissuerservice.services
 
 import com.azure.security.keyvault.certificates.CertificateAsyncClient
 import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.CertificateDetailDto
-import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.CertificatesResponseDto
 import it.pagopa.touchpoint.jwtissuerservice.mdcutilities.LogTracingUtils
 import java.net.URI
 import java.time.Duration
@@ -18,49 +17,30 @@ class CertificatesService(private val certClient: CertificateAsyncClient) {
     fun getCertificateByNameAndValidity(
         certificateName: String,
         validForDays: Int,
-    ): Mono<CertificatesResponseDto> =
+    ): Mono<CertificateDetailDto> =
         certClient
-            .listPropertiesOfCertificateVersions(certificateName)
+            .getCertificate(certificateName)
             .doOnNext {
                 LogTracingUtils.loggerTracingUtils()
                     .dependency(LogTracingUtils.AZURE_KEY_VAULT_DEPENDENCY)
                     .details(
                         mapOf(
                             "name" to it.name,
-                            "version" to it.version,
-                            "enabled" to it.isEnabled?.toString(),
-                            "expires_on" to it.expiresOn?.toString(),
-                            "not_before" to it.notBefore?.toString(),
+                            "version" to it.properties.version,
+                            "enabled" to it.properties.isEnabled?.toString(),
+                            "expires_on" to it.properties.expiresOn?.toString(),
+                            "not_before" to it.properties.notBefore?.toString(),
                         )
                     )
                     .success()
                     .logInfo(logger, "Retrieved Certificate Properties")
             }
             .filter {
-                it.isEnabled &&
-                    (it.expiresOn == null ||
-                        it.expiresOn.isAfter(
+                it.properties.isEnabled &&
+                    (it.properties.expiresOn == null ||
+                        it.properties.expiresOn.isAfter(
                             OffsetDateTime.now().plus(Duration.ofDays(validForDays.toLong()))
                         ))
-            }
-            .flatMap {
-                certClient
-                    .getCertificateVersion(certificateName, it.version)
-                    .doOnNext { cert ->
-                        LogTracingUtils.loggerTracingUtils()
-                            .dependency(LogTracingUtils.AZURE_KEY_VAULT_DEPENDENCY)
-                            .details(
-                                mapOf("name" to cert.name, "version" to cert.properties?.version)
-                            )
-                            .success()
-                            .logInfo(logger, "Retrieved Certificate Version")
-                    }
-                    .onErrorResume { exception ->
-                        LogTracingUtils.loggerTracingUtils()
-                            .failure()
-                            .logError(logger, exception, "Failed to retrieve certificate version")
-                        Mono.empty()
-                    }
             }
             .map {
                 CertificateDetailDto(
@@ -71,6 +51,4 @@ class CertificatesService(private val certClient: CertificateAsyncClient) {
                     id = URI(it.properties.id),
                 )
             }
-            .collectList()
-            .map { CertificatesResponseDto(certificates = it) }
 }
