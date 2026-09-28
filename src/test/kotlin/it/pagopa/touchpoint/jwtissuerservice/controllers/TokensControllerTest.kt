@@ -1,11 +1,17 @@
 package it.pagopa.touchpoint.jwtissuerservice.controllers
 
+import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.CertificateDetailDto
+import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.CertificatesResponseDto
 import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.CreateTokenRequestDto
 import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.CreateTokenResponseDto
 import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.JWKResponseDto
 import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.JWKSResponseDto
 import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.ProblemJsonDto
+import it.pagopa.touchpoint.jwtissuerservice.services.CertificatesService
 import it.pagopa.touchpoint.jwtissuerservice.services.TokensService
+import java.net.URI
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -28,6 +34,7 @@ class TokensControllerTest {
 
     @Autowired lateinit var webClient: WebTestClient
     @MockitoBean private val tokensService: TokensService = mock()
+    @MockitoBean private val certificatesService: CertificatesService = mock()
 
     @Test
     fun `Should generate token successfully`() = runTest {
@@ -175,5 +182,126 @@ class TokensControllerTest {
             .expectBody(JWKSResponseDto::class.java)
             .consumeWith { assertEquals(jwksResponse, it.responseBody) }
         verify(tokensService, times(1)).getJwksKeys()
+    }
+
+    @Test
+    fun `Should return public certificates successfully`() = runTest {
+        // pre-conditions
+        val certificatesResponse =
+            CertificatesResponseDto(
+                certificates =
+                    listOf(
+                        CertificateDetailDto(
+                            id = URI("https://kv-name.vault.azure.net/secrets/certificate-name/id"),
+                            name = "certificate-name",
+                            notBefore = OffsetDateTime.now(ZoneOffset.UTC).minusDays(1),
+                            expirationDate = OffsetDateTime.now(ZoneOffset.UTC).plusDays(60),
+                            updated = OffsetDateTime.now(ZoneOffset.UTC),
+                        )
+                    )
+            )
+
+        given(certificatesService.getCertificateByNameAndValidity("certificate-name", 30))
+            .willReturn(Mono.just(certificatesResponse))
+        webClient
+            .get()
+            .uri("/tokens/certificates/certificate-name?validForDays=30")
+            .exchange()
+            .expectStatus()
+            .isOk
+            .expectBody(CertificatesResponseDto::class.java)
+            .consumeWith { assertEquals(certificatesResponse, it.responseBody) }
+        verify(certificatesService, times(1))
+            .getCertificateByNameAndValidity("certificate-name", 30)
+    }
+
+    @Test
+    fun `Should return not found when no valid certificate is found`() = runTest {
+        // pre-conditions
+        val expectedErrorResponse =
+            ProblemJsonDto(
+                title = "Unable to retrieve certificates",
+                status = 404,
+                detail = "No valid KeyVault certificate found ",
+            )
+
+        given(certificatesService.getCertificateByNameAndValidity("certificate-name", 30))
+            .willReturn(Mono.empty())
+        webClient
+            .get()
+            .uri("/tokens/certificates/certificate-name?validForDays=30")
+            .exchange()
+            .expectStatus()
+            .isNotFound
+            .expectBody(ProblemJsonDto::class.java)
+            .consumeWith { assertEquals(expectedErrorResponse, it.responseBody) }
+        verify(certificatesService, times(1))
+            .getCertificateByNameAndValidity("certificate-name", 30)
+    }
+
+    @Test
+    fun `Should return bad request when validForDays is missing`() = runTest {
+        // pre-conditions
+        val expectedErrorResponse =
+            ProblemJsonDto(
+                title = "Bad request",
+                status = 400,
+                detail = "Input request is not valid",
+            )
+
+        webClient
+            .get()
+            .uri("/tokens/certificates/certificate-name")
+            .exchange()
+            .expectStatus()
+            .isBadRequest
+            .expectBody(ProblemJsonDto::class.java)
+            .consumeWith { assertEquals(expectedErrorResponse, it.responseBody) }
+        verify(certificatesService, times(0)).getCertificateByNameAndValidity(any(), any())
+    }
+
+    @Test
+    fun `Should return bad request when validForDays is negative`() = runTest {
+        // pre-conditions
+        val expectedErrorResponse =
+            ProblemJsonDto(
+                title = "Bad request",
+                status = 400,
+                detail = "Input request is not valid",
+            )
+
+        webClient
+            .get()
+            .uri("/tokens/certificates/certificate-name?validForDays=-1")
+            .exchange()
+            .expectStatus()
+            .isBadRequest
+            .expectBody(ProblemJsonDto::class.java)
+            .consumeWith { assertEquals(expectedErrorResponse, it.responseBody) }
+        verify(certificatesService, times(0)).getCertificateByNameAndValidity(any(), any())
+    }
+
+    @Test
+    fun `Should return internal server error for error retrieving certificates`() = runTest {
+        // pre-conditions
+        val expectedErrorResponse =
+            ProblemJsonDto(
+                title = "Internal Server Error",
+                status = 500,
+                detail = "An unexpected error occurred processing the request",
+            )
+
+        given(certificatesService.getCertificateByNameAndValidity("certificate-name", 30))
+            .willThrow(RuntimeException("Error retrieving certificates"))
+        webClient
+            .get()
+            .uri("/tokens/certificates/certificate-name?validForDays=30")
+            .exchange()
+            .expectStatus()
+            .isEqualTo(500)
+            .expectBody(ProblemJsonDto::class.java)
+            .consumeWith { assertEquals(expectedErrorResponse, it.responseBody) }
+        verify(certificatesService, times(1))
+            .getCertificateByNameAndValidity("certificate-name", 30)
     }
 }

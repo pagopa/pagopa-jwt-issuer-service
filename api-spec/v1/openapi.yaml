@@ -28,6 +28,7 @@ tags:
       url: https://TODO
       description: Technical specifications
 paths:
+
   /.well-known/openid-configuration:
     get:
       tags:
@@ -50,6 +51,53 @@ paths:
                 $ref: '#/components/schemas/ProblemJson'
         '401':
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+  /tokens/certificates/{certificateName}:
+    get:
+      tags:
+        - jwtIssuer
+      operationId: getTokenPublicCertificates
+      summary: Retrieve jwt public signature verifier certificates
+      description: Retrieve jwt public signature verifier certificates in x509 format
+      parameters:
+        - name: certificateName
+          in: path
+          required: true
+          description: The name of the certificate to retrieve
+          schema:
+            type: string
+        - name: validForDays
+          in: query
+          required: true
+          description: Minimum number of remaining validity days for the certificates to be returned
+          schema:
+            type: integer
+            minimum: 0
+            example: 30
+      responses:
+        '200':
+          description: Certificates retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CertificatesResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '404':
+          description: Not Found
           content:
             application/json:
               schema:
@@ -394,6 +442,48 @@ components:
           description: |-
             An absolute URI that identifies the specific occurrence of the problem.
             It may or may not yield further information if dereferenced.
+    CertificatesResponse:
+      type: object
+      required:
+        - certificates
+      properties:
+        certificates:
+          type: array
+          items:
+            $ref: '#/components/schemas/CertificateDetail'
+    CertificateDetail:
+      type: object
+      required:
+        - id
+        - name
+        - notBefore
+        - expirationDate
+        - updated
+      properties:
+        id:
+          type: string
+          format: uri
+          description: Unique identifier of the certificate
+          example: "https://kv-name.vault.azure.net/secrets/certificate-name/encoded-id"
+        name:
+          type: string
+          description: Friendly name of the certificate
+          example: "jwt-token-issuer-cert-ec"
+        notBefore:
+          type: string
+          format: date-time
+          description: Certificate validity start timestamp (ISO 8601)
+          example: "2026-01-01T00:00:00Z"
+        expirationDate:
+          type: string
+          format: date-time
+          description: Certificate expiration timestamp (ISO 8601)
+          example: "2027-01-01T00:00:00Z"
+        updated:
+          type: string
+          format: date-time
+          description: Last update timestamp of the certificate record (ISO 8601)
+          example: "2026-09-28T10:00:00Z"
     HttpStatusCode:
       type: integer
       format: int32
