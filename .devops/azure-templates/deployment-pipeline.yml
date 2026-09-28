@@ -157,19 +157,11 @@ stages:
 
   # TAS tests to launch only when a TAS ref is provided by the entry pipeline.
   - ${{ if ne(parameters.tas_ref, '') }}:
-    - stage: TAS_tests_DEV
-      displayName: 'Running TAS tests on DEV environment'
-      dependsOn: test_fake_build_and_deploy #TO-CHANGE with Deploy_for_DEV
-      condition: succeeded('test_fake_build_and_deploy')  #TO-CHANGE with Deploy_for_DEV
-      pool:
-        vmImage: 'ubuntu-latest'
-      jobs:
-        - job: Run_TAS_tests
-          steps:
-            - template: ./ecommerce-tas-tests.yml
-              parameters:
-                ENVIRONMENT: dev
-                ref: ${{ parameters.tas_ref }}
+    - template: ./ecommerce-tas-tests.yml
+      parameters:
+        ENVIRONMENT: dev
+        ref: ${{ parameters.tas_ref }}
+        dependsOn: test_fake_build_and_deploy #TO-CHANGE with Deploy_for_DEV
   # --- END Deploy DEV --- #
 
   # --- START Deploy UAT --- #
