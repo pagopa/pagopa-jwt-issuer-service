@@ -67,7 +67,7 @@ parameters:
     displayName: "Jwt issuer API key used for uat environment"
     type: string
   # Required for TAS tests
-  - name: tas-ref
+  - name: tas_ref
     displayName: "TAS repo branch/tag"
     type: string
     default: main
@@ -156,7 +156,7 @@ stages:
               SERVICE_API_KEY: ${{ parameters.SERVICE_API_KEY_DEV }}
 
   # TAS tests to launch only when a TAS ref is provided by the entry pipeline.
-  - ${{ if ne(parameters.tas-ref, '') }}:
+  - ${{ if ne(parameters.tas_ref, '') }}:
     - stage: TAS_tests_DEV
       displayName: 'Running TAS tests on DEV environment'
       dependsOn: test_fake_build_and_deploy #TO-CHANGE with Deploy_for_DEV
@@ -169,7 +169,7 @@ stages:
             - template: ./ecommerce-tas-tests.yml
               parameters:
                 ENVIRONMENT: dev
-                ref: ${{ parameters.tas-ref }}
+                ref: ${{ parameters.tas_ref }}
   # --- END Deploy DEV --- #
 
   # --- START Deploy UAT --- #
@@ -406,7 +406,7 @@ stages:
               SERVICE_API_KEY: ${{ parameters.SERVICE_API_KEY_UAT }}
 
   # TAS tests to launch only when a TAS ref is provided by the entry pipeline.
-  - ${{ if ne(parameters.tas-ref, '') }}:
+  - ${{ if ne(parameters.tas_ref, '') }}:
     - stage: TAS_tests_UAT
       displayName: 'Running TAS tests on UAT environment'
       dependsOn: Deploy_UAT_Green
@@ -419,7 +419,7 @@ stages:
             - template: ./ecommerce-tas-tests.yml
               parameters:
                 ENVIRONMENT: uat
-                ref: ${{ parameters.tas-ref }}
+                ref: ${{ parameters.tas_ref }}
 
   # --- END Deploy UAT --- #
 
