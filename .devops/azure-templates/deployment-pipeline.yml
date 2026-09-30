@@ -71,6 +71,10 @@ parameters:
     displayName: "TAS repo branch/tag"
     type: string
     default: main
+  - name: TAS_TESTS_FILE
+    displayName: "Azure template file with the TAS tests to run"
+    type: string
+    default: ""
 
 # --- START Deploy DEV --- #
 stages:
@@ -165,7 +169,7 @@ stages:
     jobs:
       - job: Run_TAS_tests
         steps:
-          - template: ./ecommerce-tas-tests.yml
+          - template: ./${{ parameters.TAS_TESTS_FILE }}
             parameters:
               ENVIRONMENT: dev
               ref: ${{ parameters.tas_ref }}

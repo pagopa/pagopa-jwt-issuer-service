@@ -81,6 +81,9 @@ stages:
       NATIVE_COMPILATION: ${{ parameters.NATIVE_COMPILATION }}
       DOMAIN: ecommerce
       tas_ref: ${{ parameters.tas_ref }}
+      # Name of the file with the azure pipeline template with the TAS tests configuration for this project.
+      # Must be under the .devops/azure-templates folder of the project repository.
+      TAS_TESTS_FILE: ecommerce-tas-tests.yml
       DOCKER_FILE_NAME: ${{ variables.dockerFileName }}
       DOCKER_FILE_VERSION_SUFFIX: ${{ variables.dockerFileVersionSuffix }}
       SERVICE_API_KEY_DEV: $(SERVICE_API_KEY_DEV)
