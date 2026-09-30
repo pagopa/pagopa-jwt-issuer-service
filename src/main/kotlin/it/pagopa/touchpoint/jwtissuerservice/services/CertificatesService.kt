@@ -30,6 +30,7 @@ class CertificatesService(private val certClient: CertificateAsyncClient) {
                             "enabled" to it.properties.isEnabled?.toString(),
                             "expires_on" to it.properties.expiresOn?.toString(),
                             "not_before" to it.properties.notBefore?.toString(),
+                            "valid_for_at_least_days" to validForDays.toString(),
                         )
                     )
                     .success()
