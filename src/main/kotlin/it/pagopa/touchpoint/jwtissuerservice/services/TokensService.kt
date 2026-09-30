@@ -4,6 +4,7 @@ import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.CreateTokenReque
 import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.CreateTokenResponseDto
 import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.JWKResponseDto
 import it.pagopa.generated.touchpoint.jwtissuerservice.v1.model.JWKSResponseDto
+import it.pagopa.touchpoint.jwtissuerservice.exceptions.RestApiException
 import it.pagopa.touchpoint.jwtissuerservice.mdcutilities.LogTracingUtils
 import it.pagopa.touchpoint.jwtissuerservice.utils.JwtTokenUtils
 import java.math.BigInteger
@@ -13,6 +14,7 @@ import java.time.Duration
 import java.util.*
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 
@@ -52,6 +54,15 @@ class TokensService(
     fun getJwksKeys(): Mono<JWKSResponseDto> =
         reactiveAzureKVSecurityKeysService
             .getPublic()
+            .switchIfEmpty(
+                Mono.error(
+                    RestApiException(
+                        HttpStatus.NOT_FOUND,
+                        "Unable to retrieve certificates",
+                        "No valid KeyVault certificate found ",
+                    )
+                )
+            )
             .map {
                 when (val publicKey = it.publicKey) {
                     is ECPublicKey ->
@@ -86,11 +97,6 @@ class TokensService(
                     .success()
                     .details(mapOf("number_of_keys" to it.propertyKeys.size.toString()))
                     .logInfo(logger, "Public keys list retrieved")
-            }
-            .doOnError { exception ->
-                LogTracingUtils.loggerTracingUtils()
-                    .failure()
-                    .logError(logger, exception, "Public keys list retrieve error")
             }
 
     private fun base64UrlEncodeUnsigned(value: BigInteger): String {

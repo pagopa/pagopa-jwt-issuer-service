@@ -10,6 +10,8 @@ parameters:
     type: boolean
   - name: "SERVICE_API_KEY"
     type: string
+  - name: "COMMAND_STEP_NAME"
+    type: string
 
 
 steps:
@@ -19,7 +21,7 @@ steps:
       Contents: '**'
       TargetFolder: $(Agent.TempDirectory)
   - task: Bash@3
-    name: newman_run_command
+    name: ${{ parameters.COMMAND_STEP_NAME }}
     displayName: 'Set Newman run command'
     inputs:
       targetType: "inline"
@@ -35,12 +37,12 @@ steps:
         displayName: 'Newman installation'
         workingDirectory: $(Agent.TempDirectory)
       - script: |
-          newman $(newman_run_command.value)
+          newman $(${{ parameters.COMMAND_STEP_NAME }}.value)
         displayName: 'Run api test'
         workingDirectory: $(Agent.TempDirectory)
   - ${{ else }}:
       - script: |
-          docker run --rm -v .:/etc/newman -t postman/newman $(newman_run_command.value)
+          docker run --rm -v .:/etc/newman -t postman/newman $(${{ parameters.COMMAND_STEP_NAME }}.value)
         displayName: 'Run api test'
         workingDirectory: $(Agent.TempDirectory)
   - task: PublishTestResults@2

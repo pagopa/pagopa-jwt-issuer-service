@@ -5,7 +5,9 @@ import com.azure.security.keyvault.certificates.models.CertificateProperties
 import com.azure.security.keyvault.certificates.models.KeyVaultCertificate
 import com.azure.security.keyvault.secrets.SecretAsyncClient
 import com.azure.security.keyvault.secrets.models.KeyVaultSecret
+import com.azure.security.keyvault.secrets.models.SecretProperties
 import it.pagopa.touchpoint.jwtissuerservice.config.properties.AzureSecretConfigProperties
+import it.pagopa.touchpoint.jwtissuerservice.exceptions.RestApiException
 import it.pagopa.touchpoint.jwtissuerservice.models.PrivateKeyWithKid
 import it.pagopa.touchpoint.jwtissuerservice.models.PublicKeyWithKid
 import it.pagopa.touchpoint.jwtissuerservice.utils.AzureTestUtils
@@ -41,6 +43,11 @@ class ReactiveAzureKVSecurityKeysServiceTest {
     fun `Should get secret successfully`() = runTest {
         // pre-conditions
         val secretTest = KeyVaultSecret("testName", "testValue")
+        val secretProperties = SecretProperties()
+        secretProperties.expiresOn = OffsetDateTime.now().plusHours(1)
+        secretProperties.isEnabled = true
+        secretTest.properties = secretProperties
+
         given { secretClient.getSecret(any()) }.willReturn(Mono.just(secretTest))
 
         val obtainedSecret = securityKeysService.getSecret().block()
@@ -136,11 +143,15 @@ class ReactiveAzureKVSecurityKeysServiceTest {
         val keyPair = getKeyPairEC()
         val keyStore =
             getKeyStoreWithPKCS12Certificate("testAlias", keyPair, azureSecretConfig.password)
+        val secretProperties = SecretProperties()
+        secretProperties.expiresOn = OffsetDateTime.now().plusHours(1)
+        secretProperties.isEnabled = true
         val secretTest =
             KeyVaultSecret(
                 "testName",
                 generatePKCS12CertificateAsBase64(keyStore, azureSecretConfig.password),
             )
+        secretTest.properties = secretProperties
         given { secretClient.getSecret(any()) }.willReturn(Mono.just(secretTest))
 
         val obtainedKeyStore = securityKeysService.getKeyStore().block()
@@ -162,11 +173,15 @@ class ReactiveAzureKVSecurityKeysServiceTest {
         val keyPair = getKeyPairEC()
         val keyStore =
             getKeyStoreWithPKCS12Certificate("testAlias", keyPair, azureSecretConfig.password)
+        val secretProperties = SecretProperties()
+        secretProperties.expiresOn = OffsetDateTime.now().plusHours(1)
+        secretProperties.isEnabled = true
         val secretTest =
             KeyVaultSecret(
                 "testName",
                 generatePKCS12CertificateAsBase64(keyStore, azureSecretConfig.password),
             )
+        secretTest.properties = secretProperties
         val privateKeyWithKid =
             PrivateKeyWithKid(
                 getKid(keyStore.getCertificate(keyStore.aliases().nextElement()).encoded),
@@ -217,5 +232,37 @@ class ReactiveAzureKVSecurityKeysServiceTest {
             .expectNext(publicKeyWithKid1)
             .expectNext(publicKeyWithKid2)
             .verifyComplete()
+    }
+
+    @Test
+    fun `Should throw error if secret is not enabled`() = runTest {
+        // pre-conditions
+        val secretTest = KeyVaultSecret("testName", "testValue")
+        val secretProperties = SecretProperties()
+        secretProperties.expiresOn = OffsetDateTime.now().plusHours(1)
+        secretProperties.isEnabled = false
+        secretTest.properties = secretProperties
+
+        given { secretClient.getSecret(any()) }.willReturn(Mono.just(secretTest))
+
+        StepVerifier.create(securityKeysService.getKeyStore())
+            .expectError(RestApiException::class.java)
+            .verify()
+    }
+
+    @Test
+    fun `Should throw error if secret is expired`() = runTest {
+        // pre-conditions
+        val secretTest = KeyVaultSecret("testName", "testValue")
+        val secretProperties = SecretProperties()
+        secretProperties.expiresOn = OffsetDateTime.now().minusHours(1)
+        secretProperties.isEnabled = true
+        secretTest.properties = secretProperties
+
+        given { secretClient.getSecret(any()) }.willReturn(Mono.just(secretTest))
+
+        StepVerifier.create(securityKeysService.getKeyStore())
+            .expectError(RestApiException::class.java)
+            .verify()
     }
 }

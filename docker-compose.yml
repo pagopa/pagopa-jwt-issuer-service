@@ -1,7 +1,7 @@
 services:
   akv-emulator:
     container_name: akv-emulator
-    image: decioc/akv-emulator@sha256:45377974098672c198282991bd1d1ab899e02cece9c2fb0ed3ac936d23b000b7
+    image: decioc/akv-emulator@sha256:081f3d206141a1d0ecf8382e18538bed689096a29a968c5ebcc95c006603e252
     environment:
       - SECRETS_DIR=/test-data
       - CERTIFICATES_DIR=/test-data
@@ -21,6 +21,8 @@ services:
       context: .
     env_file:
       - ./.env
+    environment:
+      - JAVA_TOOL_OPTIONS=-Djavax.net.ssl.trustStore=/test-certs/truststore.jks -Djavax.net.ssl.trustStorePassword=changeit
     volumes:
       - ./local-testing/test-certs/truststore.jks:/test-certs/truststore.jks:ro
     command:

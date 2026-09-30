@@ -1,0 +1,93 @@
+{
+  "info": {
+    "_postman_id": "53d765ed-5076-4e9e-a3a6-b0ab7edb96e2",
+    "name": "JWT token issuer service - Expired",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "36392360"
+  },
+  "item": [
+    {
+      "name": "Create new token",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              " pm.test(\"POST tokens should return 500 if secret is expired\", function () {",
+              "    pm.response.to.have.status(500);",
+              "});",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "{{API-KEY}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"audience\": \"audience\",\n    \"duration\": 30,\n    \"privateClaims\": {\n        \"customClaim1\": \"value1\",\n        \"customClaim2\": \"value2\"\n    }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{PROTOCOL}}{{HOST}}{{BASE_PATH}}/tokens",
+          "host": [
+            "{{PROTOCOL}}{{HOST}}{{BASE_PATH}}"
+          ],
+          "path": [
+            "tokens"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Retrieve keys",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              " pm.test(\"GET tokens/keys should return 404 if certificates are expired\", function () {",
+              "    pm.response.to.have.status(404);",
+              "",
+              "});",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{PROTOCOL}}{{HOST}}{{BASE_PATH}}/tokens/keys",
+          "host": [
+            "{{PROTOCOL}}{{HOST}}{{BASE_PATH}}"
+          ],
+          "path": [
+            "tokens",
+            "keys"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

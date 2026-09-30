@@ -145,6 +145,7 @@ stages:
               TEST_FILE_PREFIX: "dev"
               USE_NEWMAN_DOCKER_IMAGE: true
               SERVICE_API_KEY: ${{ parameters.SERVICE_API_KEY_DEV }}
+              COMMAND_STEP_NAME: "newman_run_command_dev"
 
   # TAS tests to launch only when a TAS ref is provided by the entry pipeline.
   - stage: TAS_tests_DEV
@@ -289,6 +290,7 @@ stages:
               TEST_FILE_PREFIX: "uat-blue"
               USE_NEWMAN_DOCKER_IMAGE: true
               SERVICE_API_KEY: ${{ parameters.SERVICE_API_KEY_UAT }}
+              COMMAND_STEP_NAME: "newman_run_command_uat_blue"
           # uninstall helm release used for blue instance
           - task: HelmDeploy@0
             displayName: Un-install UAT blue version
@@ -394,6 +396,7 @@ stages:
               TEST_FILE_PREFIX: "uat-green"
               USE_NEWMAN_DOCKER_IMAGE: true
               SERVICE_API_KEY: ${{ parameters.SERVICE_API_KEY_UAT }}
+              COMMAND_STEP_NAME: "newman_run_command_uat"
 
   # TAS tests to launch only when a TAS ref is provided by the entry pipeline.
   - ${{ if ne(parameters.tas_ref, '') }}:
