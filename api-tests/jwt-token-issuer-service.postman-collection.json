@@ -201,6 +201,92 @@
 			"response": []
 		},
 		{
+			"name": "Retrieve certificate",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							" pm.test(\"GET tokens/certificates/{certificateName} should return 200 with valid certificate\", function () {",
+							"    pm.response.to.have.status(200);",
+							"    const responseJson = pm.response.json();",
+							"    pm.expect(responseJson.id).to.be.a(\"string\");",
+							"    pm.expect(responseJson.name).to.be.a(\"string\");",
+							"    pm.expect(responseJson.notBefore).to.be.a(\"string\");",
+							"    pm.expect(responseJson.expirationDate).to.be.a(\"string\");",
+							"    pm.expect(responseJson.updated).to.be.a(\"string\");",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{PROTOCOL}}{{HOST}}{{BASE_PATH}}/tokens/certificates/testName?validForDays=30",
+					"host": [
+						"{{PROTOCOL}}{{HOST}}{{BASE_PATH}}"
+					],
+					"path": [
+						"tokens",
+						"certificates",
+						"testName"
+					],
+					"query": [
+						{
+							"key": "validForDays",
+							"value": "30"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Retrieve certificate - 404 no certificate valid for the requested days",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							" pm.test(\"GET tokens/certificates/{certificateName} should return 404 when validForDays is too high\", function () {",
+							"    pm.response.to.have.status(404);",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{PROTOCOL}}{{HOST}}{{BASE_PATH}}/tokens/certificates/testName?validForDays=100000",
+					"host": [
+						"{{PROTOCOL}}{{HOST}}{{BASE_PATH}}"
+					],
+					"path": [
+						"tokens",
+						"certificates",
+						"testName"
+					],
+					"query": [
+						{
+							"key": "validForDays",
+							"value": "100000"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Well known",
 			"event": [
 				{
