@@ -56,7 +56,7 @@ class TokensController(
                     RestApiException(
                         HttpStatus.NOT_FOUND,
                         "Unable to retrieve certificates",
-                        "No valid KeyVault certificate found ",
+                        "No KeyVault certificate named $certificateName found valid for at least $validForDays days",
                     )
                 )
             )

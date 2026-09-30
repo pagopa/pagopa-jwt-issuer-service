@@ -216,7 +216,8 @@ class TokensControllerTest {
             ProblemJsonDto(
                 title = "Unable to retrieve certificates",
                 status = 404,
-                detail = "No valid KeyVault certificate found ",
+                detail =
+                    "No KeyVault certificate named certificate-name found valid for at least 30 days",
             )
 
         given(certificatesService.getCertificateByNameAndValidity("certificate-name", 30))
