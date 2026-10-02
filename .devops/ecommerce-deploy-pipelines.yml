@@ -40,6 +40,11 @@ parameters:
     values:
       - False
       - True
+  # Required for TAS tests
+  - name: tas_ref
+    displayName: "TAS repo branch/tag"
+    type: string
+    default: main
 
 variables:
 
@@ -56,6 +61,13 @@ resources:
       name: pagopa/azure-pipeline-templates
       ref: refs/tags/v6.14.0
       endpoint: "io-azure-devops-github-ro"
+    # Required for TAS tests - must be in the top-level template to be available for the TAS test stage
+    - repository: tas
+      type: github
+      name: pagopa/azure-pipeline-templates
+      ref: master
+      endpoint: 'io-azure-devops-github-ro'   # ← GitHub service connection name (Project settings → Service connections)
+
 pool:
   vmImage: ubuntu-latest
 
@@ -68,6 +80,10 @@ stages:
       FORCE_REPLACE_DOCKER_IMAGE: ${{ parameters.FORCE_REPLACE_DOCKER_IMAGE }}
       NATIVE_COMPILATION: ${{ parameters.NATIVE_COMPILATION }}
       DOMAIN: ecommerce
+      tas_ref: ${{ parameters.tas_ref }}
+      # Name of the file with the azure pipeline template with the TAS tests configuration for this project.
+      # Must be under the .devops/azure-templates folder of the project repository.
+      TAS_TESTS_FILE: ecommerce-tas-tests.yml
       DOCKER_FILE_NAME: ${{ variables.dockerFileName }}
       DOCKER_FILE_VERSION_SUFFIX: ${{ variables.dockerFileVersionSuffix }}
       SERVICE_API_KEY_DEV: $(SERVICE_API_KEY_DEV)
