@@ -80,7 +80,7 @@ jobs:
         validate-wrappers: true
     - if: matrix.build-mode == 'manual'
       run: |
-        ./gradlew compileKotlin :conformance-test:compileKotlin \
+        ./gradlew compileKotlin \
           -Pkotlin.incremental=false \
           --no-daemon --rerun-tasks --stacktrace
     - name: Perform CodeQL Analysis
