@@ -82,6 +82,8 @@ jobs:
       run: |
         ./gradlew compileKotlin \
           -Pkotlin.incremental=false \
+          -Pkotlin.daemon.jvmargs="-Xmx3g" \
+          -Dorg.gradle.jvmargs="-Xmx3g" \
           --no-daemon --rerun-tasks --stacktrace
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@1fc58d04a4d4374f921bdac573c3811c240f9c26
